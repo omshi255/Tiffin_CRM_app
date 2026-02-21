@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dateUtil } from "../utils/index.util.js";
+import logger from "../utils/logger.js";
 
 //create logs directory
 const __filename = fileURLToPath(import.meta.url);
@@ -13,7 +14,8 @@ const createLogsDir = async () => {
   try {
     await fs.mkdir(logsDir, { recursive: true });
   } catch (err) {
-    console.error("Failed to create logs directory:", err);
+    // console.error("Failed to create logs directory:", err);
+    logger.error("Failed to create logs directory:", err);
   }
 };
 
@@ -51,12 +53,14 @@ const logError = async (err) => {
   console.log(dateIST);
 
   const logMessage = `[${dateIST}] ${sanitizeLogMessage(err.message)}\n${err.stack || ""}\n\n`;
-  console.error(logMessage);
+  // console.error(logMessage);
+  logger.error(logMessage);
 
   try {
     await fs.appendFile(logFilePath, logMessage, { flag: "a" }); // Added append mode flag for safer file writing
   } catch (writeErr) {
-    console.error("Failed to write log message to file:", writeErr);
+    // console.error("Failed to write log message to file:", writeErr);
+    logger.error("Failed to write log message to file:", writeErr);
   }
 };
 
