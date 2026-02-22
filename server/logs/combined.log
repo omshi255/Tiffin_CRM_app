@@ -103,3 +103,17 @@ Error: Token has expired
     at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
 
 
+2026-02-22T20:38:06.488Z [error] : [23/02/2026, 02:08:06 am] Razorpay is not configured
+Error: Razorpay is not configured
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:165:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
