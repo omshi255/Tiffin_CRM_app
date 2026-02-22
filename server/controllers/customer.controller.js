@@ -51,6 +51,19 @@ const listQuerySchema = Joi.object({
   customerType: Joi.string().valid(...CUSTOMER_TYPES).optional(),
 });
 
+const bulkCustomerItemSchema = Joi.object({
+  name: Joi.string().trim().required().messages({ "string.empty": "Name is required" }),
+  phone: phoneSchema,
+  address: Joi.string().trim().allow("").optional(),
+  customerType: Joi.string().valid(...CUSTOMER_TYPES).optional(),
+  status: Joi.string().valid(...CUSTOMER_STATUSES).optional(),
+  whatsapp: Joi.string().trim().allow("").optional(),
+});
+
+const bulkCreateSchema = Joi.object({
+  customers: Joi.array().items(bulkCustomerItemSchema).min(1).max(100).required(),
+});
+
 /**
  * GET /api/v1/customers
  * Query: page, limit, status, customerType
@@ -205,6 +218,92 @@ export const updateCustomer = asyncHandler(async (req, res) => {
   ).lean();
 
   const response = new ApiResponse(200, "Customer updated", updated);
+  res.status(response.statusCode).json({
+    success: response.success,
+    message: response.message,
+    data: response.data,
+  });
+});
+
+/**
+ * POST /api/v1/customers/bulk
+ * Body: { customers: [{ name, phone, address?, ... }] }
+ * Rate limited: 5 req/15 min
+ */
+export const bulkCreateCustomers = asyncHandler(async (req, res) => {
+  const { error, value } = bulkCreateSchema.validate(req.body, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
+  const phones = value.customers.map((c) =>
+    String(c.phone).trim().replace(/^\+?91/, "")
+  );
+  const existingCustomers = await Customer.find({
+    phone: { $in: phones },
+    isDeleted: { $ne: true },
+  }).select("phone")
+    .lean();
+
+  const existingPhones = new Set(existingCustomers.map((c) => c.phone));
+
+  const toInsert = [];
+  for (const c of value.customers) {
+    const phone = String(c.phone).trim().replace(/^\+?91/, "");
+    if (existingPhones.has(phone)) continue;
+    existingPhones.add(phone); // avoid duplicates within batch
+    toInsert.push({
+      name: c.name.trim(),
+      phone,
+      address: c.address || "",
+      customerType: c.customerType || "individual",
+      status: c.status || "active",
+      whatsapp: c.whatsapp || null,
+    });
+  }
+
+  if (toInsert.length === 0) {
+    throw new ApiError(400, "All phones already exist or duplicates in batch");
+  }
+
+  const inserted = await Customer.insertMany(toInsert);
+  const skipped = value.customers.length - toInsert.length;
+
+  const response = new ApiResponse(201, "Bulk import completed", {
+    created: inserted.length,
+    skipped,
+    data: inserted.map((c) => c.toObject()),
+  });
+
+  res.status(response.statusCode).json({
+    success: response.success,
+    message: response.message,
+    data: response.data,
+  });
+});
+
+/**
+ * DELETE /api/v1/customers/:id
+ * Soft delete: sets isDeleted: true
+ */
+export const deleteCustomer = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const customer = await Customer.findOne({ _id: id, isDeleted: { $ne: true } });
+  if (!customer) {
+    throw new ApiError(404, "Customer not found");
+  }
+
+  const updated = await Customer.findByIdAndUpdate(
+    id,
+    { $set: { isDeleted: true } },
+    { new: true }
+  ).lean();
+
+  const response = new ApiResponse(200, "Customer deleted (soft)", updated);
   res.status(response.statusCode).json({
     success: response.success,
     message: response.message,
