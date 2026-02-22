@@ -1,0 +1,105 @@
+2026-02-22T09:59:33.726Z [error] : [22/02/2026, 03:29:33 pm] "otp" is required
+Error: "otp" is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:76:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-22T10:16:33.626Z [error] : [22/02/2026, 03:46:33 pm] Phone must be a valid 10-digit Indian mobile number
+Error: Phone must be a valid 10-digit Indian mobile number
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:48:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-22T16:29:47.270Z [error] : [22/02/2026, 09:59:47 pm] Phone must be a valid 10-digit Indian mobile number
+Error: Phone must be a valid 10-digit Indian mobile number
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:48:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-22T17:11:56.956Z [error] : [22/02/2026, 10:41:56 pm] Cannot destructure property 'refreshToken' of 'value' as it is undefined.
+TypeError: Cannot destructure property 'refreshToken' of 'value' as it is undefined.
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:135:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-22T17:49:35.949Z [error] : [22/02/2026, 11:19:35 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:33:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-02-22T17:49:47.545Z [error] : [22/02/2026, 11:19:47 pm] Token has expired
+Error: Token has expired
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:33:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+
+2026-02-22T17:50:01.218Z [error] : [22/02/2026, 11:20:01 pm] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:85:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-22T17:51:35.664Z [error] : [22/02/2026, 11:21:35 pm] Token has expired
+Error: Token has expired
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:33:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+

@@ -9,6 +9,7 @@ import {
 import authRoutes from "./auth.routes.js";
 import customerRoutes from "./customer.routes.js";
 import planRoutes from "./plan.routes.js";
+import subscriptionRoutes from "./subscription.routes.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -16,6 +17,7 @@ const router = Router();
 router.use("/auth", authRoutes);
 router.use("/customers", customerRoutes);
 router.use("/plans", planRoutes);
+router.use("/subscriptions", subscriptionRoutes);
 
 // Protected route for testing: GET /api/v1/me (requires Authorization: Bearer <token>)
 router.get("/me", authMiddleware, (req, res) => {
