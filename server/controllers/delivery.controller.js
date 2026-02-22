@@ -50,6 +50,11 @@ export const completeDelivery = asyncHandler(async (req, res) => {
     .populate("deliveryBoyId", "name phone")
     .lean();
 
+  const io = req.app.get("io");
+  if (io) {
+    io.of("/delivery").to("delivery-today").emit("delivery_updated", updated);
+  }
+
   const response = new ApiResponse(200, "Delivery completed", updated);
 
   res.status(response.statusCode).json({
