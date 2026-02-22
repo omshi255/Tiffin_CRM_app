@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 
-const ACCESS_TOKEN_EXPIRY = "15m";
+const ACCESS_TOKEN_EXPIRY = "5d";
 const REFRESH_TOKEN_EXPIRY = "7d";
 
 /**

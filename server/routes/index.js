@@ -7,11 +7,15 @@ import {
   verifyRefreshToken,
 } from "../services/index.js";
 import authRoutes from "./auth.routes.js";
+import customerRoutes from "./customer.routes.js";
+import planRoutes from "./plan.routes.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 router.use("/auth", authRoutes);
+router.use("/customers", customerRoutes);
+router.use("/plans", planRoutes);
 
 // Protected route for testing: GET /api/v1/me (requires Authorization: Bearer <token>)
 router.get("/me", authMiddleware, (req, res) => {
