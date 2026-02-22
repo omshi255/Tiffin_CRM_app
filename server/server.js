@@ -9,6 +9,7 @@ import config from "./config/index.js";
 import requestId from "./middleware/requestId.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
+import webhookRoutes from "./routes/webhook.routes.js";
 
 const app = express();
 
@@ -25,6 +26,10 @@ app.get("/health", (req, res) => {
 });
 
 app.use(rateLimit(config.RATE_LIMIT));
+
+// Webhook routes must use raw body (before express.json)
+app.use("/api/v1/webhooks", webhookRoutes);
+
 app.use(express.json()); // parse json body
 app.use(express.urlencoded({ extended: true }));
 app.use(

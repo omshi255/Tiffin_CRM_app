@@ -3,6 +3,7 @@ import {
   listPayments,
   createPayment,
   createOrder,
+  getInvoice,
 } from "../controllers/payment.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
@@ -10,6 +11,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get("/", listPayments);
+router.get("/:id/invoice", getInvoice);
 router.post("/", createPayment);
 router.post("/create-order", createOrder);
 

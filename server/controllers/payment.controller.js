@@ -7,6 +7,7 @@ import Payment, {
 import Customer from "../models/Customer.model.js";
 import Subscription from "../models/Subscription.model.js";
 import { createRazorpayOrder } from "../services/payment.service.js";
+import { generateInvoice } from "../services/pdf.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
@@ -165,13 +166,44 @@ export const createOrder = asyncHandler(async (req, res) => {
     throw new ApiError(503, "Razorpay is not configured");
   }
 
-  const { orderId, keyId } = await createRazorpayOrder(value.amount, value.receipt);
+  let paymentId = value.receipt;
+  if (value.customerId) {
+    const customer = await Customer.findOne({
+      _id: value.customerId,
+      isDeleted: { $ne: true },
+    });
+    if (!customer) throw new ApiError(404, "Customer not found");
+    let subId = null;
+    if (value.subscriptionId) {
+      const sub = await Subscription.findById(value.subscriptionId);
+      if (!sub) throw new ApiError(404, "Subscription not found");
+      subId = value.subscriptionId;
+    }
+    const payment = await Payment.create({
+      customerId: value.customerId,
+      subscriptionId: subId || undefined,
+      amount: value.amount,
+      method: "razorpay",
+      status: "pending",
+    });
+    paymentId = payment._id.toString();
+  }
+
+  const { orderId, keyId } = await createRazorpayOrder(value.amount, paymentId);
+
+  if (value.customerId) {
+    await Payment.findOneAndUpdate(
+      { _id: paymentId },
+      { $set: { razorpayOrderId: orderId } }
+    );
+  }
 
   const response = new ApiResponse(200, "Order created", {
     orderId,
     keyId,
     amount: value.amount,
-    receipt: value.receipt,
+    receipt: paymentId,
+    ...(value.customerId && { paymentId }),
   });
 
   res.status(response.statusCode).json({
@@ -179,4 +211,24 @@ export const createOrder = asyncHandler(async (req, res) => {
     message: response.message,
     data: response.data,
   });
+});
+
+/**
+ * GET /api/v1/payments/:id/invoice
+ * Redirect to invoice URL or generate + redirect
+ */
+export const getInvoice = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const payment = await Payment.findById(id).lean();
+  if (!payment) {
+    throw new ApiError(404, "Payment not found");
+  }
+
+  let invoiceUrl = payment.invoiceUrl;
+  if (!invoiceUrl) {
+    invoiceUrl = await generateInvoice(id);
+  }
+
+  res.redirect(302, invoiceUrl);
 });
