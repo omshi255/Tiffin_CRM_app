@@ -6,8 +6,17 @@ import {
   verifyAccessToken,
   verifyRefreshToken,
 } from "../services/index.js";
+import authRoutes from "./auth.routes.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
+
+router.use("/auth", authRoutes);
+
+// Protected route for testing: GET /api/v1/me (requires Authorization: Bearer <token>)
+router.get("/me", authMiddleware, (req, res) => {
+  res.json({ success: true, data: { user: req.user } });
+});
 
 router.post("/test-body", (req, res) => {
   res.json({ body: req.body });

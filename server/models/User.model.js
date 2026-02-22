@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.index({ phone: 1 }, { unique: true });
+// userSchema.index({ phone: 1 }, { unique: true });
 
 const User = mongoose.model("User", userSchema);
 
