@@ -1,44 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../data/customer_model.dart';
-import '../providers/customers_provider.dart';
-import '../widgets/import_contact_button.dart';
+import '../../../../core/widgets/thin_divider.dart';
+import '../../../../models/customer_model.dart';
+import '../widgets/contact_picker_bottom_sheet.dart';
+import '../widgets/contacts_permission_sheet.dart';
 
-/// Add or Edit customer form with validation.
-/// Frontend only — saves to in-memory state, no API calls.
-class AddEditCustomerScreen extends ConsumerStatefulWidget {
-  const AddEditCustomerScreen({
-    super.key,
-    this.customer,
-  });
+class AddEditCustomerScreen extends StatefulWidget {
+  const AddEditCustomerScreen({super.key, this.customer});
 
-  /// Null = Add mode, non-null = Edit mode
-  final Customer? customer;
+  final CustomerModel? customer;
+
+  bool get _isEditMode => customer != null;
 
   @override
-  ConsumerState<AddEditCustomerScreen> createState() =>
-      _AddEditCustomerScreenState();
+  State<AddEditCustomerScreen> createState() => _AddEditCustomerScreenState();
 }
 
-class _AddEditCustomerScreenState extends ConsumerState<AddEditCustomerScreen> {
+class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
-
-  bool get _isEditMode => widget.customer != null;
+  late final TextEditingController _nameController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _addressController;
 
   @override
   void initState() {
     super.initState();
-    if (widget.customer != null) {
-      _nameController.text = widget.customer!.fullName;
-      _phoneController.text = widget.customer!.phoneNumber;
-      _emailController.text = widget.customer!.email ?? '';
-    }
+    final c = widget.customer;
+    _nameController = TextEditingController(text: c?.name ?? '');
+    _phoneController = TextEditingController(text: c?.phone ?? '');
+    _emailController = TextEditingController(text: c?.email ?? '');
+    _addressController = TextEditingController(text: c?.address ?? '');
   }
 
   @override
@@ -46,175 +40,141 @@ class _AddEditCustomerScreenState extends ConsumerState<AddEditCustomerScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
-  String? _validateName(String? value) {
-    final v = value?.trim() ?? '';
-    if (v.isEmpty) return 'Full name is required';
-    return null;
-  }
-
-  String? _validatePhone(String? value) {
-    final v = value?.trim().replaceAll(RegExp(r'\s'), '') ?? '';
-    if (v.isEmpty) return 'Phone number is required';
-    if (v.length < 10) return 'Enter a valid phone number';
-    return null;
-  }
-
-  String? _validateEmail(String? value) {
-    final v = value?.trim() ?? '';
-    if (v.isEmpty) return null;
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(v)) return 'Enter a valid email address';
-    return null;
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final name = _nameController.text.trim();
-    final phone = _phoneController.text.trim();
-    final email = _emailController.text.trim();
-    final emailOrNull = email.isEmpty ? null : email;
-
-    final notifier = ref.read(customersProvider);
-
-    if (_isEditMode) {
-      notifier.updateCustomer(
-        widget.customer!.copyWith(
-          fullName: name,
-          phoneNumber: phone,
-          email: emailOrNull,
+  Future<void> _importFromContacts() async {
+    final status = await Permission.contacts.request();
+    if (!mounted) return;
+    if (status.isGranted) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (ctx) => ContactPickerBottomSheet(
+          onContactSelected: (name, phone) {
+            _nameController.text = name;
+            _phoneController.text = phone;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Contact imported successfully')),
+            );
+          },
         ),
       );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Customer updated'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        context.pop();
-      }
     } else {
-      notifier.addCustomer(
-        Customer(
-          id: '',
-          fullName: name,
-          phoneNumber: phone,
-          email: emailOrNull,
+      showModalBottomSheet(
+        context: context,
+        builder: (ctx) => ContactsPermissionSheet(
+          onCancel: () => Navigator.pop(ctx),
         ),
       );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Customer added'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        context.pop();
-      }
     }
   }
 
-  void _onContactImported(String fullName, String phoneNumber, String? email) {
-    _nameController.text = fullName;
-    _phoneController.text = phoneNumber;
-    _emailController.text = email ?? '';
-    setState(() {});
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+    // API_INTEGRATION
+    // Endpoint: POST /api/customers (create) or PUT /api/customers/:id (update)
+    // Purpose: Create or update customer
+    // Request: { name: String, phone: String, email?: String, address?: String }
+    // Response: { id: String, name: String, ... }
+    if (widget._isEditMode) {
+      context.pop();
+    } else {
+      context.pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode ? 'Edit Customer' : 'Add Customer'),
+        title: Text(widget._isEditMode ? 'Edit Customer' : 'Add Customer'),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: AppColors.onSurface,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: AppColors.border),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (!_isEditMode) ...[
-                ImportContactButton(onImported: _onContactImported),
-                const SizedBox(height: 24),
+              if (!widget._isEditMode) ...[
+                OutlinedButton.icon(
+                  onPressed: _importFromContacts,
+                  icon: const Icon(Icons.person_add),
+                  label: const Text('Import from Contacts'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    minimumSize: const Size.fromHeight(52),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const Expanded(child: ThinDivider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textHint,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: ThinDivider()),
+                  ],
+                ),
+                const SizedBox(height: 20),
               ],
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name *',
-                  hintText: 'Enter full name',
-                  prefixIcon: Icon(Icons.person_outline),
-                ),
-                textCapitalization: TextCapitalization.words,
-                validator: _validateName,
-                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(labelText: 'Name'),
+                validator: (v) =>
+                    v?.trim().isEmpty ?? true ? 'Enter name' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number *',
-                  hintText: 'Enter 10-digit mobile number',
-                  prefixIcon: Icon(Icons.phone_outlined),
-                ),
+                decoration: const InputDecoration(labelText: 'Phone'),
                 keyboardType: TextInputType.phone,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                  _PhoneFormatter(),
-                ],
-                validator: _validatePhone,
-                textInputAction: TextInputAction.next,
+                validator: (v) =>
+                    v?.trim().isEmpty ?? true ? 'Enter phone' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email (optional)',
-                  hintText: 'Enter email address',
-                  prefixIcon: Icon(Icons.email_outlined),
-                ),
+                decoration: const InputDecoration(labelText: 'Email (optional)'),
                 keyboardType: TextInputType.emailAddress,
-                validator: _validateEmail,
-                textInputAction: TextInputAction.done,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(labelText: 'Address (optional)'),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 24),
               FilledButton(
                 onPressed: _save,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text(_isEditMode ? 'Update Customer' : 'Save Customer'),
+                child: Text(widget._isEditMode ? 'Update' : 'Save'),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Formats phone as user types (e.g. 9876543210).
-class _PhoneFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
-    return TextEditingValue(
-      text: digits,
-      selection: TextSelection.collapsed(offset: digits.length),
     );
   }
 }

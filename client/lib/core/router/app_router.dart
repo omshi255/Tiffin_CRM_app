@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../transitions/page_transitions.dart';
+import '../../features/auth/presentation/screens/facebook_login_screen.dart';
 import '../../features/auth/presentation/screens/google_login_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/truecaller_screen.dart';
-import '../../features/customers/data/customer_model.dart';
 import '../../features/customers/presentation/screens/add_edit_customer_screen.dart';
+import '../../features/customers/presentation/screens/customer_detail_screen.dart';
 import '../../features/customers/presentation/screens/customers_list_screen.dart';
+import '../../features/dashboard/presentation/screens/business_profile_screen.dart';
+import '../../features/dashboard/presentation/screens/delivery_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_shell.dart';
+import '../../features/dashboard/presentation/screens/invoices_screen.dart';
+import '../../features/dashboard/presentation/screens/maps_screen.dart';
+import '../../features/dashboard/presentation/screens/meal_plans_screen.dart';
+import '../../features/dashboard/presentation/screens/notifications_screen.dart';
+import '../../features/dashboard/presentation/screens/payments_screen.dart';
+import '../../features/dashboard/presentation/screens/profile_screen.dart';
+import '../../features/dashboard/presentation/screens/reports_screen.dart';
+import '../../features/dashboard/presentation/screens/settings_screen.dart';
+import '../../features/dashboard/presentation/screens/subscriptions_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../models/customer_model.dart';
 import 'app_routes.dart';
 
 final class AppRouter {
@@ -16,80 +30,114 @@ final class AppRouter {
 
   static final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
-  static GlobalKey<NavigatorState> get rootKey => _rootKey;
-
-  static final GoRouter router = GoRouter(
+  static GoRouter get router => _router;
+  static final GoRouter _router = GoRouter(
     navigatorKey: _rootKey,
     initialLocation: AppRoutes.onboarding,
     routes: <RouteBase>[
       GoRoute(
         path: AppRoutes.splash,
         name: 'splash',
-        builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Splash'),
+        builder: (context, state) => _PlaceholderScreen(routeLabel: 'Splash'),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
         name: 'onboarding',
-        builder: (_, __) => const OnboardingScreen(),
+        builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,
         name: 'login',
-        builder: (_, __) => const LoginScreen(),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.otp,
         name: 'otp',
-        builder: (_, state) => OtpScreen(phone: state.extra as String?),
+        builder: (context, state) {
+          final phone = state.extra as String?;
+          return OtpScreen(phone: phone ?? '');
+        },
       ),
       GoRoute(
         path: AppRoutes.truecaller,
         name: 'truecaller',
-        builder: (_, __) => const TruecallerScreen(),
+        builder: (context, state) => const TruecallerScreen(),
       ),
       GoRoute(
         path: AppRoutes.googleLogin,
         name: 'googleLogin',
-        builder: (_, __) => const GoogleLoginScreen(),
+        builder: (context, state) => const GoogleLoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.facebookLogin,
+        name: 'facebookLogin',
+        builder: (context, state) => const FacebookLoginScreen(),
       ),
       GoRoute(
         path: '/',
-        redirect: (_, state) {
-          if (state.uri.path == '/' || state.uri.path.isEmpty) return AppRoutes.dashboard;
+        redirect: (context, state) {
+          if (state.uri.path == '/' || state.uri.path.isEmpty) {
+            return AppRoutes.dashboard;
+          }
           return null;
         },
         routes: <RouteBase>[
           GoRoute(
             path: 'dashboard',
             name: 'dashboard',
-            builder: (_, __) => const DashboardShell(),
+            pageBuilder: (context, state) =>
+                slideTransitionPage(state, const DashboardShell()),
           ),
           GoRoute(
             path: 'customers',
             name: 'customers',
-            builder: (_, __) => const CustomersListScreen(),
-            routes: [
+            pageBuilder: (context, state) =>
+                slideTransitionPage(state, const CustomersListScreen()),
+            routes: <RouteBase>[
               GoRoute(
                 path: 'add',
                 name: 'addCustomer',
-                builder: (_, __) => const AddEditCustomerScreen(),
+                pageBuilder: (context, state) =>
+                    slideTransitionPage(state, const AddEditCustomerScreen()),
+              ),
+              GoRoute(
+                path: 'detail',
+                name: 'customerDetail',
+                pageBuilder: (context, state) {
+                  final customer = state.extra as CustomerModel?;
+                  final child = customer == null
+                      ? Scaffold(
+                          body: Center(
+                            child: Builder(
+                              builder: (ctx) => Text(
+                                'Customer not found',
+                                style: Theme.of(ctx).textTheme.titleMedium,
+                              ),
+                            ),
+                          ),
+                        )
+                      : CustomerDetailScreen(customer: customer);
+                  return slideTransitionPage(state, child);
+                },
               ),
               GoRoute(
                 path: 'edit',
                 name: 'editCustomer',
-                builder: (context, state) {
-                  final customer = state.extra as Customer?;
-                  if (customer == null) {
-                    return Scaffold(
-                      body: Center(
-                        child: Text(
-                          'Customer not found',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ),
-                    );
-                  }
-                  return AddEditCustomerScreen(customer: customer);
+                pageBuilder: (context, state) {
+                  final customer = state.extra as CustomerModel?;
+                  final child = customer == null
+                      ? Scaffold(
+                          body: Center(
+                            child: Builder(
+                              builder: (ctx) => Text(
+                                'Customer not found',
+                                style: Theme.of(ctx).textTheme.titleMedium,
+                              ),
+                            ),
+                          ),
+                        )
+                      : AddEditCustomerScreen(customer: customer);
+                  return slideTransitionPage(state, child);
                 },
               ),
             ],
@@ -97,87 +145,101 @@ final class AppRouter {
           GoRoute(
             path: 'meal-plans',
             name: 'mealPlans',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Meal Plans'),
+            pageBuilder: (context, state) =>
+                slideTransitionPage(state, const MealPlansScreen()),
           ),
           GoRoute(
             path: 'subscriptions',
             name: 'subscriptions',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Subscriptions'),
+            pageBuilder: (context, state) =>
+                slideTransitionPage(state, const SubscriptionsScreen()),
           ),
           GoRoute(
             path: 'delivery',
             name: 'delivery',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Deliveries'),
+            pageBuilder: (context, state) =>
+                slideTransitionPage(state, const DeliveryScreen()),
           ),
           GoRoute(
             path: 'payments',
             name: 'payments',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Payments'),
+            pageBuilder: (context, state) =>
+                slideTransitionPage(state, const PaymentsScreen()),
           ),
           GoRoute(
             path: 'invoices',
             name: 'invoices',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Invoices'),
+            builder: (context, state) => const InvoicesScreen(),
           ),
           GoRoute(
             path: 'reports',
             name: 'reports',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Reports'),
+            builder: (context, state) => const ReportsScreen(),
           ),
           GoRoute(
             path: 'analytics',
             name: 'analytics',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Analytics'),
+            builder: (context, state) => const ReportsScreen(),
           ),
           GoRoute(
             path: 'settings',
             name: 'settings',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Settings'),
+            builder: (context, state) => const SettingsScreen(),
           ),
           GoRoute(
             path: 'profile',
             name: 'profile',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Profile'),
+            builder: (context, state) => const ProfileScreen(),
           ),
           GoRoute(
             path: 'notifications',
             name: 'notifications',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Notifications'),
+            builder: (context, state) => const NotificationsScreen(),
+          ),
+          GoRoute(
+            path: 'business-profile',
+            name: 'businessProfile',
+            builder: (context, state) => const BusinessProfileScreen(),
+          ),
+          GoRoute(
+            path: 'maps',
+            name: 'maps',
+            builder: (context, state) => const MapsScreen(),
           ),
           GoRoute(
             path: 'staff-management',
             name: 'staffManagement',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Staff Management'),
+            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Staff Management'),
           ),
           GoRoute(
             path: 'recent-events',
             name: 'recentEvents',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Recent Events'),
+            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Recent Events'),
           ),
           GoRoute(
             path: 'import-data',
             name: 'importData',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Import Data'),
+            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Import Data'),
           ),
           GoRoute(
             path: 'export-data',
             name: 'exportData',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Export Data'),
+            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Export Data'),
           ),
           GoRoute(
             path: 'learn-more',
             name: 'learnMore',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Learn More'),
+            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Learn More'),
           ),
           GoRoute(
             path: 'support',
             name: 'support',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Support'),
+            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Support'),
           ),
           GoRoute(
             path: 'tier-details',
             name: 'tierDetails',
-            builder: (_, __) => const _PlaceholderScreen(routeLabel: 'Tier Details'),
+            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Tier Details'),
           ),
         ],
       ),

@@ -12,8 +12,6 @@ class TiffinCrmApp extends ConsumerWidget {
       title: 'TiffinCRM',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
       routerConfig: AppRouter.router,
     );
   }

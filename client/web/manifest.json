@@ -1,6 +1,6 @@
 {
-    "name": "client",
-    "short_name": "client",
+    "name": "tiffin_crm",
+    "short_name": "tiffin_crm",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

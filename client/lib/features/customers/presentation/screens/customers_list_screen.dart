@@ -1,223 +1,204 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/data/mock_data.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../data/customer_model.dart';
-import '../providers/customers_provider.dart';
-import 'add_edit_customer_screen.dart';
+import '../../../../core/utils/color_utils.dart';
+import '../../../../core/widgets/animated_list_item.dart';
+import '../../../../core/widgets/lottie_empty_state.dart';
+import '../../../../core/widgets/thin_divider.dart';
+import '../../../../models/customer_model.dart';
 
-/// Customer list screen with FAB, edit & delete actions.
-class CustomersListScreen extends ConsumerWidget {
+class CustomersListScreen extends StatefulWidget {
   const CustomersListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final customers = ref.watch(customersProvider).customers;
+  State<CustomersListScreen> createState() => _CustomersListScreenState();
+}
+
+class _CustomersListScreenState extends State<CustomersListScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  static String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) {
+      return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '?';
+    }
+    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  }
+
+  Future<void> _openWhatsApp(String phone) async {
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    final uri = Uri.parse('https://wa.me/91$digits');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _confirmDelete(BuildContext context, CustomerModel customer) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Customer'),
+        content: Text('Delete ${customer.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Customer deleted (mock)')),
+              );
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.danger,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final customers = mockCustomers
+        .where((c) =>
+            c.name.toLowerCase().contains(_query.toLowerCase()) ||
+            c.phone.contains(_query) ||
+            (c.email?.toLowerCase().contains(_query.toLowerCase()) ?? false))
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Customers'),
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: AppColors.onSurface,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(57),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(height: 1, color: AppColors.border),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search by name, phone, email',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  onChanged: (v) => setState(() => _query = v),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
       body: customers.isEmpty
-          ? _EmptyState()
+          ? LottieEmptyState(
+              message: _query.isEmpty
+                  ? 'No customers found'
+                  : 'No results for "$_query"',
+              lottieAsset: _query.isEmpty
+                  ? 'assets/lottie/empty_state.json'
+                  : 'assets/lottie/search_empty.json',
+            )
           : ListView.separated(
               padding: const EdgeInsets.symmetric(vertical: 12),
               itemCount: customers.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (context, index) => const ThinDivider(),
               itemBuilder: (context, index) {
                 final customer = customers[index];
-                return _CustomerListItem(
-                  customer: customer,
-                  onTap: () => _navigateToEdit(context, customer),
-                  onEdit: () => _navigateToEdit(context, customer),
-                  onDelete: () => _confirmDelete(context, ref, customer),
-                );
+                final initials = _initials(customer.name);
+                final avatarColor = colorFromName(customer.name);
+                final borderColor = statusBorderColor(customer.status);
+                return AnimatedListItem(
+                  index: index,
+                  child: Slidable(
+                  key: ValueKey(customer.id),
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    extentRatio: 0.65,
+                    children: [
+                      SlidableAction(
+                        onPressed: (_) =>
+                            context.push(AppRoutes.editCustomer, extra: customer),
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.onPrimary,
+                        icon: Icons.edit_outlined,
+                        label: 'Edit',
+                      ),
+                      SlidableAction(
+                        onPressed: (_) => _openWhatsApp(customer.phone),
+                        backgroundColor: const Color(0xFF25D366),
+                        foregroundColor: Colors.white,
+                        icon: Icons.chat_outlined,
+                        label: 'WhatsApp',
+                      ),
+                      SlidableAction(
+                        onPressed: (_) => _confirmDelete(context, customer),
+                        backgroundColor: AppColors.danger,
+                        foregroundColor: AppColors.onError,
+                        icon: Icons.delete_outlined,
+                        label: 'Delete',
+                      ),
+                    ],
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(color: borderColor, width: 4),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: avatarColor,
+                        child: Text(
+                          initials,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      title: Text(customer.name),
+                      subtitle: Text(customer.phone),
+                      onTap: () =>
+                          context.push(AppRoutes.customerDetail, extra: customer),
+                    ),
+                  ),
+                ),
+              );
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _navigateToAdd(context),
+        onPressed: () => context.push(AppRoutes.addCustomer),
         icon: const Icon(Icons.add),
         label: const Text('Add Customer'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
       ),
-    );
-  }
-
-  void _navigateToAdd(BuildContext context) {
-    context.push(AppRoutes.addCustomer);
-  }
-
-  void _navigateToEdit(BuildContext context, Customer customer) {
-    context.push(AppRoutes.editCustomer, extra: customer);
-  }
-
-  void _confirmDelete(BuildContext context, WidgetRef ref, Customer customer) {
-    showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Customer'),
-        content: Text(
-          'Are you sure you want to delete ${customer.fullName}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    ).then((confirmed) {
-      if (confirmed == true) {
-        ref.read(customersProvider).deleteCustomer(customer.id);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${customer.fullName} deleted'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      }
-    });
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.people_outline,
-              size: 80,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'No customers yet',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap Add Customer to create your first customer.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CustomerListItem extends StatelessWidget {
-  const _CustomerListItem({
-    required this.customer,
-    required this.onTap,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  final Customer customer;
-  final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      leading: CircleAvatar(
-        backgroundColor: AppColors.primaryContainer,
-        child: Text(
-          customer.fullName.isNotEmpty
-              ? customer.fullName[0].toUpperCase()
-              : '?',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      title: Text(
-        customer.fullName,
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: AppColors.onSurface,
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 4),
-          Text(
-            customer.phoneNumber,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          if (customer.email != null && customer.email!.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              customer.email!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ],
-      ),
-      trailing: PopupMenuButton<String>(
-        onSelected: (value) {
-          if (value == 'edit') onEdit();
-          if (value == 'delete') onDelete();
-        },
-        itemBuilder: (ctx) => [
-          const PopupMenuItem(
-            value: 'edit',
-            child: Row(
-              children: [
-                Icon(Icons.edit_outlined),
-                SizedBox(width: 12),
-                Text('Edit'),
-              ],
-            ),
-          ),
-          const PopupMenuItem(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete_outline, color: AppColors.error),
-                SizedBox(width: 12),
-                Text('Delete', style: TextStyle(color: AppColors.error)),
-              ],
-            ),
-          ),
-        ],
-      ),
-      onTap: onTap,
     );
   }
 }

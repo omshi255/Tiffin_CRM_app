@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../di/user_profile_provider.dart';
 import '../router/app_routes.dart';
 import '../theme/app_colors.dart';
 
-class AppDrawer extends ConsumerWidget {
-  const AppDrawer({
-    super.key,
-    this.fallbackUserName = 'Guest',
-  });
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key, this.fallbackUserName = 'Guest'});
 
   final String fallbackUserName;
 
@@ -20,9 +15,7 @@ class AppDrawer extends ConsumerWidget {
   static const Color _dividerColor = Color(0xFFE5E7EB);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userNameAsync = ref.watch(userNameProvider);
-
+  Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.82,
       color: _drawerBackground,
@@ -31,7 +24,7 @@ class AppDrawer extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _DrawerHeader(
-              userName: userNameAsync.valueOrNull ?? fallbackUserName,
+              userName: fallbackUserName,
               onClose: () => Navigator.of(context).pop(),
             ),
             Expanded(
@@ -51,7 +44,7 @@ class AppDrawer extends ConsumerWidget {
                     label: 'Notifications',
                     onTap: () {
                       Navigator.of(context).pop();
-                      context.push('/notifications');
+                      context.push(AppRoutes.notifications);
                     },
                   ),
                   _DrawerItem(
@@ -137,7 +130,9 @@ class AppDrawer extends ConsumerWidget {
                     label: 'Share TiffinCRM App',
                     onTap: () {
                       Navigator.of(context).pop();
-                      _showSnackBar(context, 'Share TiffinCRM App');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Share TiffinCRM App')),
+                      );
                     },
                   ),
                   _DrawerItem(
@@ -145,7 +140,9 @@ class AppDrawer extends ConsumerWidget {
                     label: 'Rate This App!',
                     onTap: () {
                       Navigator.of(context).pop();
-                      _showSnackBar(context, 'Rate This App!');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Rate This App!')),
+                      );
                     },
                   ),
                   _DrawerItem(
@@ -173,19 +170,10 @@ class AppDrawer extends ConsumerWidget {
       ),
     );
   }
-
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
 }
 
 class _DrawerHeader extends StatelessWidget {
-  const _DrawerHeader({
-    required this.userName,
-    required this.onClose,
-  });
+  const _DrawerHeader({required this.userName, required this.onClose});
 
   final String userName;
   final VoidCallback onClose;
@@ -208,11 +196,7 @@ class _DrawerHeader extends StatelessWidget {
                   color: AppDrawer._drawerSurface,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.storefront,
-                  color: AppColors.primary,
-                  size: 26,
-                ),
+                child: Icon(Icons.storefront, color: AppColors.primary, size: 26),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -250,11 +234,7 @@ class _DrawerHeader extends StatelessWidget {
                     color: AppDrawer._drawerSurface,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.close,
-                    size: 18,
-                    color: AppColors.primary,
-                  ),
+                  child: Icon(Icons.close, size: 18, color: AppColors.primary),
                 ),
               ),
             ],

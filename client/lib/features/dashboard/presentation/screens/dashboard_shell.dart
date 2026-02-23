@@ -5,7 +5,9 @@ import '../../../customers/presentation/screens/customers_list_screen.dart';
 import 'dashboard_home_screen.dart';
 
 class DashboardShell extends StatefulWidget {
-  const DashboardShell({super.key});
+  const DashboardShell({super.key, this.adminName = 'Admin'});
+
+  final String adminName;
 
   @override
   State<DashboardShell> createState() => _DashboardShellState();
@@ -35,17 +37,19 @@ class _DashboardShellState extends State<DashboardShell> {
         title: const Text('TiffinCRM'),
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: AppColors.onSurface,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: AppColors.border),
+        ),
       ),
-      drawer: const Drawer(
-        child: AppDrawer(),
-      ),
+      drawer: Drawer(child: AppDrawer(fallbackUserName: widget.adminName)),
       body: IndexedStack(
         index: _selectedIndex,
-        children: const [
-          DashboardHomeScreen(),
-          _TabPlaceholder(label: 'Orders'),
-          CustomersListScreen(),
-          _TabPlaceholder(label: 'Finance'),
+        children: [
+          DashboardHomeScreen(adminName: widget.adminName),
+          const _TabPlaceholder(label: 'Orders'),
+          const CustomersListScreen(),
+          const _TabPlaceholder(label: 'Finance'),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

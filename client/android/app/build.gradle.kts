@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.client"
+    namespace = "com.tiffin.crm.tiffin_crm"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,9 +20,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.tiffin.service.management.crm"
-        minSdk = 24
-        targetSdk = 34
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.tiffin.crm.tiffin_crm"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
