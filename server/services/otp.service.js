@@ -25,7 +25,10 @@ export const sendOtp = async (phone) => {
     .trim()
     .replace(/^\+?91/, "");
   const otpCode = generateOtpCode();
-  console.log("otpCode", otpCode);
+  
+  if (config.NODE_ENV !== "production") {
+  console.log("Generated OTP:", otpCode);
+}
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
   // Delete any existing OTP for this phone (one active OTP per phone)

@@ -21,6 +21,7 @@ const ensureDir = async () => {
  * @param {string} paymentId - MongoDB Payment _id
  * @returns {Promise<string>} Public URL to the invoice
  */
+
 export const generateInvoice = async (paymentId) => {
   const payment = await Payment.findById(paymentId)
     .populate("customerId", "name phone address")
@@ -36,6 +37,15 @@ export const generateInvoice = async (paymentId) => {
 
   const fileName = `${paymentId}.pdf`;
   const filePath = path.join(INVOICES_DIR, fileName);
+
+  const fileExists = await fs
+    .access(filePath)
+    .then(() => true)
+    .catch(() => false);
+
+  if (fileExists && payment.invoiceUrl) {
+    return payment.invoiceUrl;
+  }
 
   const customer = payment.customerId;
   const subscription = payment.subscriptionId;

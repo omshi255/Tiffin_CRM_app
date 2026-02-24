@@ -20,7 +20,7 @@ const DEFAULT_PAGE = 1;
 const createPaymentSchema = Joi.object({
   customerId: Joi.string().hex().length(24).required(),
   subscriptionId: Joi.string().hex().length(24).optional(),
-  amount: Joi.number().min(0).required(),
+  amount: Joi.number().precision(2).min(0).required(),
   method: Joi.string()
     .valid(...PAYMENT_METHODS)
     .required(),

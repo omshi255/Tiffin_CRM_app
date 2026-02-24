@@ -34,7 +34,10 @@ app.use(express.json()); // parse json body
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: config.NODE_ENV === "production" ? process.env.CORS_ORIGIN : "*",
+    origin:
+      config.NODE_ENV === "production"
+        ? config.CORS_ORIGIN?.split(",") || []
+        : "*",
   })
 );
 
@@ -53,7 +56,6 @@ const authRateLimit = rateLimit({
 
 // Apply only to /api/v1/auth
 app.use("/api/v1/auth", authRateLimit);
-
 
 app.use("/api/v1", routes);
 

@@ -8,7 +8,7 @@ import Subscription from "../models/Subscription.model.js";
  */
 const startOfDay = (d) => {
   const date = new Date(d);
-  date.setUTCHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
   return date;
 };
 

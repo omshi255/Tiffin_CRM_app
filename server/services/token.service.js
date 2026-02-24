@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 
-const ACCESS_TOKEN_EXPIRY = "5d";
-const REFRESH_TOKEN_EXPIRY = "7d";
+const ACCESS_TOKEN_EXPIRY = config.JWT_ACCESS_EXPIRY || "5d";
+const REFRESH_TOKEN_EXPIRY = config.JWT_REFRESH_EXPIRY || "7d";
 
 /**
  * Generate access token (short-lived)

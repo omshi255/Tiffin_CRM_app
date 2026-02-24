@@ -72,7 +72,13 @@ const errorHandler = (err, req, res, next) => {
     errors = [],
   } = err;
 
-  logError(err);
+  logError({
+    message: err.message,
+    stack: err.stack,
+    method: req.method,
+    url: req.originalUrl,
+    requestId: req.id,
+  });
 
   const responseMessage =
     process.env.NODE_ENV === "development"

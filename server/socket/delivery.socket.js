@@ -34,7 +34,7 @@ export const initDeliverySocket = (io) => {
     socket.on("location_update", (data) => {
       const { lat, lng } = data || {};
       if (typeof lat !== "number" || typeof lng !== "number") {
-        socket.emit("error", { message: "Invalid lat/lng" });
+        socket.emit("location_error", { message: "Invalid lat/lng" });
         return;
       }
       deliveryNs.to(ROOM_DELIVERY_TODAY).emit("location_updated", {
