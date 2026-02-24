@@ -13,6 +13,8 @@ import subscriptionRoutes from "./subscription.routes.js";
 import deliveryRoutes from "./delivery.routes.js";
 import paymentRoutes from "./payment.routes.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import notificationRoutes from "./notification.routes.js";
+import reportRoutes from "./report.routes.js";
 
 const router = Router();
 
@@ -22,6 +24,8 @@ router.use("/plans", planRoutes);
 router.use("/subscriptions", subscriptionRoutes);
 router.use("/deliveries", deliveryRoutes);
 router.use("/payments", paymentRoutes);
+router.use("/notifications", notificationRoutes);
+router.use("/reports", reportRoutes);
 
 // Protected route for testing: GET /api/v1/me (requires Authorization: Bearer <token>)
 router.get("/me", authMiddleware, (req, res) => {

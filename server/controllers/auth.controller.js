@@ -183,3 +183,31 @@ export const logoutController = asyncHandler(async (req, res, next) => {
     message: response.message,
   });
 });
+
+/**
+ * PUT /api/v1/auth/me
+ * Save FCM token for logged-in user
+ */
+export const updateMe = asyncHandler(async (req, res) => {
+  const { fcmToken } = req.body;
+
+  if (!fcmToken) {
+    throw new ApiError(400, "fcmToken is required");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user.userId,
+    { $set: { fcmToken } },
+    { new: true }
+  ).lean();
+
+  const response = new ApiResponse(200, "FCM token saved", {
+    user: {
+      id: user._id,
+      phone: user.phone,
+      fcmToken: user.fcmToken,
+    },
+  });
+
+  res.status(response.statusCode).json(response);
+});

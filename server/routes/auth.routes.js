@@ -4,6 +4,7 @@ import {
   verifyOtpController,
   refreshTokenController,
   logoutController,
+  updateMe,
 } from "../controllers/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
@@ -13,5 +14,6 @@ router.post("/send-otp", sendOtpController);
 router.post("/verify-otp", verifyOtpController);
 router.post("/refresh-token", refreshTokenController);
 router.post("/logout", authMiddleware, logoutController);
+router.put("/me", authMiddleware, updateMe);
 
 export default router;

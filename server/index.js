@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import connectMongoDB from "./db/connectMongoDB.js";
 import config from "./config/index.js";
 import { startDeliveryCron } from "./jobs/deliveryCron.js";
+import { startSubscriptionExpiryCron } from "./jobs/subscriptionExpiryCron.js";
 import { initDeliverySocket } from "./socket/delivery.socket.js";
 
 dotenv.config({ path: "./config/.env" });
@@ -15,7 +16,8 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: config.NODE_ENV === "production" ? process.env.CORS_ORIGIN || "*" : "*",
+    origin:
+      config.NODE_ENV === "production" ? process.env.CORS_ORIGIN || "*" : "*",
   },
 });
 
@@ -24,6 +26,7 @@ app.set("io", io);
 connectMongoDB()
   .then(() => {
     startDeliveryCron();
+    startSubscriptionExpiryCron();
     initDeliverySocket(io);
 
     app.on("error", (error) => {
