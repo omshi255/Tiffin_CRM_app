@@ -21,6 +21,7 @@ class DashboardHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final summary = mockReportsData;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -34,45 +35,49 @@ class DashboardHomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
+
           const SectionHeader(title: 'Overview'),
           const SizedBox(height: 8),
+
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 1.4,
+            childAspectRatio: 1.15,
             children: [
               _StatCard(
-                title: 'Active subscriptions',
-                value: '${summary.activeSubscriptions}',
-                icon: Icons.subscriptions,
+                title: 'Total Customers',
+                value: '${summary.totalCustomers}',
+                icon: Icons.people,
                 accentColor: AppColors.primary,
               ),
               _StatCard(
-                title: 'Pending deliveries',
-                value: '${summary.pendingDeliveries}',
-                icon: Icons.delivery_dining,
+                title: 'Total Subscriptions',
+                value: '${summary.activeSubscriptions}',
+                icon: Icons.subscriptions,
                 accentColor: AppColors.secondary,
               ),
               _StatCard(
-                title: 'Today\'s revenue',
-                value: '₹${summary.dailyRevenue.toStringAsFixed(0)}',
+                title: 'Pending Deliveries',
+                value: '${summary.pendingDeliveries}',
+                icon: Icons.delivery_dining,
+                accentColor: AppColors.warning,
+              ),
+              _StatCard(
+                title: 'Revenue',
+                value: '${summary.dailyRevenue.toInt()}',
                 icon: Icons.currency_rupee,
                 accentColor: AppColors.success,
               ),
-              _StatCard(
-                title: 'Overdue payments',
-                value: '${summary.overduePayments}',
-                icon: Icons.warning_amber,
-                accentColor: AppColors.warning,
-              ),
             ],
           ),
+
           const SizedBox(height: 24),
           const SectionHeader(title: 'Quick actions'),
           const SizedBox(height: 12),
+
           Row(
             children: [
               Expanded(
@@ -92,7 +97,9 @@ class DashboardHomeScreen extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 12),
+
           Row(
             children: [
               Expanded(
@@ -112,9 +119,11 @@ class DashboardHomeScreen extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 24),
           const SectionHeader(title: 'Recent activity'),
           const SizedBox(height: 12),
+
           ...mockRecentActivity.map(
             (e) => Card(
               child: ListTile(
@@ -135,7 +144,7 @@ class DashboardHomeScreen extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
+class _StatCard extends StatefulWidget {
   const _StatCard({
     required this.title,
     required this.value,
@@ -149,50 +158,70 @@ class _StatCard extends StatelessWidget {
   final Color accentColor;
 
   @override
+  State<_StatCard> createState() => _StatCardState();
+}
+
+class _StatCardState extends State<_StatCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+
+    _scale = Tween<double>(
+      begin: 0.85,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
+    _controller.forward();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.surface,
-            accentColor.withValues(alpha: 0.03),
-          ],
+    final number = double.tryParse(widget.value) ?? 0;
+
+    return ScaleTransition(
+      scale: _scale,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
         ),
-        borderRadius: BorderRadius.circular(14),
-        border: Border(
-          top: BorderSide(color: accentColor, width: 3),
-          left: const BorderSide(color: AppColors.border, width: 1),
-          right: const BorderSide(color: AppColors.border, width: 1),
-          bottom: const BorderSide(color: AppColors.border, width: 1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 28, color: accentColor),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
+              Icon(widget.icon, size: 30, color: widget.accentColor),
+              const SizedBox(height: 10),
+
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: number),
+                duration: const Duration(milliseconds: 900),
+                builder: (context, value, child) {
+                  return Text(
+                    value.toInt().toString(),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  );
+                },
               ),
+
+              const SizedBox(height: 4),
+
               Text(
-                title,
+                widget.title,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -200,6 +229,7 @@ class _StatCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
     );
   }
 }
@@ -230,9 +260,9 @@ class _QuickActionTile extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
               ),
             ],
