@@ -32,15 +32,22 @@ app.use("/api/v1/webhooks", webhookRoutes);
 
 app.use(express.json()); // parse json body
 app.use(express.urlencoded({ extended: true }));
+// app.use(
+//   cors({
+//     origin:
+//       config.NODE_ENV === "production"
+//         ? config.CORS_ORIGIN?.split(",") || []
+//         : "*",
+//   })
+// );
+
 app.use(
   cors({
-    origin:
-      config.NODE_ENV === "production"
-        ? config.CORS_ORIGIN?.split(",") || []
-        : "*",
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: false,
   })
 );
-
 app.use(requestId);
 app.use(morgan("combined"));
 app.use("/public", express.static("public"));
