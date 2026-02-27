@@ -1,13 +1,9 @@
 import Joi from "joi";
 import mongoose from "mongoose";
-import Payment, {
-  PAYMENT_METHODS,
-  PAYMENT_STATUSES,
-} from "../models/Payment.model.js";
+import Payment, { PAYMENT_METHODS } from "../models/Payment.model.js";
 import Customer from "../models/Customer.model.js";
-import Subscription from "../models/Subscription.model.js";
+import Invoice from "../models/Invoice.model.js";
 import { createRazorpayOrder } from "../services/payment.service.js";
-import { generateInvoice } from "../services/pdf.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
@@ -19,21 +15,21 @@ const DEFAULT_PAGE = 1;
 
 const createPaymentSchema = Joi.object({
   customerId: Joi.string().hex().length(24).required(),
+  invoiceId: Joi.string().hex().length(24).optional(),
   subscriptionId: Joi.string().hex().length(24).optional(),
   amount: Joi.number().precision(2).min(0).required(),
-  method: Joi.string()
+  paymentMethod: Joi.string()
     .valid(...PAYMENT_METHODS)
     .required(),
-  status: Joi.string()
-    .valid(...PAYMENT_STATUSES)
-    .optional(),
+  paymentDate: Joi.date().iso().optional(),
+  transactionRef: Joi.string().allow("", null),
 });
 
 const createOrderSchema = Joi.object({
   amount: Joi.number().min(1).required(),
   receipt: Joi.string().required(),
   customerId: Joi.string().hex().length(24).optional(),
-  subscriptionId: Joi.string().hex().length(24).optional(),
+  invoiceId: Joi.string().hex().length(24).optional(),
 });
 
 const listQuerySchema = Joi.object({
@@ -61,7 +57,8 @@ export const listPayments = asyncHandler(async (req, res) => {
   const limit = Math.min(value.limit || DEFAULT_LIMIT, MAX_LIMIT);
   const skip = (page - 1) * limit;
 
-  const filter = {};
+  const ownerId = req.user.userId;
+  const filter = { ownerId };
   if (value.customerId) filter.customerId = value.customerId;
   if (value.fromDate || value.toDate) {
     filter.createdAt = {};
@@ -72,7 +69,7 @@ export const listPayments = asyncHandler(async (req, res) => {
   const [data, total] = await Promise.all([
     Payment.find(filter)
       .populate("customerId", "name phone address")
-      .populate("subscriptionId", "planId startDate endDate")
+      .populate("invoiceId", "invoiceNumber netAmount")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -110,43 +107,86 @@ export const createPayment = asyncHandler(async (req, res) => {
     throw new ApiError(400, error.details.map((d) => d.message).join("; "));
   }
 
+  const ownerId = req.user.userId;
   const customerId = new mongoose.Types.ObjectId(value.customerId);
-  const customer = await Customer.findOne({
-    _id: customerId,
-    isDeleted: { $ne: true },
-  });
-  if (!customer) {
-    throw new ApiError(404, "Customer not found");
-  }
+  const invoiceId = value.invoiceId
+    ? new mongoose.Types.ObjectId(value.invoiceId)
+    : null;
+  const subscriptionId = value.subscriptionId
+    ? new mongoose.Types.ObjectId(value.subscriptionId)
+    : null;
 
-  let subscriptionId = null;
-  if (value.subscriptionId) {
-    subscriptionId = new mongoose.Types.ObjectId(value.subscriptionId);
-    const sub = await Subscription.findById(subscriptionId);
-    if (!sub) {
-      throw new ApiError(404, "Subscription not found");
+  const [customer, invoice] = await Promise.all([
+    Customer.findOne({
+      _id: customerId,
+      ownerId,
+      isDeleted: { $ne: true },
+    }),
+    invoiceId
+      ? Invoice.findOne({ _id: invoiceId, ownerId })
+      : Promise.resolve(null),
+  ]);
+
+  if (!customer) throw new ApiError(404, "Customer not found");
+  if (invoiceId) {
+    if (!invoice) throw new ApiError(404, "Invoice not found");
+    if (invoice.isVoid) throw new ApiError(400, "INVOICE_VOIDED");
+
+    if (value.amount > invoice.balanceDue) {
+      throw new ApiError(400, "PAYMENT_EXCEEDS_DUE");
     }
   }
 
-  const payment = await Payment.create({
-    customerId,
-    subscriptionId: subscriptionId || undefined,
-    amount: value.amount,
-    method: value.method,
-    status: value.status || "captured",
-  });
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  const created = await Payment.findById(payment._id)
-    .populate("customerId", "name phone address")
-    .populate("subscriptionId", "planId startDate endDate")
-    .lean();
+  try {
+    const payment = await Payment.create(
+      [
+        {
+          ownerId,
+          customerId,
+          ...(invoiceId && { invoiceId }),
+          ...(subscriptionId && { subscriptionId }),
+          amount: value.amount,
+          paymentMethod: value.paymentMethod,
+          paymentDate: value.paymentDate || new Date(),
+          transactionRef: value.transactionRef,
+        },
+      ],
+      { session }
+    );
+    if (invoiceId) {
+      invoice.paidAmount += value.amount;
+      invoice.balanceDue = Math.max(invoice.netAmount - invoice.paidAmount, 0);
+      invoice.paymentStatus =
+        invoice.balanceDue === 0
+          ? "paid"
+          : invoice.paidAmount > 0
+            ? "partial"
+            : "unpaid";
+      await invoice.save({ session });
+    }
 
-  const response = new ApiResponse(201, "Payment created", created);
-  res.status(response.statusCode).json({
-    success: response.success,
-    message: response.message,
-    data: response.data,
-  });
+    await session.commitTransaction();
+    session.endSession();
+
+    const created = await Payment.findById(payment[0]._id)
+      .populate("customerId", "name phone address")
+      .populate("invoiceId", "invoiceNumber netAmount balanceDue paymentStatus")
+      .lean();
+
+    const response = new ApiResponse(201, "Payment recorded", created);
+    res.status(response.statusCode).json({
+      success: response.success,
+      message: response.message,
+      data: response.data,
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
 });
 
 /**
@@ -167,31 +207,34 @@ export const createOrder = asyncHandler(async (req, res) => {
   }
 
   let paymentId = value.receipt;
-  if (value.customerId) {
+  if (value.customerId && value.invoiceId) {
+    const ownerId = req.user.userId;
     const customer = await Customer.findOne({
       _id: value.customerId,
+      ownerId,
       isDeleted: { $ne: true },
     });
     if (!customer) throw new ApiError(404, "Customer not found");
-    let subId = null;
-    if (value.subscriptionId) {
-      const sub = await Subscription.findById(value.subscriptionId);
-      if (!sub) throw new ApiError(404, "Subscription not found");
-      subId = value.subscriptionId;
-    }
+
+    const invoice = await Invoice.findOne({
+      _id: value.invoiceId,
+      ownerId,
+    });
+    if (!invoice) throw new ApiError(404, "Invoice not found");
+
     const payment = await Payment.create({
+      ownerId,
       customerId: value.customerId,
-      subscriptionId: subId || undefined,
+      invoiceId: value.invoiceId,
       amount: value.amount,
-      method: "razorpay",
-      status: "pending",
+      paymentMethod: "razorpay",
     });
     paymentId = payment._id.toString();
   }
 
   const { orderId, keyId } = await createRazorpayOrder(value.amount, paymentId);
 
-  if (value.customerId) {
+  if (value.customerId && value.invoiceId) {
     await Payment.findOneAndUpdate(
       { _id: paymentId },
       { $set: { razorpayOrderId: orderId } }
@@ -215,7 +258,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 
 /**
  * GET /api/v1/payments/:id/invoice
- * Redirect to invoice URL or generate + redirect
+ * Backwards compatibility: return basic payment info.
  */
 export const getInvoice = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -225,10 +268,6 @@ export const getInvoice = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Payment not found");
   }
 
-  let invoiceUrl = payment.invoiceUrl;
-  if (!invoiceUrl) {
-    invoiceUrl = await generateInvoice(id);
-  }
-
-  res.redirect(302, invoiceUrl);
+  const response = new ApiResponse(200, "Payment fetched", payment);
+  res.status(response.statusCode).json(response);
 });

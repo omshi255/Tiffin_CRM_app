@@ -1,10 +1,15 @@
 import mongoose from "mongoose";
 
-const CUSTOMER_TYPES = ["individual", "corporate", "office"];
-const CUSTOMER_STATUSES = ["active", "inactive", "suspended"];
+const CUSTOMER_STATUSES = ["active", "inactive", "blocked"];
 
 const customerSchema = new mongoose.Schema(
   {
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
     name: {
       type: String,
       required: true,
@@ -13,12 +18,24 @@ const customerSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: true,
-      unique: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      lowercase: true,
       trim: true,
     },
     address: {
       type: String,
-      default: "",
+      required: true,
+      trim: true,
+    },
+    area: {
+      type: String,
+      trim: true,
+    },
+    landmark: {
+      type: String,
       trim: true,
     },
     location: {
@@ -29,31 +46,60 @@ const customerSchema = new mongoose.Schema(
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        default: null,
+        default: [0, 0],
       },
     },
-    customerType: {
+    photoUrl: {
       type: String,
-      enum: CUSTOMER_TYPES,
-      default: "individual",
+    },
+    notes: {
+      type: String,
+    },
+    tags: [
+      {
+        type: String,
+      },
+    ],
+    customerCode: {
+      type: String, // Auto: C001, C002...
     },
     status: {
       type: String,
       enum: CUSTOMER_STATUSES,
       default: "active",
     },
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    creditLimit: {
+      type: Number,
+      default: 0,
+    },
+    totalDue: {
+      type: Number,
+      default: 0,
+    },
     fcmToken: {
       type: String,
       default: null,
     },
-    whatsapp: {
+    portalEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    reportToken: {
       type: String,
-      default: null,
-      trim: true,
+    },
+    reportTokenExpiresAt: {
+      type: Date,
     },
     isDeleted: {
       type: Boolean,
       default: false,
+    },
+    deletedAt: {
+      type: Date,
     },
   },
   {
@@ -61,7 +107,8 @@ const customerSchema = new mongoose.Schema(
   }
 );
 
-// customerSchema.index({ phone: 1 }, { unique: true });
+customerSchema.index({ ownerId: 1, phone: 1 });
+customerSchema.index({ location: "2dsphere" });
 customerSchema.index({ status: 1 });
 customerSchema.index({ createdAt: -1 });
 customerSchema.index({ isDeleted: 1 });
@@ -69,4 +116,4 @@ customerSchema.index({ isDeleted: 1 });
 const Customer = mongoose.model("Customer", customerSchema);
 
 export default Customer;
-export { CUSTOMER_TYPES, CUSTOMER_STATUSES };
+export { CUSTOMER_STATUSES };

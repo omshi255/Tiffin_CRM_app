@@ -1,21 +1,27 @@
 import cron from "node-cron";
-import { getTodaysDeliveries } from "../services/delivery.service.js";
+import User from "../models/User.model.js";
+import { generateDailyOrdersForDate } from "../services/dailyOrder.service.js";
 
-/**
- * Cron: run at 00:00 (midnight) daily.
- * Creates Delivery documents for all active subscriptions for today.
- */
-const schedule = process.env.DELIVERY_CRON_SCHEDULE || "0 0 * * *"; // 0 0 * * * = midnight every day
+const schedule = process.env.DELIVERY_CRON_SCHEDULE || "0 0 * * *";
 
 export const startDeliveryCron = () => {
   cron.schedule(schedule, async () => {
     try {
       const today = new Date();
-      await getTodaysDeliveries(today);
-      console.log(`[DeliveryCron] Generated deliveries for ${today.toISOString().slice(0, 10)}`);
+      const owners = await User.find({ isActive: true }).select("_id").lean();
+
+      for (const o of owners) {
+        await generateDailyOrdersForDate(o._id, today);
+      }
+
+      console.log(
+        `[DailyOrderCron] Generated daily orders for ${today
+          .toISOString()
+          .slice(0, 10)}`
+      );
     } catch (err) {
-      console.error("[DeliveryCron] Error:", err.message);
+      console.error("[DailyOrderCron] Error:", err.message);
     }
   });
-  console.log(`[DeliveryCron] Scheduled: ${schedule}`);
+  console.log(`[DailyOrderCron] Scheduled: ${schedule}`);
 };

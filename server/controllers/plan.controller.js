@@ -1,5 +1,5 @@
 import Joi from "joi";
-import Plan, { PLAN_TYPES, PLAN_FREQUENCIES } from "../models/Plan.model.js";
+import Plan from "../models/Plan.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
@@ -9,22 +9,31 @@ const DEFAULT_LIMIT = 20;
 const DEFAULT_PAGE = 1;
 
 const createPlanSchema = Joi.object({
-  name: Joi.string().trim().required().messages({ "string.empty": "Name is required" }),
-  type: Joi.string().valid(...PLAN_TYPES).optional(),
+  planName: Joi.string()
+    .trim()
+    .required()
+    .messages({ "string.empty": "Plan name is required" }),
+  planType: Joi.string()
+    .valid("daily", "weekly", "monthly", "custom")
+    .optional(),
   price: Joi.number().min(0).required().messages({
     "number.min": "Price must be 0 or greater",
   }),
-  frequency: Joi.string().valid(...PLAN_FREQUENCIES).optional(),
-  description: Joi.string().trim().allow("").optional(),
+  includesLunch: Joi.boolean().optional(),
+  includesDinner: Joi.boolean().optional(),
+  menuDescription: Joi.string().trim().allow("").optional(),
   isActive: Joi.boolean().optional(),
 });
 
 const updatePlanSchema = Joi.object({
-  name: Joi.string().trim().optional(),
-  type: Joi.string().valid(...PLAN_TYPES).optional(),
+  planName: Joi.string().trim().optional(),
+  planType: Joi.string()
+    .valid("daily", "weekly", "monthly", "custom")
+    .optional(),
   price: Joi.number().min(0).optional(),
-  frequency: Joi.string().valid(...PLAN_FREQUENCIES).optional(),
-  description: Joi.string().trim().allow("").optional(),
+  includesLunch: Joi.boolean().optional(),
+  includesDinner: Joi.boolean().optional(),
+  menuDescription: Joi.string().trim().allow("").optional(),
   isActive: Joi.boolean().optional(),
 }).min(1);
 
@@ -32,7 +41,9 @@ const listQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).optional(),
   limit: Joi.number().integer().min(1).max(MAX_LIMIT).optional(),
   isActive: Joi.boolean().optional(),
-  type: Joi.string().valid(...PLAN_TYPES).optional(),
+  planType: Joi.string()
+    .valid("daily", "weekly", "monthly", "custom")
+    .optional(),
 });
 
 /**
@@ -52,9 +63,10 @@ export const listPlans = asyncHandler(async (req, res) => {
   const limit = Math.min(value.limit || DEFAULT_LIMIT, MAX_LIMIT);
   const skip = (page - 1) * limit;
 
-  const filter = {};
+  const ownerId = req.user.userId;
+  const filter = { ownerId };
   if (value.isActive !== undefined) filter.isActive = value.isActive;
-  if (value.type) filter.type = value.type;
+  if (value.planType) filter.planType = value.planType;
 
   const [data, total] = await Promise.all([
     Plan.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
@@ -82,8 +94,9 @@ export const listPlans = asyncHandler(async (req, res) => {
  * GET /api/v1/plans/:id
  */
 export const getPlanById = asyncHandler(async (req, res) => {
+  const ownerId = req.user.userId;
   const { id } = req.params;
-  const plan = await Plan.findById(id).lean();
+  const plan = await Plan.findOne({ _id: id, ownerId }).lean();
 
   if (!plan) {
     throw new ApiError(404, "Plan not found");
@@ -110,11 +123,15 @@ export const createPlan = asyncHandler(async (req, res) => {
   }
 
   const payload = {
-    name: value.name.trim(),
+    ownerId: req.user.userId,
+    planName: value.planName.trim(),
+    planType: value.planType || "monthly",
     price: value.price,
-    type: value.type || "regular",
-    frequency: value.frequency || "monthly",
-    description: value.description || "",
+    includesLunch:
+      value.includesLunch !== undefined ? value.includesLunch : true,
+    includesDinner:
+      value.includesDinner !== undefined ? value.includesDinner : false,
+    menuDescription: value.menuDescription || "",
     isActive: value.isActive !== undefined ? value.isActive : true,
   };
 
@@ -143,8 +160,9 @@ export const updatePlan = asyncHandler(async (req, res) => {
     throw new ApiError(400, error.details.map((d) => d.message).join("; "));
   }
 
-  const plan = await Plan.findByIdAndUpdate(
-    id,
+  const ownerId = req.user.userId;
+  const plan = await Plan.findOneAndUpdate(
+    { _id: id, ownerId },
     { $set: value },
     { new: true, runValidators: true }
   ).lean();

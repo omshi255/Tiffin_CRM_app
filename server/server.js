@@ -10,12 +10,12 @@ import requestId from "./middleware/requestId.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
 import webhookRoutes from "./routes/webhook.routes.js";
+import publicRoutes from "./routes/public.routes.js";
 
 const app = express();
 
 app.use(helmet());
 
-// Health check before rate limit (so load balancers don't consume quota)
 app.get("/health", (req, res) => {
   const dbConnected = mongoose.connection.readyState === 1;
   res.status(dbConnected ? 200 : 503).json({
@@ -27,19 +27,10 @@ app.get("/health", (req, res) => {
 
 app.use(rateLimit(config.RATE_LIMIT));
 
-// Webhook routes must use raw body (before express.json)
 app.use("/api/v1/webhooks", webhookRoutes);
 
-app.use(express.json()); // parse json body
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(
-//   cors({
-//     origin:
-//       config.NODE_ENV === "production"
-//         ? config.CORS_ORIGIN?.split(",") || []
-//         : "*",
-//   })
-// );
 
 app.use(
   cors({
@@ -53,7 +44,7 @@ app.use(morgan("combined"));
 app.use("/public", express.static("public"));
 
 const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 5,
   message: {
     success: false,
@@ -61,9 +52,8 @@ const authRateLimit = rateLimit({
   },
 });
 
-// Apply only to /api/v1/auth
 app.use("/api/v1/auth", authRateLimit);
-
+app.use("/api/v1/public", publicRoutes);
 app.use("/api/v1", routes);
 
 app.use(errorHandler);

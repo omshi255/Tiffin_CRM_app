@@ -1,38 +1,56 @@
 import mongoose from "mongoose";
 
-const PLAN_TYPES = ["regular", "premium", "custom"];
-const PLAN_FREQUENCIES = ["daily", "weekly", "monthly", "custom"];
-
-const planSchema = new mongoose.Schema(
+// MealPlan model as per final spec
+const mealPlanSchema = new mongoose.Schema(
   {
-    name: {
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    planName: {
       type: String,
       required: true,
       trim: true,
     },
-    type: {
+    planType: {
       type: String,
-      enum: PLAN_TYPES,
-      default: "regular",
+      enum: ["daily", "weekly", "monthly", "custom"],
     },
     price: {
       type: Number,
       required: true,
       min: 0,
     },
-    frequency: {
-      type: String,
-      enum: PLAN_FREQUENCIES,
-      default: "monthly",
+    includesLunch: {
+      type: Boolean,
+      default: true,
     },
-    description: {
+    includesDinner: {
+      type: Boolean,
+      default: false,
+    },
+    menuDescription: {
       type: String,
-      default: "",
-      trim: true,
     },
     isActive: {
       type: Boolean,
       default: true,
+    },
+    rawMaterials: [
+      {
+        materialId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "RawMaterial",
+        },
+        quantityPerMeal: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    color: {
+      type: String,
     },
   },
   {
@@ -40,10 +58,9 @@ const planSchema = new mongoose.Schema(
   }
 );
 
-planSchema.index({ isActive: 1 });
-planSchema.index({ type: 1 });
+mealPlanSchema.index({ ownerId: 1, isActive: 1 });
 
-const Plan = mongoose.model("Plan", planSchema);
+// Keep filename/exports but model is MealPlan per spec
+const MealPlan = mongoose.model("MealPlan", mealPlanSchema);
 
-export default Plan;
-export { PLAN_TYPES, PLAN_FREQUENCIES };
+export default MealPlan;

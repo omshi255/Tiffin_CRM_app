@@ -2,14 +2,13 @@ import Joi from "joi";
 import mongoose from "mongoose";
 import Subscription, {
   SUBSCRIPTION_STATUSES,
-  BILLING_PERIODS,
 } from "../models/Subscription.model.js";
 import Customer from "../models/Customer.model.js";
-import Plan from "../models/Plan.model.js";
-import { computeEndDate } from "../services/subscription.service.js";
+import MealPlan from "../models/Plan.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
+import { generateDailyOrdersForDate } from "../services/dailyOrder.service.js";
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
@@ -18,24 +17,27 @@ const DEFAULT_PAGE = 1;
 const createSubscriptionSchema = Joi.object({
   customerId: Joi.string().hex().length(24).required(),
   planId: Joi.string().hex().length(24).required(),
-  startDate: Joi.date().iso().optional(),
-  billingPeriod: Joi.string()
-    .valid(...BILLING_PERIODS)
-    .optional(),
-  autoRenew: Joi.boolean().optional(),
+  startDate: Joi.date().iso().required(),
+  endDate: Joi.date().iso().min(Joi.ref("startDate")).required(),
+  deliverySlot: Joi.string()
+    .valid("morning", "afternoon", "evening")
+    .required(),
+  deliveryDays: Joi.array().items(Joi.number().min(0).max(6)).min(1).required(),
+  autoRenew: Joi.boolean().default(false),
+  notes: Joi.string().allow("", null),
 });
 
 const renewSubscriptionSchema = Joi.object({
-  startDate: Joi.date().iso().optional(),
-  billingPeriod: Joi.string()
-    .valid(...BILLING_PERIODS)
-    .optional(),
+  startDate: Joi.date().iso().required(),
+  endDate: Joi.date().iso().min(Joi.ref("startDate")).required(),
 }).optional();
 
 const listQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).optional(),
   limit: Joi.number().integer().min(1).max(MAX_LIMIT).optional(),
-  status: Joi.string().valid(...SUBSCRIPTION_STATUSES).optional(),
+  status: Joi.string()
+    .valid(...SUBSCRIPTION_STATUSES)
+    .optional(),
   customerId: Joi.string().hex().length(24).optional(),
 });
 
@@ -56,7 +58,8 @@ export const listSubscriptions = asyncHandler(async (req, res) => {
   const limit = Math.min(value.limit || DEFAULT_LIMIT, MAX_LIMIT);
   const skip = (page - 1) * limit;
 
-  const filter = {};
+  const ownerId = req.user.userId;
+  const filter = { ownerId };
   if (value.status) filter.status = value.status;
   if (value.customerId) filter.customerId = value.customerId;
 
@@ -92,10 +95,11 @@ export const listSubscriptions = asyncHandler(async (req, res) => {
  * GET /api/v1/subscriptions/:id
  */
 export const getSubscriptionById = asyncHandler(async (req, res) => {
+  const ownerId = req.user.userId;
   const { id } = req.params;
-  const subscription = await Subscription.findById(id)
+  const subscription = await Subscription.findOne({ _id: id, ownerId })
     .populate("customerId", "name phone address")
-    .populate("planId", "name price frequency type")
+    .populate("planId", "planName price planType")
     .lean();
 
   if (!subscription) {
@@ -114,56 +118,135 @@ export const getSubscriptionById = asyncHandler(async (req, res) => {
  * POST /api/v1/subscriptions
  */
 export const createSubscription = asyncHandler(async (req, res) => {
+  console.log("========== CREATE SUBSCRIPTION START ==========");
+
   const { error, value } = createSubscriptionSchema.validate(req.body, {
     stripUnknown: true,
     abortEarly: false,
   });
+
   if (error) {
+    console.log("❌ Validation Error:", error.details);
     throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
+  // Convert ownerId safely
+  const ownerId = new mongoose.Types.ObjectId(req.user.userId);
+
+  // Validate ObjectIds
+  if (!mongoose.Types.ObjectId.isValid(value.customerId)) {
+    throw new ApiError(400, "Invalid customerId");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(value.planId)) {
+    throw new ApiError(400, "Invalid planId");
   }
 
   const customerId = new mongoose.Types.ObjectId(value.customerId);
   const planId = new mongoose.Types.ObjectId(value.planId);
 
+  console.log("🔍 ownerId:", ownerId.toString());
+  console.log("🔍 customerId:", customerId.toString());
+  console.log("🔍 planId:", planId.toString());
+
   const [customer, plan] = await Promise.all([
-    Customer.findOne({ _id: customerId, isDeleted: { $ne: true } }).lean(),
-    Plan.findById(planId).lean(),
+    Customer.findOne({
+      _id: customerId,
+      ownerId,
+      isDeleted: { $ne: true },
+    }),
+    MealPlan.findOne({
+      _id: planId,
+      ownerId,
+    }),
   ]);
 
+  console.log("👤 Customer Found:", customer);
+  console.log("📦 Plan Found:", plan);
+
   if (!customer) {
+    console.log("❌ Customer not found");
     throw new ApiError(404, "Customer not found");
   }
+
   if (!plan) {
+    console.log("❌ Plan not found");
     throw new ApiError(404, "Plan not found");
   }
+
   if (!plan.isActive) {
+    console.log("❌ Plan is inactive");
     throw new ApiError(400, "Plan is not active");
   }
 
-  const billingPeriod = value.billingPeriod || plan.frequency || "monthly";
-  const startDate = value.startDate ? new Date(value.startDate) : new Date();
-  startDate.setHours(0, 0, 0, 0);
+  const startDate = new Date(value.startDate);
+  const endDate = new Date(value.endDate);
 
-  const endDate = computeEndDate(startDate, billingPeriod);
-  const price = plan.price;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (startDate < today) {
+    throw new ApiError(400, "Subscription start date cannot be in the past");
+  }
+
+  if (endDate < startDate) {
+    throw new ApiError(400, "End date must be after start date");
+  }
+
+  const existingActive = await Subscription.findOne({
+    ownerId,
+    customerId,
+    status: "active",
+  });
+
+  if (existingActive) {
+    console.log("❌ Active subscription already exists");
+    throw new ApiError(409, "Active subscription already exists for customer");
+  }
+
+  const totalDays =
+    Math.floor(
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    ) + 1;
+
+  const totalAmount = plan.price * totalDays;
+
+  console.log("📅 Total Days:", totalDays);
+  console.log("💰 Total Amount:", totalAmount);
 
   const subscription = await Subscription.create({
+    ownerId,
     customerId,
     planId,
     startDate,
     endDate,
+    deliverySlot: value.deliverySlot,
+    deliveryDays: value.deliveryDays,
     status: "active",
-    billingPeriod,
+    totalAmount,
+    paidAmount: 0,
     autoRenew: value.autoRenew ?? false,
-    price,
+    notes: value.notes,
   });
+
+  console.log("✅ Subscription Created:", subscription._id);
+
+  // Generate first day orders
+  await generateDailyOrdersForDate(ownerId, startDate);
 
   const created = await Subscription.findById(subscription._id)
     .populate("customerId", "name phone address")
-    .populate("planId", "name price frequency type")
+    .populate("planId", "planName price planType")
     .lean();
 
-  const response = new ApiResponse(201, "Subscription created", created);
+  console.log("========== CREATE SUBSCRIPTION SUCCESS ==========");
+
+  const response = new ApiResponse(
+    201,
+    "Subscription created successfully",
+    created
+  );
+
   res.status(response.statusCode).json({
     success: response.success,
     message: response.message,
@@ -175,6 +258,7 @@ export const createSubscription = asyncHandler(async (req, res) => {
  * PUT /api/v1/subscriptions/:id/renew
  */
 export const renewSubscription = asyncHandler(async (req, res) => {
+  const ownerId = req.user.userId;
   const { id } = req.params;
 
   const { error, value } = renewSubscriptionSchema.validate(req.body || {}, {
@@ -185,7 +269,7 @@ export const renewSubscription = asyncHandler(async (req, res) => {
     throw new ApiError(400, error.details.map((d) => d.message).join("; "));
   }
 
-  const subscription = await Subscription.findById(id)
+  const subscription = await Subscription.findOne({ _id: id, ownerId })
     .populate("planId")
     .lean();
 
@@ -201,15 +285,11 @@ export const renewSubscription = asyncHandler(async (req, res) => {
   if (!plan || !plan.isActive) {
     throw new ApiError(400, "Plan is not active or not found");
   }
-
-  const billingPeriod = value?.billingPeriod || subscription.billingPeriod || plan.frequency || "monthly";
-  const startDate = value?.startDate
-    ? new Date(value.startDate)
-    : new Date(Math.max(Date.now(), new Date(subscription.endDate).getTime()));
-  startDate.setHours(0, 0, 0, 0);
-
-  const endDate = computeEndDate(startDate, billingPeriod);
-  const price = plan.price;
+  const startDate = new Date(value.startDate);
+  const endDate = new Date(value.endDate);
+  const totalDays =
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
+  const totalAmount = plan.price * totalDays;
 
   const updated = await Subscription.findByIdAndUpdate(
     id,
@@ -218,14 +298,13 @@ export const renewSubscription = asyncHandler(async (req, res) => {
         startDate,
         endDate,
         status: "active",
-        billingPeriod,
-        price,
+        totalAmount,
       },
     },
     { new: true, runValidators: true }
   )
     .populate("customerId", "name phone address")
-    .populate("planId", "name price frequency type")
+    .populate("planId", "planName price planType")
     .lean();
 
   const response = new ApiResponse(200, "Subscription renewed", updated);
@@ -240,9 +319,10 @@ export const renewSubscription = asyncHandler(async (req, res) => {
  * PUT /api/v1/subscriptions/:id/cancel
  */
 export const cancelSubscription = asyncHandler(async (req, res) => {
+  const ownerId = req.user.userId;
   const { id } = req.params;
 
-  const subscription = await Subscription.findById(id);
+  const subscription = await Subscription.findOne({ _id: id, ownerId });
   if (!subscription) {
     throw new ApiError(404, "Subscription not found");
   }

@@ -186,25 +186,42 @@ export const logoutController = asyncHandler(async (req, res, next) => {
 
 /**
  * PUT /api/v1/auth/me
- * Save FCM token for logged-in user
+ * Update logged-in user's profile (fcmToken, businessName, ownerName, city, etc.)
  */
 export const updateMe = asyncHandler(async (req, res) => {
-  const { fcmToken } = req.body;
+  const schema = Joi.object({
+    fcmToken: Joi.string().optional(),
+    businessName: Joi.string().trim().optional(),
+    ownerName: Joi.string().trim().optional(),
+    city: Joi.string().trim().optional(),
+    address: Joi.string().trim().optional(),
+    email: Joi.string().email().optional(),
+    logoUrl: Joi.string().uri().optional(),
+  }).min(1);
 
-  if (!fcmToken) {
-    throw new ApiError(400, "fcmToken is required");
+  const { error, value } = schema.validate(req.body, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
   }
+
+  const updatePayload = { ...value };
 
   const user = await User.findByIdAndUpdate(
     req.user.userId,
-    { $set: { fcmToken } },
+    { $set: updatePayload },
     { new: true }
   ).lean();
 
-  const response = new ApiResponse(200, "FCM token saved", {
+  const response = new ApiResponse(200, "Profile updated", {
     user: {
       id: user._id,
       phone: user.phone,
+      businessName: user.businessName,
+      ownerName: user.ownerName,
+      city: user.city,
       fcmToken: user.fcmToken,
     },
   });

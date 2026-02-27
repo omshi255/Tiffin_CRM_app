@@ -1,15 +1,17 @@
 import { verifyAccessToken } from "../services/token.service.js";
 
-const ROOM_DELIVERY_TODAY = "delivery-today";
-
 /**
- * Initialize the /delivery namespace with JWT auth and location_update handling.
- * @param {import("socket.io").Server} io - Socket.io server instance
+ * Initialize the /delivery namespace with JWT auth and room joining.
+ * Rooms:
+ * - admin:{ownerId}
+ * - customer:{customerId}
+ * - staff:{staffId}
+ * - zone:{zoneId}
  */
 export const initDeliverySocket = (io) => {
-  const deliveryNs = io.of("/delivery");
+  const delivery = io.of("/delivery");
 
-  deliveryNs.use((socket, next) => {
+  delivery.use((socket, next) => {
     const token =
       socket.handshake.auth?.token ||
       socket.handshake.auth?.accessToken ||
@@ -21,33 +23,41 @@ export const initDeliverySocket = (io) => {
 
     try {
       const decoded = verifyAccessToken(token);
-      socket.user = { userId: decoded.userId, phone: decoded.phone };
+      socket.user = decoded;
       next();
-    } catch (err) {
+    } catch {
       next(new Error("Invalid or expired token"));
     }
   });
 
-  deliveryNs.on("connection", (socket) => {
-    socket.join(ROOM_DELIVERY_TODAY);
+  delivery.on("connection", (socket) => {
+    const { userId, role, ownerId } = socket.user;
 
-    socket.on("location_update", (data) => {
-      const { lat, lng } = data || {};
+    if (role === "admin") socket.join(`admin:${ownerId || userId}`);
+    if (role === "customer") socket.join(`customer:${userId}`);
+    if (role === "delivery_boy" || role === "delivery_staff")
+      socket.join(`staff:${userId}`);
+
+    socket.on("join_zone", ({ zoneId }) => {
+      if (zoneId) socket.join(`zone:${zoneId}`);
+    });
+
+    socket.on("leave_zone", ({ zoneId }) => {
+      if (zoneId) socket.leave(`zone:${zoneId}`);
+    });
+
+    socket.on("location_update", ({ lat, lng, orderId }) => {
       if (typeof lat !== "number" || typeof lng !== "number") {
         socket.emit("location_error", { message: "Invalid lat/lng" });
         return;
       }
-      deliveryNs.to(ROOM_DELIVERY_TODAY).emit("location_updated", {
-        userId: socket.user.userId,
-        phone: socket.user.phone,
+      delivery.to(`admin:${ownerId || userId}`).emit("location_update", {
         lat,
         lng,
-        timestamp: new Date().toISOString(),
+        orderId,
+        userId,
       });
-    });
-
-    socket.on("disconnect", () => {
-      // leave room handled automatically
     });
   });
 };
+

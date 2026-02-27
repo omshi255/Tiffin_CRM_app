@@ -1,6 +1,6 @@
 import Subscription from "../models/Subscription.model.js";
 import Payment from "../models/Payment.model.js";
-import Delivery from "../models/Delivery.model.js";
+import DailyOrder from "../models/DailyOrder.model.js";
 
 const getDateRange = (period) => {
   const now = new Date();
@@ -40,8 +40,8 @@ export const getSummaryReport = async (period = "monthly") => {
       },
     ]),
 
-    Delivery.countDocuments({
-      date: { $gte: start, $lte: end },
+    DailyOrder.countDocuments({
+      orderDate: { $gte: start, $lte: end },
       status: "delivered",
     }),
   ]);

@@ -145,3 +145,605 @@ Error: Customer not found
     at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
 
+2026-02-27T07:19:51.278Z [error] : [27/02/2026, 12:49:51 pm] Token has expired
+Error: Token has expired
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:33:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+
+2026-02-27T07:21:07.755Z [error] : [27/02/2026, 12:51:07 pm] Cannot destructure property 'fcmToken' of 'req.body' as it is undefined.
+TypeError: Cannot destructure property 'fcmToken' of 'req.body' as it is undefined.
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:192:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:27:5)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-02-27T07:22:22.526Z [error] : [27/02/2026, 12:52:22 pm] fcmToken is required
+Error: fcmToken is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:195:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:27:5)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-02-27T07:23:19.374Z [error] : [27/02/2026, 12:53:19 pm] Customer with this phone already exists
+Error: Customer with this phone already exists
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customer.controller.js:137:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:23:41.258Z [error] : [27/02/2026, 12:53:41 pm] Customer with this phone already exists
+Error: Customer with this phone already exists
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customer.controller.js:137:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:23:53.709Z [error] : [27/02/2026, 12:53:53 pm] Customer validation failed: ownerId: Path `ownerId` is required.
+ValidationError: Customer validation failed: ownerId: Path `ownerId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T07:24:47.554Z [error] : [27/02/2026, 12:54:47 pm] Customer validation failed: ownerId: Path `ownerId` is required.
+ValidationError: Customer validation failed: ownerId: Path `ownerId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T07:24:59.799Z [error] : [27/02/2026, 12:54:59 pm] Customer with this phone already exists
+Error: Customer with this phone already exists
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customer.controller.js:137:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:25:06.485Z [error] : [27/02/2026, 12:55:06 pm] Customer validation failed: ownerId: Path `ownerId` is required.
+ValidationError: Customer validation failed: ownerId: Path `ownerId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T07:29:12.474Z [error] : [27/02/2026, 12:59:12 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:12:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-02-27T07:31:31.457Z [error] : [27/02/2026, 01:01:31 pm] "customerId" must only contain hexadecimal characters; "customerId" length must be 24 characters long; "planId" must only contain hexadecimal characters; "planId" length must be 24 characters long
+Error: "customerId" must only contain hexadecimal characters; "customerId" length must be 24 characters long; "planId" must only contain hexadecimal characters; "planId" length must be 24 characters long
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:124:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-27T07:32:03.196Z [error] : [27/02/2026, 01:02:03 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:141:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:32:22.442Z [error] : [27/02/2026, 01:02:22 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:141:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:32:43.534Z [error] : [27/02/2026, 01:02:43 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:141:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:33:58.658Z [error] : [27/02/2026, 01:03:58 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:144:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:34:35.697Z [error] : [27/02/2026, 01:04:35 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:144:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:34:45.812Z [error] : [27/02/2026, 01:04:45 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:144:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:35:51.040Z [error] : [27/02/2026, 01:05:51 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:144:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:40:21.047Z [error] : [27/02/2026, 01:10:21 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:145:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:44:08.528Z [error] : [27/02/2026, 01:14:08 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:145:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:45:44.261Z [error] : [27/02/2026, 01:15:44 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:145:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:48:29.096Z [error] : [27/02/2026, 01:18:29 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:169:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:49:03.341Z [error] : [27/02/2026, 01:19:03 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:169:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T07:50:57.492Z [error] : [27/02/2026, 01:20:57 pm] Customer validation failed: ownerId: Path `ownerId` is required.
+ValidationError: Customer validation failed: ownerId: Path `ownerId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T07:52:09.684Z [error] : [27/02/2026, 01:22:09 pm] Customer validation failed: ownerId: Path `ownerId` is required.
+ValidationError: Customer validation failed: ownerId: Path `ownerId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T07:52:17.796Z [error] : [27/02/2026, 01:22:17 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:169:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T08:42:14.747Z [error] : [27/02/2026, 02:12:14 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
+MongoServerError: E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "9876543211" }
+    at InsertOneOperation.handleOk (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:216:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async Collection.insertOne (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\collection.js:154:16)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:405:16)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+    at async E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2778:9
+    at async Promise.all (index 0)
+    at async model.create (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2763:11)
+
+
+2026-02-27T08:47:09.289Z [error] : [27/02/2026, 02:17:09 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:169:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T08:48:40.196Z [error] : [27/02/2026, 02:18:40 pm] Subscription not found
+Error: Subscription not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:106:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T08:52:21.521Z [error] : [27/02/2026, 02:22:21 pm] "invoiceId" is required; "paymentMethod" is required
+Error: "invoiceId" is required; "paymentMethod" is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:106:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-27T08:55:48.650Z [error] : [27/02/2026, 02:25:48 pm] "invoiceId" is required; "paymentMethod" is required
+Error: "invoiceId" is required; "paymentMethod" is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:106:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-27T09:35:16.844Z [error] : [27/02/2026, 03:05:16 pm] Owner not found
+Error: Owner not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:72:21
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T09:36:16.718Z [error] : [27/02/2026, 03:06:16 pm] Owner not found
+Error: Owner not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:72:21
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T09:36:59.942Z [error] : [27/02/2026, 03:06:59 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T09:38:10.445Z [error] : [27/02/2026, 03:08:10 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T09:40:57.685Z [error] : [27/02/2026, 03:10:57 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T09:44:17.527Z [error] : [27/02/2026, 03:14:17 pm] Active subscription already exists for customer
+Error: Active subscription already exists for customer
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:204:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T09:45:57.299Z [error] : [27/02/2026, 03:15:57 pm] Active subscription already exists for customer
+Error: Active subscription already exists for customer
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:204:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T09:47:12.177Z [error] : [27/02/2026, 03:17:12 pm] Subscription not found
+Error: Subscription not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:327:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:00:42.809Z [error] : [27/02/2026, 03:30:42 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:01:14.375Z [error] : [27/02/2026, 03:31:14 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:01:16.092Z [error] : [27/02/2026, 03:31:16 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:01:35.102Z [error] : [27/02/2026, 03:31:35 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:01:50.927Z [error] : [27/02/2026, 03:31:50 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:85:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:02:34.898Z [error] : [27/02/2026, 03:32:34 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:85:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:02:47.571Z [error] : [27/02/2026, 03:32:47 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:08:04.050Z [error] : [27/02/2026, 03:38:04 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:30:10.944Z [error] : [27/02/2026, 04:00:10 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T10:30:53.682Z [error] : [27/02/2026, 04:00:53 pm] No delivered orders in this range
+Error: No delivered orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:95:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T11:45:53.779Z [error] : [27/02/2026, 05:15:53 pm] "invoiceId" is required
+Error: "invoiceId" is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:106:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-27T11:46:50.984Z [error] : [27/02/2026, 05:16:50 pm] "invoiceId" is required
+Error: "invoiceId" is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:106:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-27T11:47:20.795Z [error] : [27/02/2026, 05:17:20 pm] "invoiceId" is required
+Error: "invoiceId" is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:106:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-02-27T11:49:34.238Z [error] : [27/02/2026, 05:19:34 pm] Payment validation failed: invoiceId: Path `invoiceId` is required.
+ValidationError: Payment validation failed: invoiceId: Path `invoiceId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T11:50:06.975Z [error] : [27/02/2026, 05:20:06 pm] INVOICE_VOIDED
+Error: INVOICE_VOIDED
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:133:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T11:50:21.363Z [error] : [27/02/2026, 05:20:21 pm] Payment validation failed: invoiceId: Path `invoiceId` is required.
+ValidationError: Payment validation failed: invoiceId: Path `invoiceId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T11:51:41.907Z [error] : [27/02/2026, 05:21:41 pm] INVOICE_VOIDED
+Error: INVOICE_VOIDED
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:133:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T11:52:54.395Z [error] : [27/02/2026, 05:22:54 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:130:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T11:54:11.919Z [error] : [27/02/2026, 05:24:11 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:85:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T11:54:18.767Z [error] : [27/02/2026, 05:24:18 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:85:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T11:54:34.445Z [error] : [27/02/2026, 05:24:34 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customer.controller.js:153:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T11:55:09.967Z [error] : [27/02/2026, 05:25:09 pm] No orders in this range
+Error: No orders in this range
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/invoice.controller.js:113:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T12:01:06.266Z [error] : [27/02/2026, 05:31:06 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:130:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-02-27T12:01:17.508Z [error] : [27/02/2026, 05:31:17 pm] Payment validation failed: invoiceId: Path `invoiceId` is required.
+ValidationError: Payment validation failed: invoiceId: Path `invoiceId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T12:01:53.682Z [error] : [27/02/2026, 05:31:53 pm] Payment validation failed: invoiceId: Path `invoiceId` is required.
+ValidationError: Payment validation failed: invoiceId: Path `invoiceId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+
+2026-02-27T12:01:57.436Z [error] : [27/02/2026, 05:31:57 pm] Payment validation failed: invoiceId: Path `invoiceId` is required.
+ValidationError: Payment validation failed: invoiceId: Path `invoiceId` is required.
+    at Document.invalidate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3420:32)
+    at validatePath (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3192:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:3133:3)
+    at async model.validate (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\document.js:2702:5)
+    at async model.validateBeforeSavePreSave (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\plugins\validateBeforeSave.js:39:5)
+    at async Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+
+

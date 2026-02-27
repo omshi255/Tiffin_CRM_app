@@ -1,11 +1,13 @@
+// HTTP shim for delivery-related endpoints. Core logic lives in dailyOrder.controller.js
 import { Router } from "express";
-import { getToday, completeDelivery } from "../controllers/delivery.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { getToday } from "../controllers/dailyOrder.controller.js";
 
 const router = Router();
+
 router.use(authMiddleware);
 
-router.get("/today", getToday);
-router.put("/:id/complete", completeDelivery);
+// GET /api/v1/delivery -> today's delivery list (same as /daily-orders/today)
+router.get("/", getToday);
 
 export default router;
