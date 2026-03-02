@@ -747,3 +747,53 @@ ValidationError: Payment validation failed: invoiceId: Path `invoiceId` is requi
     at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
 
 
+2026-03-02T17:56:44.904Z [error] : [02/03/2026, 11:26:44 pm] statusCode must be a valid HTTP status code (100-599)
+TypeError: statusCode must be a valid HTTP status code (100-599)
+    at validateStatusCode (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/class/statusCode.js:6:11)
+    at new ApiError (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/class/apiErrorClass.js:6:23)
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:56:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-02T18:41:50.989Z [error] : [03/03/2026, 12:11:50 am] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:85:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-02T18:42:07.330Z [error] : [03/03/2026, 12:12:07 am] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:85:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-02T18:46:26.943Z [error] : [03/03/2026, 12:16:26 am] statusCode must be a valid HTTP status code (100-599)
+TypeError: statusCode must be a valid HTTP status code (100-599)
+    at validateStatusCode (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/class/statusCode.js:6:11)
+    at new ApiError (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/class/apiErrorClass.js:6:23)
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:56:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-02T18:46:53.909Z [error] : [03/03/2026, 12:16:53 am] statusCode must be a valid HTTP status code (100-599)
+TypeError: statusCode must be a valid HTTP status code (100-599)
+    at validateStatusCode (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/class/statusCode.js:6:11)
+    at new ApiError (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/class/apiErrorClass.js:6:23)
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:56:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-02T18:47:07.683Z [error] : [03/03/2026, 12:17:07 am] statusCode must be a valid HTTP status code (100-599)
+TypeError: statusCode must be a valid HTTP status code (100-599)
+    at validateStatusCode (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/class/statusCode.js:6:11)
+    at new ApiError (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/class/apiErrorClass.js:6:23)
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:56:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
