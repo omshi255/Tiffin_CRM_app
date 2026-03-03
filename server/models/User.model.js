@@ -102,6 +102,23 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
 
+    // Password support (added during week‑1 upgrade)
+    passwordHash: {
+      type: String,
+    },
+
+    // track login events (used for analytics/security)
+    loginHistory: [
+      {
+        ip: String,
+        userAgent: String,
+        at: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+
     // Existing fields kept for compatibility
     name: {
       type: String,

@@ -1,6 +1,9 @@
 import Joi from "joi";
 import User from "../models/User.model.js";
+import config from "../config/index.js";
 import { sendOtp, verifyOtp } from "../services/otp.service.js";
+import * as passwordService from "../services/password.service.js";
+import * as securePassword from "../services/securePassword.service.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -18,6 +21,11 @@ const phoneSchema = Joi.string()
       "Phone must be a valid 10-digit Indian mobile number",
   });
 
+// simple password strength: min 8, one lower, one upper, one digit
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const passwordMessage =
+  "Password must be at least 8 characters and include upper, lower and number";
+
 const sendOtpSchema = Joi.object({
   phone: phoneSchema,
 });
@@ -32,6 +40,18 @@ const verifyOtpSchema = Joi.object({
 
 const refreshTokenSchema = Joi.object({
   refreshToken: Joi.string().required(),
+});
+
+// ---------------- password management ----------------
+const forgotPasswordSchema = Joi.object({
+  phone: phoneSchema,
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  newPassword: Joi.string().pattern(passwordPattern).required().messages({
+    "string.pattern.base": passwordMessage,
+  }),
 });
 
 /**
@@ -63,6 +83,113 @@ export const sendOtpController = asyncHandler(async (req, res, next) => {
   });
 });
 
+// -----------------------------------------------------------------------------
+// Password reset flow (Day 1)
+// -----------------------------------------------------------------------------
+
+/**
+ * POST /api/v1/auth/forgot-password
+ * Body: { phone: "9876543210" }
+ */
+export const forgotPasswordController = asyncHandler(async (req, res, next) => {
+  // make sure body is an object so Joi doesn't quietly return undefined
+  const { error, value } = forgotPasswordSchema.validate(req.body || {}, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+
+  if (error || !value || typeof value.phone === "undefined") {
+    const msg = error
+      ? error.details.map((d) => d.message).join("; ")
+      : "phone is required";
+    throw new ApiError(400, msg);
+  }
+
+  const { phone } = value;
+  const user = await User.findOne({ phone }).lean();
+
+  // always return 200 to avoid enumerating users
+  const response = new ApiResponse(
+    200,
+    "If the phone is registered, a reset link has been sent"
+  );
+
+  // in development we return the raw token for easier testing
+  const payload = {
+    success: response.success,
+    message: response.message,
+  };
+
+  if (config.NODE_ENV !== "production" && user) {
+    // generate token early so we can include it in the response
+    const token = await passwordService.generateResetToken(user._id);
+    payload.debugToken = token;
+    console.log("[forgot-password] token for", phone, token);
+  }
+
+  res.status(response.statusCode).json(payload);
+
+  if (!user) return;
+
+  // in production the token has already been generated above
+  if (config.NODE_ENV === "production") {
+    const token = await passwordService.generateResetToken(user._id);
+    // TODO: send token via email/whatsapp once service is available
+    console.log("[forgot-password] token for", phone, token);
+  }
+});
+
+/**
+ * POST /api/v1/auth/reset-password
+ * Body: { token, newPassword }
+ */
+export const resetPasswordController = asyncHandler(async (req, res, next) => {
+  const { error, value } = resetPasswordSchema.validate(req.body || {}, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+
+  if (
+    error ||
+    !value ||
+    typeof value.token === "undefined" ||
+    typeof value.newPassword === "undefined"
+  ) {
+    const msg = error
+      ? error.details.map((d) => d.message).join("; ")
+      : "token and newPassword are required";
+    throw new ApiError(400, msg);
+  }
+
+  const { token, newPassword } = value;
+  const user = await passwordService.resetPassword(token, newPassword);
+
+  const payload = {
+    userId: user._id.toString(),
+    phone: user.phone,
+  };
+
+  const accessToken = generateAccessToken(payload);
+  const refreshToken = generateRefreshToken(payload);
+
+  const resp = new ApiResponse(200, "Password updated", {
+    accessToken,
+    refreshToken,
+    user: {
+      id: user._id.toString(),
+      phone: user.phone,
+      name: user.name || "",
+      role: user.role,
+    },
+  });
+
+  res.status(resp.statusCode).json({
+    success: resp.success,
+    message: resp.message,
+    data: resp.data,
+  });
+});
+
 /**
  * POST /api/v1/auth/verify-otp
  * Body: { phone: "9876543210", otp: "123456" }
@@ -85,12 +212,21 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, "Invalid or expired OTP");
   }
 
-  let user = await User.findOne({ phone }).lean();
+  let user = await User.findOne({ phone });
 
   if (!user) {
     user = await User.create({ phone });
-    user = user.toObject();
   }
+
+  // record login event
+  user.loginHistory = user.loginHistory || [];
+  user.loginHistory.push({
+    ip: req.ip,
+    userAgent: req.get("User-Agent") || "",
+    at: new Date(),
+  });
+  await user.save();
+  user = user.toObject();
 
   const payload = {
     userId: user._id.toString(),
@@ -182,6 +318,80 @@ export const logoutController = asyncHandler(async (req, res, next) => {
     success: response.success,
     message: response.message,
   });
+});
+
+/**
+ * GET /api/v1/auth/me
+ * Returns profile of authenticated user
+ */
+export const getMeController = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.userId).lean();
+  if (!user) throw new ApiError(404, "User not found");
+
+  const response = new ApiResponse(200, "User profile", {
+    id: user._id.toString(),
+    phone: user.phone,
+    name: user.name || "",
+    role: user.role,
+    email: user.email,
+    businessName: user.businessName,
+    ownerName: user.ownerName,
+    city: user.city,
+    settings: user.settings,
+    loginHistory: user.loginHistory || [],
+  });
+
+  res.status(response.statusCode).json(response);
+});
+
+/**
+ * PUT /api/v1/auth/change-password
+ * Body: { currentPassword, newPassword }
+ */
+export const changePasswordController = asyncHandler(async (req, res, next) => {
+  const schema = Joi.object({
+    currentPassword: Joi.string().min(8).required(),
+    newPassword: Joi.string().pattern(passwordPattern).required().messages({
+      "string.pattern.base": passwordMessage,
+    }),
+  });
+
+  const { error, value } = schema.validate(req.body || {}, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (
+    error ||
+    !value ||
+    typeof value.currentPassword === "undefined" ||
+    typeof value.newPassword === "undefined"
+  ) {
+    const msg = error
+      ? error.details.map((d) => d.message).join("; ")
+      : "currentPassword and newPassword are required";
+    throw new ApiError(400, msg);
+  }
+
+  const user = await User.findById(req.user.userId);
+  if (!user) throw new ApiError(404, "User not found");
+
+  if (!user.passwordHash) {
+    // no password set yet.
+    throw new ApiError(400, "No password exists for this account");
+  }
+
+  const isValid = await securePassword.validatePassword(
+    value.currentPassword,
+    user.passwordHash
+  );
+  if (!isValid) throw new ApiError(401, "Current password incorrect");
+
+  user.passwordHash = await securePassword.hashPassword(value.newPassword);
+  await user.save();
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Password changed, please login again"));
 });
 
 /**
