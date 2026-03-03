@@ -119,6 +119,12 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    truecallerId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
     // Existing fields kept for compatibility
     name: {
       type: String,

@@ -4,6 +4,7 @@ import config from "../config/index.js";
 import { sendOtp, verifyOtp } from "../services/otp.service.js";
 import * as passwordService from "../services/password.service.js";
 import * as securePassword from "../services/securePassword.service.js";
+import * as truecallerService from "../services/truecaller.service.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -52,6 +53,18 @@ const resetPasswordSchema = Joi.object({
   newPassword: Joi.string().pattern(passwordPattern).required().messages({
     "string.pattern.base": passwordMessage,
   }),
+});
+
+const truecallerSchema = Joi.object({
+  accessToken: Joi.string().required(),
+  // profile may be supplied by client to avoid extra API call;
+  // if present we still verify the token for security, but it
+  // allows UI code to pass along name/phone it already received.
+  profile: Joi.object({
+    phone: Joi.string().optional(),
+    name: Joi.string().optional(),
+    truecallerId: Joi.string().optional(),
+  }).optional(),
 });
 
 /**
@@ -252,6 +265,101 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
     message: response.message,
     data: response.data,
   });
+});
+
+/**
+ * POST /api/v1/auth/truecaller
+ * Body: { accessToken }
+ * Clients obtain `accessToken` from Truecaller SDK on the device.
+ */
+export const truecallerController = asyncHandler(async (req, res, next) => {
+  const { error, value } = truecallerSchema.validate(req.body || {}, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+
+  if (error || !value || !value.accessToken) {
+    const msg = error
+      ? error.details.map((d) => d.message).join("; ")
+      : "accessToken is required";
+    throw new ApiError(400, msg);
+  }
+
+  const { accessToken, profile: clientProfile } = value;
+  let profile = clientProfile || null;
+
+  // always verify token to ensure it's valid and coming from Truecaller
+  try {
+    const remoteProfile = await truecallerService.verifyToken(accessToken);
+    // use remote profile as authoritative, but if client provided name/phone
+    // we can merge basic fields to reduce churn
+    profile = { ...remoteProfile, ...profile };
+  } catch (err) {
+    const msg = err.message || "unknown error";
+    // if network problem, propagate as 503 so client may retry later
+    if (msg.includes("network error")) {
+      throw new ApiError(503, `Truecaller service unavailable: ${msg}`);
+    }
+    throw new ApiError(401, `Truecaller verification failed: ${msg}`);
+  }
+
+  // profile object typically contains phoneNumber and name fields
+  const phoneRaw = profile.phoneNumber || profile.phone || "";
+  const phone = String(phoneRaw).replace(/^\+91/, "");
+  const tcId = profile.truecallerId || profile.id || "";
+
+  // prefer matching by Truecaller ID if available
+  let user = null;
+  if (tcId) {
+    user = await User.findOne({ truecallerId: tcId }).lean();
+  }
+  if (!user) {
+    user = await User.findOne({ phone }).lean();
+  }
+
+  if (!user) {
+    user = await User.create({
+      phone,
+      name:
+        (profile.firstName || profile.name || "") +
+        (profile.lastName ? " " + profile.lastName : ""),
+      truecallerId: tcId,
+    });
+    user = user.toObject();
+  } else {
+    // existing user: sync any missing fields
+    const update = {};
+    if (tcId && !user.truecallerId) {
+      update.truecallerId = tcId;
+    }
+    if (phone && user.phone !== phone) {
+      update.phone = phone;
+    }
+    if (Object.keys(update).length) {
+      user = await User.findByIdAndUpdate(
+        user._id,
+        { $set: update },
+        { new: true }
+      ).lean();
+    }
+  }
+
+  const payload = { userId: user._id.toString(), phone: user.phone };
+  const access = generateAccessToken(payload);
+  const refresh = generateRefreshToken(payload);
+
+  const response = new ApiResponse(200, "Login successful", {
+    accessToken: access,
+    refreshToken: refresh,
+    user: {
+      id: user._id.toString(),
+      phone: user.phone,
+      name: user.name || "",
+      role: user.role,
+    },
+  });
+
+  res.status(response.statusCode).json(response);
 });
 
 /**

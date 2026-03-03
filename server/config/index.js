@@ -22,6 +22,9 @@ const optional = {
   TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || "",
   TWILIO_SERVICE_SID: process.env.TWILIO_SERVICE_SID || "",
 
+  // Optional Truecaller API key (set in .env if using Truecaller)
+  TRUECALLER_API_KEY: process.env.TRUECALLER_API_KEY || "",
+
   RATE_LIMIT: {
     windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
     max: Number(process.env.RATE_LIMIT_MAX) || 100,
@@ -58,6 +61,12 @@ export default {
     process.env.TWILIO_AUTH_TOKEN || optional.TWILIO_AUTH_TOKEN,
   TWILIO_SERVICE_SID:
     process.env.TWILIO_SERVICE_SID || optional.TWILIO_SERVICE_SID,
+
+  TRUECALLER_API_KEY: process.env.TRUECALLER_API_KEY || "",
+  // override host if default `api4.truecaller.com` cannot be resolved
+  TRUECALLER_BASE_URL: process.env.TRUECALLER_BASE_URL || "",
+  // enable mock mode: returns a fake profile in development
+  TRUECALLER_MOCK: process.env.TRUECALLER_MOCK || "false",
 
   RATE_LIMIT: {
     windowMs:

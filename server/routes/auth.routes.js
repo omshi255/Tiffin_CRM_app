@@ -7,6 +7,7 @@ import {
   updateMe,
   forgotPasswordController,
   resetPasswordController,
+  truecallerController,
   getMeController,
   changePasswordController,
 } from "../controllers/auth.controller.js";
@@ -18,6 +19,7 @@ router.post("/send-otp", sendOtpController);
 router.post("/verify-otp", verifyOtpController);
 router.post("/forgot-password", forgotPasswordController);
 router.post("/reset-password", resetPasswordController);
+router.post("/truecaller", truecallerController);
 router.post("/refresh-token", refreshTokenController);
 router.post("/logout", authMiddleware, logoutController);
 router.put("/me", authMiddleware, updateMe);
