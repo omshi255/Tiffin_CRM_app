@@ -5,6 +5,7 @@ import { sendOtp, verifyOtp } from "../services/otp.service.js";
 import * as passwordService from "../services/password.service.js";
 import * as securePassword from "../services/securePassword.service.js";
 import * as truecallerService from "../services/truecaller.service.js";
+import * as emailService from "../services/email.service.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -133,22 +134,42 @@ export const forgotPasswordController = asyncHandler(async (req, res, next) => {
     message: response.message,
   };
 
-  if (config.NODE_ENV !== "production" && user) {
-    // generate token early so we can include it in the response
-    const token = await passwordService.generateResetToken(user._id);
-    payload.debugToken = token;
-    console.log("[forgot-password] token for", phone, token);
+  let token;
+  if (user) {
+    // generate/reset token now so we can use it in email or debug output
+    token = await passwordService.generateResetToken(user._id);
+    if (config.NODE_ENV !== "production") {
+      payload.debugToken = token;
+      console.log("[forgot-password] token for", phone, token);
+    }
   }
 
   res.status(response.statusCode).json(payload);
 
   if (!user) return;
 
-  // in production the token has already been generated above
-  if (config.NODE_ENV === "production") {
-    const token = await passwordService.generateResetToken(user._id);
-    // TODO: send token via email/whatsapp once service is available
-    console.log("[forgot-password] token for", phone, token);
+  // send email if we know the address and user has enabled notifications
+  if (user.email) {
+    const resetLink =
+      (config.FRONTEND_URL || "https://app.tiffincrm.com") + `/reset/${token}`;
+
+    const emailResult = await emailService.sendEmail({
+      to: user.email,
+      subject: "Password Reset - TiffinCRM",
+      template: "password-reset",
+      data: {
+        name: user.ownerName || user.name || "",
+        resetLink,
+        expiresIn: "10 minutes",
+      },
+    });
+
+    if (!emailResult.success) {
+      // log and continue; we don't want to reveal failure to the caller
+      console.log("[forgot-password] failed to send email", emailResult.error);
+    }
+  } else {
+    console.log("[forgot-password] no email on user", user._id);
   }
 });
 

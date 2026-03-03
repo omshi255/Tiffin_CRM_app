@@ -1,4 +1,4 @@
-import config from "./server/config/index.js";
+import config from "./config/index.js";
 
 (async () => {
   console.log("key", config.TRUECALLER_API_KEY);

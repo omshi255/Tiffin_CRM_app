@@ -1,6 +1,6 @@
-import config from "./server/config/index.js";
+import config from "./config/index.js";
 config.TRUECALLER_MOCK = "true";
-import * as svc from "./server/services/truecaller.service.js";
+import * as svc from "./services/truecaller.service.js";
 
 (async () => {
   try {

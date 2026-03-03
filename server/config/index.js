@@ -68,6 +68,11 @@ export default {
   // enable mock mode: returns a fake profile in development
   TRUECALLER_MOCK: process.env.TRUECALLER_MOCK || "false",
 
+  // email settings (SendGrid)
+  SENDGRID_API_KEY: process.env.SENDGRID_API_KEY || "",
+  FROM_EMAIL: process.env.FROM_EMAIL || "noreply@tiffincrm.com",
+  FRONTEND_URL: process.env.FRONTEND_URL || "",
+
   RATE_LIMIT: {
     windowMs:
       Number(process.env.RATE_LIMIT_WINDOW_MS) || optional.RATE_LIMIT.windowMs,
