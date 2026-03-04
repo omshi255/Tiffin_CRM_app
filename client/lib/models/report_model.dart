@@ -14,4 +14,6 @@ class ReportSummary {
   final int activeSubscriptions;
   final int pendingDeliveries;
   final int overduePayments;
+
+  get totalCustomers => null;
 }

@@ -23,4 +23,5 @@ abstract final class AppRoutes {
   static const String notifications = '/notifications';
   static const String businessProfile = '/business-profile';
   static const String maps = '/maps';
+  static const String home = dashboard;
 }
