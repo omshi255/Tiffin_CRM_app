@@ -1,52 +1,245 @@
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import '../../data/customer_repository.dart';
+// import '../../../../models/customer_model.dart';
+
+// class AddEditCustomerScreen extends StatefulWidget {
+//   final Customer? customer;
+
+//   const AddEditCustomerScreen({super.key, this.customer});
+
+//   @override
+//   State<AddEditCustomerScreen> createState() => _AddEditCustomerScreenState();
+// }
+
+// class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
+//   final CustomerRepository repo = CustomerRepository();
+
+//   final _formKey = GlobalKey<FormState>();
+
+//   final nameController = TextEditingController();
+//   final phoneController = TextEditingController();
+//   final emailController = TextEditingController();
+//   final addressController = TextEditingController();
+
+//   bool loading = false;
+
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     if (widget.customer != null) {
+//       nameController.text = widget.customer!.name;
+//       phoneController.text = widget.customer!.phone;
+//       emailController.text = widget.customer!.email;
+//       addressController.text = widget.customer!.address;
+//     }
+//   }
+
+//   @override
+//   void dispose() {
+//     nameController.dispose();
+//     phoneController.dispose();
+//     emailController.dispose();
+//     addressController.dispose();
+//     super.dispose();
+//   }
+
+//   Future<void> saveCustomer() async {
+//     if (!_formKey.currentState!.validate()) return;
+
+//     setState(() {
+//       loading = true;
+//     });
+
+//     final customer = Customer(
+//       id: widget.customer?.id ?? "",
+//       name: nameController.text.trim(),
+//       phone: phoneController.text.trim(),
+//       email: emailController.text.trim(),
+//       address: addressController.text.trim(),
+//       status: "active",
+//     );
+
+//     try {
+//       if (widget.customer == null) {
+//         await repo.createCustomer(customer);
+//       } else {
+//         await repo.updateCustomer(widget.customer!.id, customer);
+//       }
+
+//       if (!mounted) return;
+
+//       Navigator.pop(context);
+//     } catch (e) {
+//       setState(() {
+//         loading = false;
+//       });
+
+//       ScaffoldMessenger.of(
+//         context,
+//       ).showSnackBar(SnackBar(content: Text("Error: $e")));
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text(widget.customer == null ? "Add Customer" : "Edit Customer"),
+//       ),
+
+//       body: Padding(
+//         padding: const EdgeInsets.all(20),
+
+//         child: Form(
+//           key: _formKey,
+
+//           child: Column(
+//             children: [
+//               /// NAME
+//               TextFormField(
+//                 controller: nameController,
+//                 decoration: const InputDecoration(labelText: "Name"),
+//                 validator: (v) {
+//                   if (v == null || v.trim().isEmpty) {
+//                     return "Name required";
+//                   }
+//                   return null;
+//                 },
+//               ),
+
+//               const SizedBox(height: 16),
+
+//               /// PHONE
+//               TextFormField(
+//                 controller: phoneController,
+//                 keyboardType: TextInputType.phone,
+//                 inputFormatters: [
+//                   FilteringTextInputFormatter.digitsOnly,
+//                   LengthLimitingTextInputFormatter(10),
+//                 ],
+//                 decoration: const InputDecoration(labelText: "Phone"),
+//                 validator: (v) {
+//                   if (v == null || v.isEmpty) {
+//                     return "Phone required";
+//                   }
+
+//                   if (v.length != 10) {
+//                     return "Enter valid 10 digit number";
+//                   }
+
+//                   return null;
+//                 },
+//               ),
+
+//               const SizedBox(height: 16),
+
+//               /// EMAIL
+//               TextFormField(
+//                 controller: emailController,
+//                 decoration: const InputDecoration(
+//                   labelText: "Email (optional)",
+//                 ),
+//               ),
+
+//               const SizedBox(height: 16),
+
+//               /// ADDRESS
+//               TextFormField(
+//                 controller: addressController,
+//                 decoration: const InputDecoration(labelText: "Address"),
+//                 validator: (v) {
+//                   if (v == null || v.trim().isEmpty) {
+//                     return "Address required";
+//                   }
+//                   return null;
+//                 },
+//               ),
+
+//               const SizedBox(height: 30),
+
+//               /// SAVE BUTTON
+//               SizedBox(
+//                 width: double.infinity,
+//                 child: ElevatedButton(
+//                   onPressed: loading ? null : saveCustomer,
+//                   child: loading
+//                       ? const SizedBox(
+//                           height: 20,
+//                           width: 20,
+//                           child: CircularProgressIndicator(
+//                             strokeWidth: 2,
+//                             color: Colors.white,
+//                           ),
+//                         )
+//                       : Text(widget.customer == null ? "Save" : "Update"),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/thin_divider.dart';
+
+import '../../data/customer_repository.dart';
 import '../../../../models/customer_model.dart';
 import '../widgets/contact_picker_bottom_sheet.dart';
 import '../widgets/contacts_permission_sheet.dart';
 
 class AddEditCustomerScreen extends StatefulWidget {
+  final Customer? customer;
+
   const AddEditCustomerScreen({super.key, this.customer});
-
-  final CustomerModel? customer;
-
-  bool get _isEditMode => customer != null;
 
   @override
   State<AddEditCustomerScreen> createState() => _AddEditCustomerScreenState();
 }
 
 class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
+  final CustomerRepository repo = CustomerRepository();
+
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _nameController;
-  late final TextEditingController _phoneController;
-  late final TextEditingController _emailController;
-  late final TextEditingController _addressController;
+
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
+  final addressController = TextEditingController();
+
+  bool loading = false;
 
   @override
   void initState() {
     super.initState();
-    final c = widget.customer;
-    _nameController = TextEditingController(text: c?.name ?? '');
-    _phoneController = TextEditingController(text: c?.phone ?? '');
-    _emailController = TextEditingController(text: c?.email ?? '');
-    _addressController = TextEditingController(text: c?.address ?? '');
+
+    if (widget.customer != null) {
+      nameController.text = widget.customer!.name;
+      phoneController.text = widget.customer!.phone;
+      emailController.text = widget.customer!.email;
+      addressController.text = widget.customer!.address;
+    }
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _emailController.dispose();
-    _addressController.dispose();
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    addressController.dispose();
     super.dispose();
   }
 
-  Future<void> _importFromContacts() async {
+  /// IMPORT CONTACT FROM PHONE
+  Future<void> importFromContacts() async {
     final status = await Permission.contacts.request();
+
     if (!mounted) return;
+
     if (status.isGranted) {
       showModalBottomSheet(
         context: context,
@@ -54,10 +247,11 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
         backgroundColor: Colors.transparent,
         builder: (ctx) => ContactPickerBottomSheet(
           onContactSelected: (name, phone) {
-            _nameController.text = name;
-            _phoneController.text = phone;
+            nameController.text = name;
+            phoneController.text = phone;
+
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Contact imported successfully')),
+              const SnackBar(content: Text("Contact imported")),
             );
           },
         ),
@@ -72,104 +266,144 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
     }
   }
 
-  void _save() {
+  /// SAVE CUSTOMER
+  Future<void> saveCustomer() async {
     if (!_formKey.currentState!.validate()) return;
-    // API_INTEGRATION
-    // Endpoint: POST /api/customers (create) or PUT /api/customers/:id (update)
-    // Purpose: Create or update customer
-    // Request: { name: String, phone: String, email?: String, address?: String }
-    // Response: { id: String, name: String, ... }
-    if (widget._isEditMode) {
-      context.pop();
-    } else {
-      context.pop();
+
+    setState(() => loading = true);
+
+    final customer = Customer(
+      id: widget.customer?.id ?? "",
+      name: nameController.text.trim(),
+      phone: phoneController.text.trim(),
+      email: emailController.text.trim(),
+      address: addressController.text.trim(),
+      status: "active",
+    );
+
+    try {
+      if (widget.customer == null) {
+        await repo.createCustomer(customer);
+      } else {
+        await repo.updateCustomer(widget.customer!.id, customer);
+      }
+
+      if (!mounted) return;
+
+      Navigator.pop(context);
+    } catch (e) {
+      setState(() => loading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget._isEditMode ? 'Edit Customer' : 'Add Customer'),
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: AppColors.onSurface,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
-        ),
+        title: Text(widget.customer == null ? "Add Customer" : "Edit Customer"),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
+
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (!widget._isEditMode) ...[
+
+              /// CONTACT IMPORT BUTTON
+              if (widget.customer == null)
                 OutlinedButton.icon(
-                  onPressed: _importFromContacts,
+                  onPressed: importFromContacts,
                   icon: const Icon(Icons.person_add),
-                  label: const Text('Import from Contacts'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                    minimumSize: const Size.fromHeight(52),
-                  ),
+                  label: const Text("Import from Contacts"),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    const Expanded(child: ThinDivider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OR',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textHint,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const Expanded(child: ThinDivider()),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ],
+
+              if (widget.customer == null) const SizedBox(height: 20),
+
+              /// NAME
               TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator: (v) =>
-                    v?.trim().isEmpty ?? true ? 'Enter name' : null,
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "Name"),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return "Name required";
+                  }
+                  return null;
+                },
               ),
+
               const SizedBox(height: 16),
+
+              /// PHONE
               TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
+                controller: phoneController,
                 keyboardType: TextInputType.phone,
-                validator: (v) =>
-                    v?.trim().isEmpty ?? true ? 'Enter phone' : null,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
+                decoration: const InputDecoration(labelText: "Phone"),
+                validator: (v) {
+                  if (v == null || v.isEmpty) {
+                    return "Phone required";
+                  }
+
+                  if (v.length != 10) {
+                    return "Enter valid 10 digit number";
+                  }
+
+                  return null;
+                },
               ),
+
               const SizedBox(height: 16),
+
+              /// EMAIL
               TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email (optional)'),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(labelText: 'Address (optional)'),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _save,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: "Email (optional)",
                 ),
-                child: Text(widget._isEditMode ? 'Update' : 'Save'),
+              ),
+
+              const SizedBox(height: 16),
+
+              /// ADDRESS
+              TextFormField(
+                controller: addressController,
+                decoration: const InputDecoration(labelText: "Address"),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return "Address required";
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 30),
+
+              /// SAVE BUTTON
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: loading ? null : saveCustomer,
+                  child: loading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(widget.customer == null ? "Save" : "Update"),
+                ),
               ),
             ],
           ),

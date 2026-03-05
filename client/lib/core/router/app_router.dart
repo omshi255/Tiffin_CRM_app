@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../transitions/page_transitions.dart';
+import '../../models/customer_model.dart';
 import '../../features/auth/presentation/screens/facebook_login_screen.dart';
 import '../../features/auth/presentation/screens/google_login_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -22,13 +23,14 @@ import '../../features/dashboard/presentation/screens/reports_screen.dart';
 import '../../features/dashboard/presentation/screens/settings_screen.dart';
 import '../../features/dashboard/presentation/screens/subscriptions_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
-import '../../models/customer_model.dart';
 import 'app_routes.dart';
 
 final class AppRouter {
   AppRouter._();
 
-  static final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+  static final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(
+    debugLabel: 'root',
+  );
 
   static GoRouter get router => _router;
   static final GoRouter _router = GoRouter(
@@ -104,7 +106,8 @@ final class AppRouter {
                 path: 'detail',
                 name: 'customerDetail',
                 pageBuilder: (context, state) {
-                  final customer = state.extra as CustomerModel?;
+                  final customer = state.extra as Customer?;
+
                   final child = customer == null
                       ? Scaffold(
                           body: Center(
@@ -117,6 +120,7 @@ final class AppRouter {
                           ),
                         )
                       : CustomerDetailScreen(customer: customer);
+
                   return slideTransitionPage(state, child);
                 },
               ),
@@ -124,7 +128,7 @@ final class AppRouter {
                 path: 'edit',
                 name: 'editCustomer',
                 pageBuilder: (context, state) {
-                  final customer = state.extra as CustomerModel?;
+                  final customer = state.extra as Customer?;
                   final child = customer == null
                       ? Scaffold(
                           body: Center(
@@ -209,37 +213,44 @@ final class AppRouter {
           GoRoute(
             path: 'staff-management',
             name: 'staffManagement',
-            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Staff Management'),
+            builder: (context, state) =>
+                _PlaceholderScreen(routeLabel: 'Staff Management'),
           ),
           GoRoute(
             path: 'recent-events',
             name: 'recentEvents',
-            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Recent Events'),
+            builder: (context, state) =>
+                _PlaceholderScreen(routeLabel: 'Recent Events'),
           ),
           GoRoute(
             path: 'import-data',
             name: 'importData',
-            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Import Data'),
+            builder: (context, state) =>
+                _PlaceholderScreen(routeLabel: 'Import Data'),
           ),
           GoRoute(
             path: 'export-data',
             name: 'exportData',
-            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Export Data'),
+            builder: (context, state) =>
+                _PlaceholderScreen(routeLabel: 'Export Data'),
           ),
           GoRoute(
             path: 'learn-more',
             name: 'learnMore',
-            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Learn More'),
+            builder: (context, state) =>
+                _PlaceholderScreen(routeLabel: 'Learn More'),
           ),
           GoRoute(
             path: 'support',
             name: 'support',
-            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Support'),
+            builder: (context, state) =>
+                _PlaceholderScreen(routeLabel: 'Support'),
           ),
           GoRoute(
             path: 'tier-details',
             name: 'tierDetails',
-            builder: (context, state) => _PlaceholderScreen(routeLabel: 'Tier Details'),
+            builder: (context, state) =>
+                _PlaceholderScreen(routeLabel: 'Tier Details'),
           ),
         ],
       ),

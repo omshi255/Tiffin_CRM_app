@@ -6,10 +6,7 @@ import '../../../../core/widgets/animated_list_item.dart';
 import '../../../../core/widgets/bottom_sheet_handle.dart';
 
 class ContactPickerBottomSheet extends StatefulWidget {
-  const ContactPickerBottomSheet({
-    super.key,
-    required this.onContactSelected,
-  });
+  const ContactPickerBottomSheet({super.key, required this.onContactSelected});
 
   final void Function(String name, String phone) onContactSelected;
 
@@ -50,7 +47,8 @@ class _ContactPickerBottomSheetState extends State<ContactPickerBottomSheet> {
       );
       if (mounted) {
         setState(() {
-          _contacts = contacts..sort((a, b) => a.displayName.compareTo(b.displayName));
+          _contacts = contacts
+            ..sort((a, b) => a.displayName.compareTo(b.displayName));
           _filteredContacts = List.from(_contacts);
           _loading = false;
         });
@@ -74,7 +72,9 @@ class _ContactPickerBottomSheetState extends State<ContactPickerBottomSheet> {
         _filteredContacts = _contacts.where((c) {
           final nameMatch = c.displayName.toLowerCase().contains(query);
           final phoneMatch = c.phones.any(
-            (p) => p.number.replaceAll(RegExp(r'\D'), '').contains(query.replaceAll(RegExp(r'\D'), '')),
+            (p) => p.number
+                .replaceAll(RegExp(r'\D'), '')
+                .contains(query.replaceAll(RegExp(r'\D'), '')),
           );
           return nameMatch || phoneMatch;
         }).toList();
@@ -92,7 +92,19 @@ class _ContactPickerBottomSheetState extends State<ContactPickerBottomSheet> {
   }
 
   static String _stripPhone(String phone) {
-    return phone.replaceAll(RegExp(r'\D'), '');
+    String digits = phone.replaceAll(RegExp(r'\D'), '');
+
+    // remove country code if Indian
+    if (digits.startsWith('91') && digits.length > 10) {
+      digits = digits.substring(digits.length - 10);
+    }
+
+    // keep only last 10 digits
+    if (digits.length > 10) {
+      digits = digits.substring(digits.length - 10);
+    }
+
+    return digits;
   }
 
   void _selectContact(Contact contact) {
@@ -144,49 +156,49 @@ class _ContactPickerBottomSheetState extends State<ContactPickerBottomSheet> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _error.isNotEmpty
-                    ? Center(child: Text(_error))
-                    : _filteredContacts.isEmpty
-                        ? Center(
+                ? Center(child: Text(_error))
+                : _filteredContacts.isEmpty
+                ? Center(
+                    child: Text(
+                      'No contacts found',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: _filteredContacts.length,
+                    itemBuilder: (context, index) {
+                      final contact = _filteredContacts[index];
+                      final avatarColor = colorFromName(contact.displayName);
+                      return AnimatedListItem(
+                        index: index,
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: avatarColor,
                             child: Text(
-                              'No contacts found',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
+                              _initials(contact.displayName),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            itemCount: _filteredContacts.length,
-                            itemBuilder: (context, index) {
-                              final contact = _filteredContacts[index];
-                              final avatarColor = colorFromName(contact.displayName);
-                              return AnimatedListItem(
-                                index: index,
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: avatarColor,
-                                    child: Text(
-                                      _initials(contact.displayName),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                  title: Text(contact.displayName),
-                                  subtitle: Text(
-                                    contact.phones.isNotEmpty
-                                        ? contact.phones.first.number
-                                        : 'No phone',
-                                  ),
-                                  trailing: contact.phones.length > 1
-                                      ? const Icon(Icons.arrow_drop_down)
-                                      : null,
-                                  onTap: () => _selectContact(contact),
-                                ),
-                              );
-                            },
                           ),
+                          title: Text(contact.displayName),
+                          subtitle: Text(
+                            contact.phones.isNotEmpty
+                                ? contact.phones.first.number
+                                : 'No phone',
+                          ),
+                          trailing: contact.phones.length > 1
+                              ? const Icon(Icons.arrow_drop_down)
+                              : null,
+                          onTap: () => _selectContact(contact),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),

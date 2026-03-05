@@ -1,7 +1,4 @@
-2026-03-03T13:41:55.622Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
-2026-03-04T12:38:33.356Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
-2026-03-05T04:57:07.700Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
-2026-03-05T06:05:35.205Z [error] : [05/03/2026, 11:35:34 am] Authorization header missing or invalid
+[05/03/2026, 11:35:34 am] Authorization header missing or invalid
 Error: Authorization header missing or invalid
     at authMiddleware (file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/middleware/auth.middleware.js:12:17)
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
@@ -14,8 +11,7 @@ Error: Authorization header missing or invalid
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
     at trimPrefix (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
 
-
-2026-03-05T06:06:06.762Z [error] : [05/03/2026, 11:36:06 am] Authorization header missing or invalid
+[05/03/2026, 11:36:06 am] Authorization header missing or invalid
 Error: Authorization header missing or invalid
     at authMiddleware (file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/middleware/auth.middleware.js:12:17)
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
@@ -28,8 +24,7 @@ Error: Authorization header missing or invalid
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
     at trimPrefix (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
 
-
-2026-03-05T06:29:05.628Z [error] : [05/03/2026, 11:59:05 am] Authorization header missing or invalid
+[05/03/2026, 11:59:05 am] Authorization header missing or invalid
 Error: Authorization header missing or invalid
     at authMiddleware (file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/middleware/auth.middleware.js:12:17)
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
@@ -42,8 +37,7 @@ Error: Authorization header missing or invalid
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
     at trimPrefix (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
 
-
-2026-03-05T06:29:06.032Z [error] : [05/03/2026, 11:59:06 am] "refreshToken" must be a string
+[05/03/2026, 11:59:06 am] "refreshToken" must be a string
 Error: "refreshToken" must be a string
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/auth.controller.js:397:11
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
@@ -56,8 +50,7 @@ Error: "refreshToken" must be a string
     at processParams (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
     at next (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
-
-2026-03-05T06:29:33.181Z [error] : [05/03/2026, 11:59:33 am] Authorization header missing or invalid
+[05/03/2026, 11:59:33 am] Authorization header missing or invalid
 Error: Authorization header missing or invalid
     at authMiddleware (file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/middleware/auth.middleware.js:12:17)
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
@@ -70,8 +63,7 @@ Error: Authorization header missing or invalid
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
     at trimPrefix (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
 
-
-2026-03-05T06:29:33.246Z [error] : [05/03/2026, 11:59:33 am] "refreshToken" must be a string
+[05/03/2026, 11:59:33 am] "refreshToken" must be a string
 Error: "refreshToken" must be a string
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/auth.controller.js:397:11
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
@@ -84,8 +76,7 @@ Error: "refreshToken" must be a string
     at processParams (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
     at next (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
-
-2026-03-05T06:31:52.204Z [error] : [05/03/2026, 12:01:52 pm] Authorization header missing or invalid
+[05/03/2026, 12:01:52 pm] Authorization header missing or invalid
 Error: Authorization header missing or invalid
     at authMiddleware (file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/middleware/auth.middleware.js:12:17)
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
@@ -98,8 +89,7 @@ Error: Authorization header missing or invalid
     at Layer.handleRequest (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
     at trimPrefix (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
 
-
-2026-03-05T06:31:53.200Z [error] : [05/03/2026, 12:01:53 pm] "refreshToken" must be a string
+[05/03/2026, 12:01:53 pm] "refreshToken" must be a string
 Error: "refreshToken" must be a string
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/auth.controller.js:397:11
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
@@ -112,8 +102,7 @@ Error: "refreshToken" must be a string
     at processParams (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
     at next (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
-
-2026-03-05T06:41:51.156Z [error] : [05/03/2026, 12:11:50 pm] "address" must be a string
+[05/03/2026, 12:11:50 pm] "address" must be a string
 Error: "address" must be a string
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:173:11
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
@@ -126,8 +115,7 @@ Error: "address" must be a string
     at processParams (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
     at next (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
-
-2026-03-05T07:14:26.881Z [error] : [05/03/2026, 12:44:26 pm] Phone must be a valid 10-digit Indian mobile number; Address is required
+[05/03/2026, 12:44:26 pm] Phone must be a valid 10-digit Indian mobile number; Address is required
 Error: Phone must be a valid 10-digit Indian mobile number; Address is required
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:173:11
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
@@ -140,184 +128,157 @@ Error: Phone must be a valid 10-digit Indian mobile number; Address is required
     at processParams (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
     at next (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
-
-2026-03-05T08:02:47.529Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
-2026-03-05T08:33:16.484Z [error] : [05/03/2026, 02:03:16 pm] Customer not found
+[05/03/2026, 02:03:16 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:17.398Z [error] : [05/03/2026, 02:03:17 pm] Customer not found
+[05/03/2026, 02:03:17 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:19.638Z [error] : [05/03/2026, 02:03:19 pm] Customer not found
+[05/03/2026, 02:03:19 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:22.213Z [error] : [05/03/2026, 02:03:22 pm] Customer not found
+[05/03/2026, 02:03:22 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:22.626Z [error] : [05/03/2026, 02:03:22 pm] Customer not found
+[05/03/2026, 02:03:22 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:22.914Z [error] : [05/03/2026, 02:03:22 pm] Customer not found
+[05/03/2026, 02:03:22 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:24.865Z [error] : [05/03/2026, 02:03:24 pm] Customer not found
+[05/03/2026, 02:03:24 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:25.374Z [error] : [05/03/2026, 02:03:25 pm] Customer not found
+[05/03/2026, 02:03:25 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:25.399Z [error] : [05/03/2026, 02:03:25 pm] Customer not found
+[05/03/2026, 02:03:25 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:25.531Z [error] : [05/03/2026, 02:03:25 pm] Customer not found
+[05/03/2026, 02:03:25 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:25.786Z [error] : [05/03/2026, 02:03:25 pm] Customer not found
+[05/03/2026, 02:03:25 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:25.826Z [error] : [05/03/2026, 02:03:25 pm] Customer not found
+[05/03/2026, 02:03:25 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:28.143Z [error] : [05/03/2026, 02:03:28 pm] Customer not found
+[05/03/2026, 02:03:28 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:242:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:36.667Z [error] : [05/03/2026, 02:03:36 pm] Customer not found
+[05/03/2026, 02:03:36 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:37.662Z [error] : [05/03/2026, 02:03:37 pm] Customer not found
+[05/03/2026, 02:03:37 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:37.721Z [error] : [05/03/2026, 02:03:37 pm] Customer not found
+[05/03/2026, 02:03:37 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:37.892Z [error] : [05/03/2026, 02:03:37 pm] Customer not found
+[05/03/2026, 02:03:37 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:38.048Z [error] : [05/03/2026, 02:03:38 pm] Customer not found
+[05/03/2026, 02:03:38 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:33:38.231Z [error] : [05/03/2026, 02:03:38 pm] Customer not found
+[05/03/2026, 02:03:38 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:36:32.984Z [error] : [05/03/2026, 02:06:32 pm] Customer not found
+[05/03/2026, 02:06:32 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:38:16.019Z [error] : [05/03/2026, 02:08:15 pm] Customer not found
+[05/03/2026, 02:08:15 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:43:10.566Z [error] : [05/03/2026, 02:13:10 pm] Customer not found
+[05/03/2026, 02:13:10 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:43:18.641Z [error] : [05/03/2026, 02:13:18 pm] Customer not found
+[05/03/2026, 02:13:18 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:370:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:43:34.430Z [error] : [05/03/2026, 02:13:34 pm] Customer not found
+[05/03/2026, 02:13:34 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:242:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:43:43.591Z [error] : [05/03/2026, 02:13:43 pm] Customer not found
+[05/03/2026, 02:13:43 pm] Customer not found
 Error: Customer not found
     at file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/controllers/customer.controller.js:242:11
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async file:///C:/Users/DELL/Desktop/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
-
-2026-03-05T08:44:50.990Z [error] : [05/03/2026, 02:14:50 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
+[05/03/2026, 02:14:50 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
 MongoServerError: E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "8717986069" }
     at InsertOneOperation.handleOk (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\insert.js:51:19)
     at tryOperation (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:216:34)
@@ -330,8 +291,7 @@ MongoServerError: E11000 duplicate key error collection: test.customers index: p
     at async Promise.all (index 0)
     at async Function.create (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2763:11)
 
-
-2026-03-05T08:44:56.880Z [error] : [05/03/2026, 02:14:56 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
+[05/03/2026, 02:14:56 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
 MongoServerError: E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "8717986069" }
     at InsertOneOperation.handleOk (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\insert.js:51:19)
     at tryOperation (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:216:34)
@@ -344,9 +304,7 @@ MongoServerError: E11000 duplicate key error collection: test.customers index: p
     at async Promise.all (index 0)
     at async Function.create (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2763:11)
 
-
-2026-03-05T08:45:21.218Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
-2026-03-05T08:45:24.938Z [error] : [05/03/2026, 02:15:24 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
+[05/03/2026, 02:15:24 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
 MongoServerError: E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "8717986069" }
     at InsertOneOperation.handleOk (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\insert.js:51:19)
     at tryOperation (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:216:34)
@@ -359,8 +317,7 @@ MongoServerError: E11000 duplicate key error collection: test.customers index: p
     at async Promise.all (index 0)
     at async Function.create (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2763:11)
 
-
-2026-03-05T08:49:33.356Z [error] : [05/03/2026, 02:19:33 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
+[05/03/2026, 02:19:33 pm] E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "[REDACTED_PHONE]" }
 MongoServerError: E11000 duplicate key error collection: test.customers index: phone_1 dup key: { phone: "6261461762" }
     at InsertOneOperation.handleOk (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\insert.js:51:19)
     at tryOperation (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:216:34)
@@ -372,5 +329,4 @@ MongoServerError: E11000 duplicate key error collection: test.customers index: p
     at async C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2778:9
     at async Promise.all (index 0)
     at async Function.create (C:\Users\DELL\Desktop\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2763:11)
-
 
