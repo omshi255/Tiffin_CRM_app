@@ -8,6 +8,7 @@ import {
   generateOrders,
   debugSubscriptions,
   debugMatchForDate,
+  generateNextWeekOrders,
 } from "../controllers/dailyOrder.controller.js";
 
 const router = Router();
@@ -21,5 +22,6 @@ router.post("/generate", generateOrders);
 router.get("/debug/subscriptions", debugSubscriptions);
 router.get("/debug/subscription/:subscriptionId", debugOrders);
 router.get("/debug/match", debugMatchForDate);
+router.post("/generate-week", generateNextWeekOrders);
 
 export default router;

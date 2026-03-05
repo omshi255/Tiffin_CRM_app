@@ -8,6 +8,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import config from "../config/index.js";
+import { sendNotification } from "../services/inAppNotification.service.js";
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
@@ -175,6 +176,13 @@ export const createPayment = asyncHandler(async (req, res) => {
       .populate("customerId", "name phone address")
       .populate("invoiceId", "invoiceNumber netAmount balanceDue paymentStatus")
       .lean();
+
+    await sendNotification({
+      customerId: payment.customerId,
+      title: "Payment received",
+      message: `Payment of ₹${payment.amount} received`,
+      data: { paymentId: payment._id },
+    });
 
     const response = new ApiResponse(201, "Payment recorded", created);
     res.status(response.statusCode).json({

@@ -9,6 +9,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import { generateDailyOrdersForDate } from "../services/dailyOrder.service.js";
+import { sendNotification } from "../services/inAppNotification.service.js";
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
@@ -227,6 +228,12 @@ export const createSubscription = asyncHandler(async (req, res) => {
     paidAmount: 0,
     autoRenew: value.autoRenew ?? false,
     notes: value.notes,
+  });
+  await sendNotification({
+    customerId: subscription.customerId,
+    title: "Subscription activated",
+    message: "Your meal subscription is now active",
+    data: { subscriptionId: subscription._id },
   });
 
   console.log("✅ Subscription Created:", subscription._id);

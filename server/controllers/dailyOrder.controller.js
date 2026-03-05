@@ -9,11 +9,14 @@ import {
   getTodayDailyOrders,
   generateDailyOrdersForDate,
 } from "../services/dailyOrder.service.js";
+import { sendNotification } from "../services/inAppNotification.service.js";
 
-const startOfDay = (d) => {
-  const date = new Date(d);
-  date.setHours(0, 0, 0, 0);
-  return date;
+/**
+ * Convert YYYY-MM-DD to UTC date
+ */
+const parseUTC = (d) => {
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, day));
 };
 
 /**
@@ -21,6 +24,7 @@ const startOfDay = (d) => {
  */
 export const getToday = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
+
   const orders = await getTodayDailyOrders(ownerId);
 
   const response = new ApiResponse(200, "Today's orders fetched", {
@@ -36,8 +40,7 @@ export const getToday = asyncHandler(async (req, res) => {
 });
 
 /**
- * GET /api/v1/daily-orders/debug/subscription/:subscriptionId
- * Debug: fetch all orders for a subscription (not just today)
+ * DEBUG: fetch all orders for a subscription
  */
 export const debugOrders = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
@@ -58,27 +61,22 @@ export const debugOrders = asyncHandler(async (req, res) => {
     TODAY: new Date().toISOString().slice(0, 10),
   });
 
-  res.status(response.statusCode).json({
-    success: response.success,
-    message: response.message,
-    data: response.data,
-  });
+  res.status(response.statusCode).json(response);
 });
 
 /**
  * POST /api/v1/daily-orders/generate
- * Manually regenerate orders for a given date
- * Body: { date: "2026-02-27", subscriptionId?: "..." }
  */
 export const generateOrders = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
   const { date } = req.body;
 
   if (!date) {
-    throw new ApiError(400, "date is required (format: YYYY-MM-DD)");
+    throw new ApiError(400, "date is required (YYYY-MM-DD)");
   }
 
-  const targetDate = new Date(date);
+  const targetDate = parseUTC(date);
+
   const { generatedCount, existingCount } = await generateDailyOrdersForDate(
     ownerId,
     targetDate
@@ -87,20 +85,14 @@ export const generateOrders = asyncHandler(async (req, res) => {
   const response = new ApiResponse(200, "Orders generated", {
     generatedCount,
     existingCount,
-    date: date,
-    ownerId,
+    date,
   });
 
-  res.status(response.statusCode).json({
-    success: response.success,
-    message: response.message,
-    data: response.data,
-  });
+  res.status(response.statusCode).json(response);
 });
 
 /**
- * GET /api/v1/daily-orders/debug/subscriptions
- * Debug: list all subscriptions for this owner
+ * DEBUG: list subscriptions
  */
 export const debugSubscriptions = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
@@ -115,29 +107,21 @@ export const debugSubscriptions = asyncHandler(async (req, res) => {
     total: subs.length,
   });
 
-  res.status(response.statusCode).json({
-    success: response.success,
-    message: response.message,
-    data: response.data,
-  });
+  res.status(response.statusCode).json(response);
 });
 
 /**
- * GET /api/v1/daily-orders/debug/match
- * Query: date=YYYY-MM-DD
- * Returns subscriptions matching the date filter used by generator
+ * DEBUG: find subscriptions matching a date
  */
 export const debugMatchForDate = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
   const { date } = req.query;
+
   if (!date) {
     throw new ApiError(400, "date query param required");
   }
 
-  // parse date string as UTC midnight to avoid timezone shift
-  const day = new Date(
-    Date.UTC(...date.split("-").map((n) => parseInt(n, 10)))
-  );
+  const day = parseUTC(date);
   const dow = day.getUTCDay();
 
   const subs = await Subscription.find({
@@ -158,25 +142,24 @@ export const debugMatchForDate = asyncHandler(async (req, res) => {
     total: subs.length,
   });
 
-  res.status(response.statusCode).json({
-    success: response.success,
-    message: response.message,
-    data: response.data,
-  });
+  res.status(response.statusCode).json(response);
 });
 
 /**
  * POST /api/v1/daily-orders/process
- * BR-01/BR-03 core: bulk update pending -> processing and send FCM.
  */
 export const processToday = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
-  const today = startOfDay(new Date());
+  const { date } = req.body;
+
+  const targetDate = date
+    ? parseUTC(date)
+    : parseUTC(new Date().toISOString().slice(0, 10));
 
   const result = await DailyOrder.updateMany(
     {
       ownerId,
-      orderDate: today,
+      orderDate: targetDate,
       status: "pending",
     },
     {
@@ -192,7 +175,7 @@ export const processToday = asyncHandler(async (req, res) => {
   if (processedCount > 0) {
     const orders = await DailyOrder.find({
       ownerId,
-      orderDate: today,
+      orderDate: targetDate,
       status: "processing",
     })
       .select("customerId")
@@ -201,7 +184,10 @@ export const processToday = asyncHandler(async (req, res) => {
     const customerIds = [
       ...new Set(orders.map((o) => o.customerId.toString())),
     ];
-    const customers = await Customer.find({ _id: { $in: customerIds } })
+
+    const customers = await Customer.find({
+      _id: { $in: customerIds },
+    })
       .select("fcmToken")
       .lean();
 
@@ -218,12 +204,13 @@ export const processToday = asyncHandler(async (req, res) => {
   }
 
   const io = req.app.get("io");
+
   if (io) {
     io.of("/delivery")
       .to(`admin:${ownerId}`)
       .emit("orders_processed", {
         count: processedCount,
-        date: today.toISOString().slice(0, 10),
+        date: targetDate.toISOString().slice(0, 10),
       });
   }
 
@@ -231,17 +218,11 @@ export const processToday = asyncHandler(async (req, res) => {
     processedCount,
   });
 
-  res.status(response.statusCode).json({
-    success: response.success,
-    message: response.message,
-    data: response.data,
-  });
+  res.status(response.statusCode).json(response);
 });
 
 /**
  * POST /api/v1/daily-orders/mark-delivered
- * Bulk mark orders as delivered for a specific date
- * Body: { orderDate: "2026-03-01", customerId?: "...", status: "delivered" }
  */
 export const markDelivered = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
@@ -251,16 +232,26 @@ export const markDelivered = asyncHandler(async (req, res) => {
     throw new ApiError(400, "orderDate is required");
   }
 
-  const date = startOfDay(new Date(orderDate));
+  const date = parseUTC(orderDate);
 
   const filter = {
     ownerId,
     orderDate: date,
-    status: { $in: ["pending", "processing"] }, // can mark from pending or processing
+    status: { $in: ["pending", "processing"] },
   };
 
   if (customerId) {
     filter.customerId = customerId;
+  }
+
+  const orders = await DailyOrder.find(filter).select("_id customerId").lean();
+
+  if (!orders.length) {
+    const response = new ApiResponse(200, "No orders found to mark delivered", {
+      deliveredCount: 0,
+    });
+
+    return res.status(response.statusCode).json(response);
   }
 
   const result = await DailyOrder.updateMany(filter, {
@@ -272,14 +263,33 @@ export const markDelivered = asyncHandler(async (req, res) => {
 
   const deliveredCount = result.modifiedCount || 0;
 
+  await Promise.all(
+    orders.map((order) =>
+      sendNotification({
+        customerId: order.customerId,
+        title: "Order delivered",
+        message: "Your meal has been delivered",
+        data: { orderId: order._id.toString() },
+      })
+    )
+  );
+
   const response = new ApiResponse(200, "Orders marked as delivered", {
     deliveredCount,
     date: date.toISOString().slice(0, 10),
   });
 
-  res.status(response.statusCode).json({
-    success: response.success,
-    message: response.message,
-    data: response.data,
+  res.status(response.statusCode).json(response);
+});
+
+export const generateNextWeekOrders = asyncHandler(async (req, res) => {
+  const ownerId = req.user.userId;
+
+  const results = await generateOrdersForNextDays(ownerId, 7);
+
+  const response = new ApiResponse(200, "Orders generated for next 7 days", {
+    results,
   });
+
+  res.status(response.statusCode).json(response);
 });

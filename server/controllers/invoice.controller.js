@@ -7,6 +7,7 @@ import Customer from "../models/Customer.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
+import { sendNotification } from "../services/inAppNotification.service.js";
 
 const listQuerySchema = Joi.object({
   customerId: Joi.string().hex().length(24).optional(),
@@ -152,6 +153,13 @@ export const generateInvoiceForRange = asyncHandler(async (req, res) => {
     paidAmount: 0,
     balanceDue: netAmount,
     paymentStatus: "unpaid",
+  });
+
+  await sendNotification({
+    customerId: invoice.customerId,
+    title: "Invoice ready",
+    message: `Invoice ${invoice.invoiceNumber} generated`,
+    data: { invoiceId: invoice._id },
   });
 
   const response = new ApiResponse(201, "Invoice generated", {

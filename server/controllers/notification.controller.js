@@ -3,21 +3,19 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import User from "../models/User.model.js";
+import { sendNotification } from "../services/inAppNotification.service.js";
 
-export const testNotification = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.userId);
+export const testNotification = async (req, res) => {
+  const { customerId } = req.body;
 
-  if (!user?.fcmToken) {
-    throw new ApiError(400, "User does not have FCM token saved");
-  }
+  const result = await sendNotification({
+    customerId,
+    title: "Test notification",
+    message: "This is a test push notification",
+  });
 
-  await sendToToken(
-    user.fcmToken,
-    "Test Notification 🚀",
-    "Your FCM integration is working!",
-    { type: "test" }
-  );
-
-  const response = new ApiResponse(200, "Notification sent");
-  res.status(response.statusCode).json(response);
-});
+  res.json({
+    success: true,
+    result,
+  });
+};

@@ -47,13 +47,10 @@ export const generateDailyOrdersForDate = async (ownerId, date) => {
 
   const subscriptions = await Subscription.find({
     ownerId,
-    status: "active",
     startDate: { $lte: day },
     endDate: { $gte: day },
     deliveryDays: { $in: [dow] },
-  })
-    .populate("planId")
-    .lean();
+  }).populate("planId", "includesLunch includesDinner");
 
   console.log("📦 Found subscriptions:", subscriptions.length);
   subscriptions.forEach((s) => {
@@ -119,4 +116,22 @@ export const getTodayDailyOrders = async (ownerId) => {
     .populate("deliveryStaffId", "name phone")
     .sort({ createdAt: 1 })
     .lean();
+};
+
+export const generateOrdersForNextDays = async (ownerId, days = 7) => {
+  const results = [];
+
+  for (let i = 0; i < days; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+
+    const result = await generateDailyOrdersForDate(ownerId, date);
+
+    results.push({
+      date: date.toISOString().slice(0, 10),
+      ...result,
+    });
+  }
+
+  return results;
 };

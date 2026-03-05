@@ -113,6 +113,7 @@ const dailyOrderSchema = new mongoose.Schema(
 dailyOrderSchema.index({ ownerId: 1, orderDate: 1, status: 1 });
 dailyOrderSchema.index({ customerId: 1, orderDate: -1 });
 dailyOrderSchema.index({ ownerId: 1, orderDate: 1, deliveryStaffId: 1 });
+dailyOrderSchema.index({ subscriptionId: 1, orderDate: 1 }, { unique: true });
 
 const DailyOrder = mongoose.model("DailyOrder", dailyOrderSchema);
 
