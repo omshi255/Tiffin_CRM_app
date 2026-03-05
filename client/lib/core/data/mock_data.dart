@@ -6,8 +6,8 @@ import '../../models/payment_model.dart';
 import '../../models/notification_model.dart';
 import '../../models/report_model.dart';
 
-final List<CustomerModel> mockCustomers = [
-  CustomerModel(
+final List<Customer> mockCustomers = [
+  Customer(
     id: 'c1',
     name: 'Rajesh Kumar',
     phone: '+91 9876543210',
@@ -15,7 +15,7 @@ final List<CustomerModel> mockCustomers = [
     address: '42, Lamington Road, Grant Road East, Mumbai 400007',
     status: 'active',
   ),
-  CustomerModel(
+  Customer(
     id: 'c2',
     name: 'Priya Sharma',
     phone: '+91 9123456789',
@@ -23,7 +23,7 @@ final List<CustomerModel> mockCustomers = [
     address: 'Block A-12, Andheri West, Mumbai 400058',
     status: 'active',
   ),
-  CustomerModel(
+  Customer(
     id: 'c3',
     name: 'Amit Patel',
     phone: '+91 9988776655',
@@ -31,7 +31,7 @@ final List<CustomerModel> mockCustomers = [
     address: 'Sector 5, Vashi, Navi Mumbai 400703',
     status: 'active',
   ),
-  CustomerModel(
+  Customer(
     id: 'c4',
     name: 'Sneha Reddy',
     phone: '+91 8765432109',
@@ -39,7 +39,7 @@ final List<CustomerModel> mockCustomers = [
     address: 'Koramangala 5th Block, Bangalore 560095',
     status: 'inactive',
   ),
-  CustomerModel(
+  Customer(
     id: 'c5',
     name: 'Vikram Singh',
     phone: '+91 7654321098',
@@ -188,9 +188,21 @@ final List<NotificationModel> mockNotifications = [
 ];
 
 final List<Map<String, dynamic>> mockRecentActivity = [
-  {'label': 'Payment received', 'subtitle': 'Rajesh Kumar • ₹4,500', 'time': '2 hours ago'},
-  {'label': 'New subscription', 'subtitle': 'Priya Sharma • Roti Sabzi Combo', 'time': '1 day ago'},
-  {'label': 'Delivery completed', 'subtitle': 'Amit Patel • Lunch', 'time': '1 day ago'},
+  {
+    'label': 'Payment received',
+    'subtitle': 'Rajesh Kumar • ₹4,500',
+    'time': '2 hours ago',
+  },
+  {
+    'label': 'New subscription',
+    'subtitle': 'Priya Sharma • Roti Sabzi Combo',
+    'time': '1 day ago',
+  },
+  {
+    'label': 'Delivery completed',
+    'subtitle': 'Amit Patel • Lunch',
+    'time': '1 day ago',
+  },
 ];
 
 final ReportSummary mockReportsData = ReportSummary(
@@ -202,7 +214,7 @@ final ReportSummary mockReportsData = ReportSummary(
   overduePayments: 3,
 );
 
-CustomerModel? getMockCustomerById(String id) {
+Customer? getMockCustomerById(String id) {
   try {
     return mockCustomers.firstWhere((c) => c.id == id);
   } catch (_) {
