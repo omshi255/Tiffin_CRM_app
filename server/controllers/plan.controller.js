@@ -1,5 +1,7 @@
 import Joi from "joi";
 import Plan from "../models/Plan.model.js";
+import Subscription from "../models/Subscription.model.js";
+import DailyOrder from "../models/DailyOrder.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
@@ -176,5 +178,45 @@ export const updatePlan = asyncHandler(async (req, res) => {
     success: response.success,
     message: response.message,
     data: response.data,
+  });
+});
+
+export const deletePlan = asyncHandler(async (req, res) => {
+  const ownerId = req.user.userId;
+  const { id } = req.params;
+
+  const plan = await Plan.findOne({ _id: id, ownerId });
+
+  if (!plan) {
+    throw new ApiError(404, "Meal plan not found");
+  }
+
+  // Check subscriptions using this plan
+  const activeSubscriptions = await Subscription.countDocuments({
+    planId: id,
+    status: "active",
+  });
+
+  if (activeSubscriptions > 0) {
+    throw new ApiError(400, "Cannot delete plan. Active subscriptions exist.");
+  }
+
+  // Check future orders using this plan
+  const futureOrders = await DailyOrder.countDocuments({
+    planId: id,
+    orderDate: { $gte: new Date() },
+  });
+
+  if (futureOrders > 0) {
+    throw new ApiError(400, "Cannot delete plan. Orders already generated.");
+  }
+
+  await Plan.deleteOne({ _id: id });
+
+  const response = new ApiResponse(200, "Meal plan deleted successfully");
+
+  res.status(response.statusCode).json({
+    success: response.success,
+    message: response.message,
   });
 });

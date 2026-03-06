@@ -4,6 +4,7 @@ import {
   getPlanById,
   createPlan,
   updatePlan,
+  deletePlan,
 } from "../controllers/plan.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
@@ -15,5 +16,6 @@ router.get("/", listPlans);
 router.get("/:id", getPlanById);
 router.post("/", createPlan);
 router.put("/:id", updatePlan);
+router.delete("/:id", deletePlan);
 
 export default router;
