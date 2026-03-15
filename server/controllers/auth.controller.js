@@ -202,13 +202,22 @@ export const resetPasswordController = asyncHandler(async (req, res, next) => {
   const { token, newPassword } = value;
   const user = await passwordService.resetPassword(token, newPassword);
 
-  const resolved =
-    user.role === "vendor"
-      ? { role: "vendor", ownerId: null }
-      : await resolveRoleForPhone(user.phone);
-  const role = user.role === "vendor" ? "vendor" : resolved.role;
+  // Admin is never overridden
+  let resolved;
+  if (user.role === "admin") {
+    resolved = { role: "admin", ownerId: null, staffId: null, customerId: null };
+  } else if (user.role === "vendor") {
+    resolved = { role: "vendor", ownerId: null, staffId: null, customerId: null };
+  } else {
+    resolved = await resolveRoleForPhone(user.phone);
+  }
+  const role = resolved.role;
   const ownerId =
-    role === "vendor" ? user._id.toString() : resolved.ownerId || null;
+    role === "admin"
+      ? null
+      : role === "vendor"
+        ? user._id.toString()
+        : resolved.ownerId || null;
   const staffId = resolved.staffId || null;
   const customerId = resolved.customerId || null;
 
@@ -271,6 +280,8 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
 
   if (!user) {
     user = await User.create({ phone, role: resolved.role });
+  } else if (user.role === "admin") {
+    // Admin is never overridden: resolveRoleForPhone is not used for role/ownerId
   } else if (user.role === "vendor") {
     // Override to customer/delivery_staff ONLY if they have NO vendor business data.
     // Protects real vendors from abuse: a malicious vendor could add another vendor's
@@ -292,7 +303,7 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
       resolved.ownerId = null;
     }
   } else {
-    // Keep customer/delivery_staff in sync: if resolved role changed (e.g. removed from Customer), update user
+    // Keep customer/delivery_staff in sync: if resolved role changed, update user. Never overwrite admin.
     if (user.role !== resolved.role) {
       await User.updateOne(
         { _id: user._id },
@@ -312,9 +323,19 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
   await user.save();
   user = user.toObject();
 
-  const role = user.role === "vendor" ? "vendor" : resolved.role;
+  // Admin is never overridden: use stored user.role and no ownerId
+  const role =
+    user.role === "admin"
+      ? "admin"
+      : user.role === "vendor"
+        ? "vendor"
+        : resolved.role;
   const ownerId =
-    role === "vendor" ? user._id.toString() : resolved.ownerId || null;
+    role === "admin"
+      ? null
+      : role === "vendor"
+        ? user._id.toString()
+        : resolved.ownerId || null;
 
   // For delivery_staff: link their User account to DeliveryStaff if not already done
   let staffId = resolved.staffId || null;
@@ -421,7 +442,10 @@ export const truecallerController = asyncHandler(async (req, res, next) => {
     });
     user = user.toObject();
   } else {
-    if (user.role === "vendor" && resolved.role !== "vendor") {
+    // Admin is never overridden
+    if (user.role === "admin") {
+      // keep role as admin; resolved is ignored for role/ownerId below
+    } else if (user.role === "vendor" && resolved.role !== "vendor") {
       const hasBusiness = await hasVendorBusinessData(user._id);
       if (!hasBusiness) {
         await User.updateOne(
@@ -455,9 +479,19 @@ export const truecallerController = asyncHandler(async (req, res, next) => {
     }
   }
 
-  const role = user.role === "vendor" ? "vendor" : resolved.role;
+  // Admin is never overridden
+  const role =
+    user.role === "admin"
+      ? "admin"
+      : user.role === "vendor"
+        ? "vendor"
+        : resolved.role;
   const ownerId =
-    role === "vendor" ? user._id.toString() : resolved.ownerId || null;
+    role === "admin"
+      ? null
+      : role === "vendor"
+        ? user._id.toString()
+        : resolved.ownerId || null;
   const tcCustomerId = resolved.customerId || null;
   const tcStaffId = resolved.staffId || null;
 
@@ -523,13 +557,22 @@ export const refreshTokenController = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, "User not found");
   }
 
-  const resolved =
-    user.role === "vendor"
-      ? { role: "vendor", ownerId: null }
-      : await resolveRoleForPhone(user.phone);
-  const role = user.role === "vendor" ? "vendor" : resolved.role;
+  // Admin is never overridden; vendor uses stored role; others use resolveRoleForPhone
+  let resolved;
+  if (user.role === "admin") {
+    resolved = { role: "admin", ownerId: null, staffId: null, customerId: null };
+  } else if (user.role === "vendor") {
+    resolved = { role: "vendor", ownerId: null, staffId: null, customerId: null };
+  } else {
+    resolved = await resolveRoleForPhone(user.phone);
+  }
+  const role = resolved.role;
   const ownerId =
-    role === "vendor" ? user._id.toString() : resolved.ownerId || null;
+    role === "admin"
+      ? null
+      : role === "vendor"
+        ? user._id.toString()
+        : resolved.ownerId || null;
   const staffId = resolved.staffId || null;
   const customerId = resolved.customerId || null;
 
