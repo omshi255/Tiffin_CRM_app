@@ -1,0 +1,45 @@
+import mongoose from "mongoose";
+
+const itemSchema = new mongoose.Schema(
+  {
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    unitPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    unit: {
+      type: String,
+      enum: ["piece", "bowl", "plate", "glass", "other"],
+      default: "piece",
+    },
+    category: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+itemSchema.index({ ownerId: 1, isActive: 1 });
+itemSchema.index({ ownerId: 1, name: 1 });
+
+const Item = mongoose.model("Item", itemSchema);
+
+export default Item;

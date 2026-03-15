@@ -1,0 +1,4 @@
+2026-03-03T13:00:29.362Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-03T13:00:29.368Z [info] : sendEmail called but API key missing; skipping
+2026-03-03T13:05:49.167Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-03T13:05:49.172Z [info] : sendEmail called but API key missing; skipping

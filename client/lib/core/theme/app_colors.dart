@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+
+abstract final class AppColors {
+  static const Color primary = Color(0xFF1E3A5F);
+  static const Color primaryLight = Color(0xFF2D5BE3);
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color primaryContainer = Color(0xFFE8EEF7);
+  static const Color onPrimaryContainer = Color(0xFF1E3A5F);
+  static const Color secondary = Color(0xFF0EA5E9);
+  static const Color onSecondary = Color(0xFFFFFFFF);
+  static const Color secondaryContainer = Color(0xFFE0F2FE);
+  static const Color onSecondaryContainer = Color(0xFF0369A1);
+  static const Color tertiary = Color(0xFF0EA5E9);
+  static const Color onTertiary = Color(0xFFFFFFFF);
+  static const Color tertiaryContainer = Color(0xFFE0F2FE);
+  static const Color onTertiaryContainer = Color(0xFF0369A1);
+  static const Color error = Color(0xFFDC2626);
+  static const Color onError = Color(0xFFFFFFFF);
+  static const Color errorContainer = Color(0xFFFEE2E2);
+  static const Color onErrorContainer = Color(0xFF450A0A);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color surfaceAlt = Color(0xFFF8FAFC);
+  static const Color onSurface = Color(0xFF0F172A);
+  static const Color onSurfaceVariant = Color(0xFF475569);
+  static const Color outline = Color(0xFFE2E8F0);
+  static const Color outlineVariant = Color(0xFFE2E8F0);
+  static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
+  static const Color surfaceContainerLow = Color(0xFFF8FAFC);
+  static const Color surfaceContainer = Color(0xFFF8FAFC);
+  static const Color surfaceContainerHigh = Color(0xFFF0F4F8);
+  static const Color surfaceContainerHighest = Color(0xFFE2E8F0);
+  static const Color shadow = Color(0xFF000000);
+  static const Color scrim = Color(0xFF000000);
+  static const Color background = Color(0xFFF0F4F8);
+  static const Color success = Color(0xFF059669);
+  static const Color warning = Color(0xFFD97706);
+  static const Color danger = Color(0xFFDC2626);
+  static const Color statusActive = Color(0xFF059669);
+  static const Color statusExpired = Color(0xFFDC2626);
+  static const Color statusPending = Color(0xFFD97706);
+  static const Color statusInactive = Color(0xFF94A3B8);
+  static const Color textPrimary = Color(0xFF0F172A);
+  static const Color textSecondary = Color(0xFF475569);
+  static const Color textHint = Color(0xFF94A3B8);
+  static const Color border = Color(0xFFE2E8F0);
+}

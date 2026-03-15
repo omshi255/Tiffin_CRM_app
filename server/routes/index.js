@@ -1,0 +1,34 @@
+import { Router } from "express";
+import authRoutes from "./auth.routes.js";
+import customerRoutes from "./customer.routes.js";
+import customerPortalRoutes from "./customerPortal.routes.js";
+import itemRoutes from "./item.routes.js";
+import deliveryStaffRoutes from "./deliveryStaff.routes.js";
+import planRoutes from "./plan.routes.js";
+import subscriptionRoutes from "./subscription.routes.js";
+import paymentRoutes from "./payment.routes.js";
+import invoiceRoutes from "./invoice.routes.js";
+import notificationRoutes from "./notification.routes.js";
+import reportRoutes from "./report.routes.js";
+import dailyOrderRoutes from "./dailyOrder.routes.js";
+import deliveryRoutes from "./delivery.routes.js";
+import adminRoutes from "./admin.routes.js";
+
+const router = Router();
+
+router.use("/auth", authRoutes);
+router.use("/customers", customerRoutes);
+router.use("/customer", customerPortalRoutes);   // customer self-service portal
+router.use("/items", itemRoutes);
+router.use("/delivery-staff", deliveryStaffRoutes);
+router.use("/plans", planRoutes);
+router.use("/subscriptions", subscriptionRoutes);
+router.use("/payments", paymentRoutes);
+router.use("/invoices", invoiceRoutes);
+router.use("/notifications", notificationRoutes);
+router.use("/reports", reportRoutes);
+router.use("/daily-orders", dailyOrderRoutes);
+router.use("/delivery", deliveryRoutes);
+router.use("/admin", adminRoutes);
+
+export default router;

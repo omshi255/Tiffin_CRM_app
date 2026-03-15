@@ -1,0 +1,259 @@
+[11/03/2026, 01:24:33 am] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:260:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[11/03/2026, 01:24:37 am] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:260:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[12/03/2026, 01:15:04 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:17:28 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:17:56 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:19:37 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:19:43 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:21:55 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:22:10 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:23:46 pm] "mealSlots[0].items[0].itemId" must only contain hexadecimal characters; Invalid item ID format; "mealSlots[0].items[1].itemId" must only contain hexadecimal characters; Invalid item ID format; "mealSlots[0].items[2].itemId" must only contain hexadecimal characters; Invalid item ID format
+Error: "mealSlots[0].items[0].itemId" must only contain hexadecimal characters; Invalid item ID format; "mealSlots[0].items[1].itemId" must only contain hexadecimal characters; Invalid item ID format; "mealSlots[0].items[2].itemId" must only contain hexadecimal characters; Invalid item ID format
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/plan.controller.js:177:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+[12/03/2026, 01:26:15 pm] next is not a function
+TypeError: next is not a function
+    at model.<anonymous> (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/models/Plan.model.js:96:3)
+    at Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:68:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+    at async E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2778:9
+    at async Promise.all (index 0)
+    at async model.create (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2763:11)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/plan.controller.js:192:16
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[12/03/2026, 01:30:47 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:31:38 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:43:28 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:44:46 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:44:46 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+[12/03/2026, 01:44:57 pm] "amount" is required
+Error: "amount" is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customer.controller.js:380:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at param (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:600:14)
+    at param (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:610:14)
+
+[13/03/2026, 12:47:05 am] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:38:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+[13/03/2026, 12:47:17 am] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:38:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+[13/03/2026, 12:47:19 am] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:38:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+[13/03/2026, 12:47:39 am] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:38:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+

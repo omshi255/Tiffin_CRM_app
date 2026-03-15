@@ -1,0 +1,95 @@
+abstract final class ApiEndpoints {
+  // Auth
+  static const String sendOtp = '/auth/send-otp';
+  static const String verifyOtp = '/auth/verify-otp';
+  static const String truecaller = '/auth/truecaller';
+  static const String refreshToken = '/auth/refresh-token';
+  static const String forgotPassword = '/auth/forgot-password';
+  static const String resetPassword = '/auth/reset-password';
+  static const String logout = '/auth/logout';
+  static const String authMe = '/auth/me';
+  static const String changePassword = '/auth/change-password';
+
+  // Customers (vendor/admin)
+  static const String customers = '/customers';
+  static String customerById(String id) => '/customers/$id';
+  static const String customersBulk = '/customers/bulk';
+  static String customerWalletCredit(String id) => '/customers/$id/wallet/credit';
+  static String customerPlans(String id) => '/customers/$id/plans';
+
+  // Customer portal (self-service)
+  static const String customerMe = '/customer/me';
+  static const String customerMePlan = '/customer/me/plan';
+  static const String customerMeOrders = '/customer/me/orders';
+
+  // Items
+  static const String items = '/items';
+  static String itemById(String id) => '/items/$id';
+
+  // Delivery staff
+  static const String deliveryStaff = '/delivery-staff';
+  static const String deliveryStaffMe = '/delivery-staff/me';
+  static String deliveryStaffById(String id) => '/delivery-staff/$id';
+
+  // Plans
+  static const String plans = '/plans';
+  static String planById(String id) => '/plans/$id';
+
+  // Subscriptions
+  static const String subscriptions = '/subscriptions';
+  static String subscriptionById(String id) => '/subscriptions/$id';
+  static String subscriptionRenew(String id) => '/subscriptions/$id/renew';
+  static String subscriptionCancel(String id) => '/subscriptions/$id/cancel';
+  static String subscriptionPause(String id) => '/subscriptions/$id/pause';
+  static String subscriptionUnpause(String id) => '/subscriptions/$id/unpause';
+
+  // Daily orders
+  static const String dailyOrdersToday = '/daily-orders/today';
+  static const String dailyOrdersProcess = '/daily-orders/process';
+  static const String dailyOrdersMarkDelivered = '/daily-orders/mark-delivered';
+  static const String dailyOrdersAssignBulk = '/daily-orders/assign-bulk';
+  static const String dailyOrdersGenerate = '/daily-orders/generate';
+  static const String dailyOrdersGenerateWeek = '/daily-orders/generate-week';
+  static String dailyOrderAssign(String id) => '/daily-orders/$id/assign';
+  static String dailyOrderStatus(String id) => '/daily-orders/$id/status';
+  static String dailyOrderQuantities(String id) => '/daily-orders/$id/quantities';
+  static String dailyOrderAccept(String id) => '/daily-orders/$id/accept';
+  static String dailyOrderReject(String id) => '/daily-orders/$id/reject';
+
+  // Delivery (staff view)
+  static const String delivery = '/delivery';
+  static const String deliveryMyDeliveries = '/delivery/my-deliveries';
+
+  // Payments
+  static const String payments = '/payments';
+  static const String paymentsCreateOrder = '/payments/create-order';
+  static String paymentInvoice(String id) => '/payments/$id/invoice';
+
+  // Invoices
+  static const String invoices = '/invoices';
+  static const String invoicesGenerate = '/invoices/generate';
+  static const String invoicesOverdue = '/invoices/overdue';
+  static String invoiceById(String id) => '/invoices/$id';
+  static String invoiceShare(String id) => '/invoices/$id/share';
+  static String invoiceVoid(String id) => '/invoices/$id/void';
+
+  // Reports
+  static const String reportsSummary = '/reports/summary';
+  static const String reportsTodayDeliveries = '/reports/today-deliveries';
+  static const String reportsExpiringSubscriptions =
+      '/reports/expiring-subscriptions';
+  static const String reportsPendingPayments = '/reports/pending-payments';
+
+  // Admin
+  static const String adminStats = '/admin/stats';
+  static const String adminVendors = '/admin/vendors';
+  static const String adminCustomers = '/admin/customers';
+  static const String adminDeliveryStaff = '/admin/delivery-staff';
+  static const String adminPlans = '/admin/plans';
+  static const String adminItems = '/admin/items';
+  static const String adminSubscriptions = '/admin/subscriptions';
+  static const String adminOrders = '/admin/orders';
+  static const String adminPayments = '/admin/payments';
+  static const String adminInvoices = '/admin/invoices';
+  static const String adminNotifications = '/admin/notifications';
+}

@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/router/app_routes.dart';
+import '../../../../core/storage/secure_storage.dart';
+import '../../data/auth_api.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    final router = GoRouter.of(context);
+
+    final token = await SecureStorage.getAccessToken();
+    if (token == null || token.isEmpty) {
+      if (!mounted) return;
+      router.go(AppRoutes.roleSelection);
+      return;
+    }
+
+    try {
+      final user = await AuthApi.getProfile();
+      if (!mounted) return;
+      await SecureStorage.saveUserRole(user.role);
+      await SecureStorage.saveUserId(user.id);
+      if (user.role == 'vendor') {
+        final onboarded = await SecureStorage.get('vendorOnboarded') == 'true';
+        final needsOnboarding =
+            user.businessName.isEmpty && user.name.isEmpty;
+        if (needsOnboarding && !onboarded) {
+          router.go(AppRoutes.vendorOnboarding, extra: user.phone);
+          return;
+        }
+      }
+      if (!mounted) return;
+      router.go(_routeForRole(user.role));
+    } catch (_) {
+      try {
+        final refreshed = await _refreshToken();
+        if (refreshed && mounted) {
+          final user = await AuthApi.getProfile();
+          if (!mounted) return;
+          await SecureStorage.saveUserRole(user.role);
+          await SecureStorage.saveUserId(user.id);
+          if (user.role == 'vendor') {
+            final onboarded =
+                await SecureStorage.get('vendorOnboarded') == 'true';
+            final needsOnboarding =
+                user.businessName.isEmpty && user.name.isEmpty;
+            if (needsOnboarding && !onboarded) {
+              router.go(AppRoutes.vendorOnboarding, extra: user.phone);
+              return;
+            }
+          }
+          if (!mounted) return;
+          router.go(_routeForRole(user.role));
+          return;
+        }
+      } catch (_) {}
+      await SecureStorage.clearAll();
+      if (!mounted) return;
+      router.go(AppRoutes.roleSelection);
+    }
+  }
+
+  Future<bool> _refreshToken() async {
+    final refresh = await SecureStorage.getRefreshToken();
+    if (refresh == null || refresh.isEmpty) return false;
+    final response = await AuthApi.refreshToken(refresh);
+    if (response != null) {
+      await SecureStorage.saveAccessToken(response.accessToken);
+      await SecureStorage.saveRefreshToken(response.refreshToken);
+      return true;
+    }
+    return false;
+  }
+
+  String _routeForRole(String role) {
+    switch (role) {
+      case 'vendor':
+        return AppRoutes.dashboard;
+      case 'customer':
+        return AppRoutes.customerHome;
+      case 'delivery_staff':
+        return AppRoutes.deliveryDashboard;
+      case 'admin':
+        return AppRoutes.adminDashboard;
+      default:
+        return AppRoutes.dashboard;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.restaurant_menu, size: 64, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 16),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      ),
+    );
+  }
+}

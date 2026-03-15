@@ -1,0 +1,100 @@
+class OrderModel {
+  const OrderModel({
+    required this.id,
+    required this.customerId,
+    required this.date,
+    required this.status,
+    this.customerName,
+    this.customerPhone,
+    this.customerAddress,
+    this.planId,
+    this.deliveryStaffId,
+    this.deliveryStaffName,
+    this.deliveryStaffPhone,
+    this.mealSlots,
+    this.totalAmount,
+    this.slot,
+    this.customerLocation,
+  });
+
+  final String id;
+  final String customerId;
+  final DateTime date;
+  final String status;
+  final String? customerName;
+  final String? customerPhone;
+  final String? customerAddress;
+  final String? planId;
+  final String? deliveryStaffId;
+  final String? deliveryStaffName;
+  final String? deliveryStaffPhone;
+  final List<dynamic>? mealSlots;
+  final double? totalAmount;
+  final String? slot;
+  final OrderLocation? customerLocation;
+
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
+    final id = json['_id']?.toString() ?? json['id']?.toString() ?? '';
+    DateTime orderDate = DateTime.now();
+    if (json['date'] != null) {
+      if (json['date'] is String) {
+        orderDate = DateTime.tryParse(json['date'] as String) ?? orderDate;
+      }
+    }
+    OrderLocation? loc;
+    if (json['customerId'] is Map) {
+      final c = json['customerId'] as Map<String, dynamic>;
+      if (c['location'] is Map) {
+        final l = c['location'] as Map;
+        final coords = l['coordinates'];
+        if (coords is List && coords.length >= 2) {
+          final lng = (coords[0] is num) ? (coords[0] as num).toDouble() : null;
+          final lat = (coords[1] is num) ? (coords[1] as num).toDouble() : null;
+          if (lng != null && lat != null) loc = OrderLocation(lat: lat, lng: lng);
+        }
+      }
+    }
+    return OrderModel(
+      id: id,
+      customerId: json['customerId'] is String
+          ? json['customerId'] as String
+          : (json['customerId'] as Map?)?['_id']?.toString() ?? '',
+      date: orderDate,
+      status: json['status']?.toString() ?? 'pending',
+      customerName: json['customerName']?.toString() ??
+          (json['customerId'] is Map
+              ? (json['customerId'] as Map)['name']?.toString()
+              : null),
+      customerPhone: json['customerPhone']?.toString() ??
+          (json['customerId'] is Map
+              ? (json['customerId'] as Map)['phone']?.toString()
+              : null),
+      customerAddress: json['customerAddress']?.toString() ??
+          (json['customerId'] is Map
+              ? (json['customerId'] as Map)['address']?.toString()
+              : null),
+      planId: json['planId']?.toString(),
+      deliveryStaffId: json['deliveryStaffId']?.toString(),
+      deliveryStaffName: json['deliveryStaffName']?.toString() ??
+          (json['deliveryStaffId'] is Map
+              ? (json['deliveryStaffId'] as Map)['name']?.toString()
+              : null),
+      deliveryStaffPhone: json['deliveryStaffPhone']?.toString() ??
+          (json['deliveryStaffId'] is Map
+              ? (json['deliveryStaffId'] as Map)['phone']?.toString()
+              : null),
+      mealSlots: json['mealSlots'] is List ? json['mealSlots'] as List : null,
+      totalAmount: (json['totalAmount'] is num)
+          ? (json['totalAmount'] as num).toDouble()
+          : null,
+      slot: json['slot']?.toString(),
+      customerLocation: loc,
+    );
+  }
+}
+
+class OrderLocation {
+  const OrderLocation({required this.lat, required this.lng});
+  final double lat;
+  final double lng;
+}

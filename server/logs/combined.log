@@ -1,0 +1,358 @@
+2026-03-03T13:41:55.622Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-10T19:51:06.564Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-10T19:54:33.475Z [error] : [11/03/2026, 01:24:33 am] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:260:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-10T19:54:37.953Z [error] : [11/03/2026, 01:24:37 am] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:260:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-10T19:55:14.388Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-11T09:34:38.353Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-11T09:50:16.013Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T05:29:48.079Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T05:39:19.726Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T05:48:30.185Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T06:23:37.823Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T07:41:17.226Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T07:45:04.847Z [error] : [12/03/2026, 01:15:04 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T07:47:28.863Z [error] : [12/03/2026, 01:17:28 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T07:47:56.897Z [error] : [12/03/2026, 01:17:56 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T07:49:37.953Z [error] : [12/03/2026, 01:19:37 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T07:49:43.198Z [error] : [12/03/2026, 01:19:43 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T07:51:55.361Z [error] : [12/03/2026, 01:21:55 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T07:52:10.933Z [error] : [12/03/2026, 01:22:10 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T07:53:46.509Z [error] : [12/03/2026, 01:23:46 pm] "mealSlots[0].items[0].itemId" must only contain hexadecimal characters; Invalid item ID format; "mealSlots[0].items[1].itemId" must only contain hexadecimal characters; Invalid item ID format; "mealSlots[0].items[2].itemId" must only contain hexadecimal characters; Invalid item ID format
+Error: "mealSlots[0].items[0].itemId" must only contain hexadecimal characters; Invalid item ID format; "mealSlots[0].items[1].itemId" must only contain hexadecimal characters; Invalid item ID format; "mealSlots[0].items[2].itemId" must only contain hexadecimal characters; Invalid item ID format
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/plan.controller.js:177:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-03-12T07:56:15.252Z [error] : [12/03/2026, 01:26:15 pm] next is not a function
+TypeError: next is not a function
+    at model.<anonymous> (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/models/Plan.model.js:96:3)
+    at Kareem.execPre (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\kareem\index.js:68:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async model.$__save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:376:5)
+    at async model.save (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:642:5)
+    at async E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2778:9
+    at async Promise.all (index 0)
+    at async model.create (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\model.js:2763:11)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/plan.controller.js:192:16
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-12T07:59:02.559Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:00:47.663Z [error] : [12/03/2026, 01:30:47 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T08:01:38.812Z [error] : [12/03/2026, 01:31:38 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T08:13:28.330Z [error] : [12/03/2026, 01:43:28 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T08:14:46.090Z [error] : [12/03/2026, 01:44:46 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T08:14:46.702Z [error] : [12/03/2026, 01:44:46 pm] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:35:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-12T08:14:57.266Z [error] : [12/03/2026, 01:44:57 pm] "amount" is required
+Error: "amount" is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customer.controller.js:380:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at param (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:600:14)
+    at param (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:610:14)
+
+
+2026-03-12T08:19:45.165Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:19:53.940Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:20:10.654Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:20:19.710Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:20:29.217Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:20:39.377Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:21:10.639Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:21:19.981Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:21:29.314Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:21:36.541Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:21:50.738Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:22:00.848Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:22:10.581Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:22:35.755Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:22:55.608Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:23:21.671Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:32:01.850Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:32:12.661Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:32:19.803Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:32:27.356Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:32:48.259Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:32:57.899Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:33:02.412Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:33:13.176Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:36:13.078Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:36:22.788Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:36:30.300Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:36:38.993Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:36:48.343Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:37:00.183Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:37:05.657Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:37:10.829Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:37:17.112Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:37:21.918Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:37:30.690Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:37:39.345Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:37:47.179Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:40:41.723Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:40:45.588Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:40:51.303Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:40:58.762Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:41:31.781Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:41:38.826Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:41:45.628Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:42:03.839Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:42:08.824Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:42:30.955Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:42:56.347Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:43:03.734Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:43:13.550Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:43:23.586Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:43:30.742Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:43:38.915Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:43:45.526Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:44:01.175Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:44:04.998Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:44:14.705Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:49:05.731Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:49:31.983Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:49:41.682Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T08:50:23.316Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T19:03:09.798Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T19:17:05.100Z [info] : 13/03/2026, 12:47:05 am
+2026-03-12T19:17:05.103Z [error] : [13/03/2026, 12:47:05 am] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:38:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+
+2026-03-12T19:17:17.435Z [info] : 13/03/2026, 12:47:17 am
+2026-03-12T19:17:17.436Z [error] : [13/03/2026, 12:47:17 am] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:38:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+
+2026-03-12T19:17:19.430Z [info] : 13/03/2026, 12:47:19 am
+2026-03-12T19:17:19.430Z [error] : [13/03/2026, 12:47:19 am] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:38:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+
+2026-03-12T19:17:37.180Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-12T19:17:39.712Z [info] : 13/03/2026, 12:47:39 am
+2026-03-12T19:17:39.713Z [error] : [13/03/2026, 12:47:39 am] Invalid or expired token
+Error: Invalid or expired token
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:38:10)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+
+
