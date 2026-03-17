@@ -136,7 +136,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                             ),
                             const SizedBox(height: 16),
                             DropdownButtonFormField<CustomerModel>(
-                              value: _selectedCustomer,
+                              initialValue: _selectedCustomer,
                               decoration: const InputDecoration(
                                 labelText: 'Customer',
                               ),

@@ -77,7 +77,7 @@ abstract final class InvoiceApi {
         'customerId': customerId,
         'billingStart': billingStart.toIso8601String().split('T').first,
         'billingEnd': billingEnd.toIso8601String().split('T').first,
-        if (subscriptionId != null) 'subscriptionId': subscriptionId,
+        'subscriptionId': ?subscriptionId,
       },
     );
     final data = parseData(response);

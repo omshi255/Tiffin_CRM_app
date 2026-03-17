@@ -1,6 +1,13 @@
 abstract final class AppConfig {
-  static const String baseUrl =
+  /// Set to true for local backend (e.g. http://localhost:5800), false for Render.
+  static const bool useLocalApi = true;
+
+  static const String apiUrlLocal = 'http://localhost:5800/api/v1';
+  static const String apiUrlProduction =
       'https://tiffin-crm-app.onrender.com/api/v1';
+
+  static String get baseUrl =>
+      useLocalApi ? apiUrlLocal : apiUrlProduction;
 
   static const String googleMapsApiKey =
       String.fromEnvironment('GOOGLE_MAPS_API_KEY',

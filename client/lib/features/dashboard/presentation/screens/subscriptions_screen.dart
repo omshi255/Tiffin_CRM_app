@@ -520,7 +520,7 @@ class _AssignSubscriptionSheetState extends State<_AssignSubscriptionSheet> {
             Text('Assign Plan', style: theme.textTheme.titleLarge),
             const SizedBox(height: 16),
             DropdownButtonFormField<CustomerModel>(
-              value: _customer,
+              initialValue: _customer,
               decoration: const InputDecoration(labelText: 'Customer'),
               items: _customers
                   .map(
@@ -534,7 +534,7 @@ class _AssignSubscriptionSheetState extends State<_AssignSubscriptionSheet> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _plans.any((p) => p.id == _selectedPlanId)
+              initialValue: _plans.any((p) => p.id == _selectedPlanId)
                   ? _selectedPlanId
                   : null,
               decoration: const InputDecoration(labelText: 'Plan'),
@@ -594,7 +594,7 @@ class _AssignSubscriptionSheetState extends State<_AssignSubscriptionSheet> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _deliverySlot,
+              initialValue: _deliverySlot,
               decoration: const InputDecoration(labelText: 'Delivery slot'),
               items: [
                 'morning',

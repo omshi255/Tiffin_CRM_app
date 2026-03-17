@@ -12,8 +12,9 @@ abstract final class SubscriptionApi {
   }) async {
     final query = <String, dynamic>{'page': page, 'limit': limit};
     if (status != null && status.isNotEmpty) query['status'] = status;
-    if (customerId != null && customerId.isNotEmpty)
+    if (customerId != null && customerId.isNotEmpty) {
       query['customerId'] = customerId;
+    }
 
     final response = await DioClient.instance.get(
       ApiEndpoints.subscriptions,

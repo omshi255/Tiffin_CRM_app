@@ -14,8 +14,9 @@ abstract final class PlanApi {
     final query = <String, dynamic>{'page': page, 'limit': limit};
     if (isActive != null) query['isActive'] = isActive;
     if (planType != null && planType.isNotEmpty) query['planType'] = planType;
-    if (customerId != null && customerId.isNotEmpty)
+    if (customerId != null && customerId.isNotEmpty) {
       query['customerId'] = customerId;
+    }
 
     final response = await DioClient.instance.get(
       ApiEndpoints.plans,

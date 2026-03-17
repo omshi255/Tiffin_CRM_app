@@ -69,8 +69,8 @@ abstract final class AuthApi {
         'accessToken': accessToken,
         'profile': {
           'phone': phone,
-          if (name != null) 'name': name,
-          if (truecallerId != null) 'truecallerId': truecallerId,
+          'name': ?name,
+          'truecallerId': ?truecallerId,
         },
       },
       options: Options(

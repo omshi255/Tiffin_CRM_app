@@ -2,23 +2,24 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../models/notification_model.dart';
-import '../../data/notification_api.dart';
+import '../../data/customer_portal_api.dart';
 
-class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
+class CustomerNotificationsScreen extends StatefulWidget {
+  const CustomerNotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
+  State<CustomerNotificationsScreen> createState() =>
+      _CustomerNotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class _CustomerNotificationsScreenState extends State<CustomerNotificationsScreen> {
   List<NotificationModel> _notifications = [];
   bool _loading = true;
 
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final res = await NotificationApi.getMyNotifications();
+      final res = await CustomerPortalApi.getMyNotifications();
       if (mounted) {
         setState(() {
           _notifications =
@@ -37,20 +38,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> _markRead(NotificationModel n) async {
     if (n.read) return;
     try {
-      await NotificationApi.markNotificationRead(n.id);
+      await CustomerPortalApi.markNotificationRead(n.id);
       if (mounted) {
         setState(() {
           _notifications = _notifications
-              .map((e) => e.id == n.id
-                  ? NotificationModel(
-                      id: e.id,
-                      title: e.title,
-                      body: e.body,
-                      time: e.time,
-                      read: true,
-                      type: e.type,
-                    )
-                  : e)
+              .map((e) => e.id == n.id ? NotificationModel(id: e.id, title: e.title, body: e.body, time: e.time, read: true, type: e.type) : e)
               .toList();
         });
       }
@@ -93,8 +85,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         Icon(
                           Icons.notifications_none_rounded,
                           size: 64,
-                          color: theme.colorScheme.onSurfaceVariant
-                              .withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -106,11 +97,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Updates and alerts will appear here.',
+                          'You’ll see meal updates and alerts here.',
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant
-                                .withValues(alpha: 0.8),
+                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -135,9 +125,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               title: Text(
                                 n.title,
                                 style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: n.read
-                                      ? FontWeight.normal
-                                      : FontWeight.w600,
+                                  fontWeight:
+                                      n.read ? FontWeight.normal : FontWeight.w600,
                                 ),
                               ),
                               subtitle: Text(

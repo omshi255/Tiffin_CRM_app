@@ -356,3 +356,910 @@ Error: Invalid or expired token
     at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
 
 
+2026-03-16T14:49:08.435Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-16T14:49:24.289Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-16T14:49:33.865Z [info] : 16/03/2026, 08:19:33 pm
+2026-03-16T14:49:33.866Z [error] : [16/03/2026, 08:19:33 pm] Authenticate
+Error: Authenticate
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-16T15:04:58.094Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-16T15:05:10.169Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-16T15:05:19.719Z [info] : 16/03/2026, 08:35:19 pm
+2026-03-16T15:05:19.720Z [error] : [16/03/2026, 08:35:19 pm] getaddrinfo EAI_AGAIN verify.twilio.com
+Error: getaddrinfo EAI_AGAIN verify.twilio.com
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T06:07:19.266Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:15:01.308Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:22:04.085Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:23:55.004Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:24:15.626Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:35:19.145Z [info] : 17/03/2026, 12:05:19 pm
+2026-03-17T06:35:19.152Z [error] : [17/03/2026, 12:05:19 pm] password is required
+Error: password is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T06:35:29.999Z [info] : 17/03/2026, 12:05:29 pm
+2026-03-17T06:35:30.000Z [error] : [17/03/2026, 12:05:29 pm] password is required
+Error: password is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T06:36:22.730Z [info] : 17/03/2026, 12:06:22 pm
+2026-03-17T06:36:22.730Z [error] : [17/03/2026, 12:06:22 pm] password is required
+Error: password is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T06:37:37.573Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:37:46.134Z [info] : 17/03/2026, 12:07:46 pm
+2026-03-17T06:37:46.135Z [error] : [17/03/2026, 12:07:46 pm] password is required
+Error: password is required
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T06:39:20.542Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:39:23.618Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:39:36.849Z [info] : 17/03/2026, 12:09:36 pm
+2026-03-17T06:39:36.849Z [error] : [17/03/2026, 12:09:36 pm] OTP service is not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_SERVICE_SID in environment.
+Error: OTP service is not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_SERVICE_SID in environment.
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T06:40:00.063Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:40:05.069Z [info] : 17/03/2026, 12:10:05 pm
+2026-03-17T06:40:05.070Z [error] : [17/03/2026, 12:10:05 pm] Invalid parameter
+Error: Invalid parameter
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T06:41:06.502Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:41:29.410Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:41:39.892Z [info] : 17/03/2026, 12:11:39 pm
+2026-03-17T06:41:39.893Z [error] : [17/03/2026, 12:11:39 pm] Invalid parameter
+Error: Invalid parameter
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T06:42:47.620Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:42:57.842Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T06:43:03.460Z [info] : 17/03/2026, 12:13:03 pm
+2026-03-17T06:43:03.461Z [error] : [17/03/2026, 12:13:03 pm] Invalid TWILIO_SERVICE_SID. Use a Verify Service SID (starts with VA) from Twilio Console → Verify → Services, not the Account SID (AC).
+Error: Invalid TWILIO_SERVICE_SID. Use a Verify Service SID (starts with VA) from Twilio Console → Verify → Services, not the Account SID (AC).
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T07:17:35.953Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T07:19:38.000Z [info] : 17/03/2026, 12:49:37 pm
+2026-03-17T07:19:38.002Z [error] : [17/03/2026, 12:49:37 pm] Invalid TWILIO_SERVICE_SID. Use a Verify Service SID (starts with VA) from Twilio Console → Verify → Services, not the Account SID (AC).
+Error: Invalid TWILIO_SERVICE_SID. Use a Verify Service SID (starts with VA) from Twilio Console → Verify → Services, not the Account SID (AC).
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T07:21:03.952Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T08:47:01.227Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:01:44.644Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:01:53.398Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:01:56.877Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:01:59.415Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:14:19.795Z [info] : 17/03/2026, 02:44:19 pm
+2026-03-17T09:14:19.836Z [error] : [17/03/2026, 02:44:19 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T09:21:59.823Z [info] : 17/03/2026, 02:51:59 pm
+2026-03-17T09:21:59.826Z [error] : [17/03/2026, 02:51:59 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T09:21:59.834Z [info] : 17/03/2026, 02:51:59 pm
+2026-03-17T09:21:59.835Z [error] : [17/03/2026, 02:51:59 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T09:21:59.837Z [info] : 17/03/2026, 02:51:59 pm
+2026-03-17T09:21:59.837Z [error] : [17/03/2026, 02:51:59 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T09:21:59.850Z [info] : 17/03/2026, 02:51:59 pm
+2026-03-17T09:21:59.851Z [error] : [17/03/2026, 02:51:59 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T09:21:59.854Z [info] : 17/03/2026, 02:51:59 pm
+2026-03-17T09:21:59.854Z [error] : [17/03/2026, 02:51:59 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T09:23:19.688Z [info] : 17/03/2026, 02:53:19 pm
+2026-03-17T09:23:19.690Z [error] : [17/03/2026, 02:53:19 pm] The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+Error: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T09:23:43.765Z [info] : 17/03/2026, 02:53:43 pm
+2026-03-17T09:23:43.766Z [error] : [17/03/2026, 02:53:43 pm] The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+Error: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T09:25:06.816Z [info] : 17/03/2026, 02:55:06 pm
+2026-03-17T09:25:06.817Z [error] : [17/03/2026, 02:55:06 pm] getaddrinfo EAI_AGAIN verify.twilio.com
+Error: getaddrinfo EAI_AGAIN verify.twilio.com
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T09:25:39.261Z [info] : 17/03/2026, 02:55:39 pm
+2026-03-17T09:25:39.262Z [error] : [17/03/2026, 02:55:39 pm] getaddrinfo EAI_AGAIN verify.twilio.com
+Error: getaddrinfo EAI_AGAIN verify.twilio.com
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T09:29:12.322Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:29:21.167Z [info] : 17/03/2026, 02:59:21 pm
+2026-03-17T09:29:21.167Z [error] : [17/03/2026, 02:59:21 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T09:29:21.171Z [info] : 17/03/2026, 02:59:21 pm
+2026-03-17T09:29:21.172Z [error] : [17/03/2026, 02:59:21 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T09:29:33.061Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:29:55.332Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:45:07.071Z [info] : 17/03/2026, 03:15:07 pm
+2026-03-17T09:45:07.080Z [error] : [17/03/2026, 03:15:07 pm] Customer profile not found
+Error: Customer profile not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customerPortal.controller.js:50:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T09:45:36.885Z [info] : 17/03/2026, 03:15:36 pm
+2026-03-17T09:45:36.885Z [error] : [17/03/2026, 03:15:36 pm] Customer profile not found
+Error: Customer profile not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customerPortal.controller.js:50:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T09:46:06.905Z [info] : 17/03/2026, 03:16:06 pm
+2026-03-17T09:46:06.906Z [error] : [17/03/2026, 03:16:06 pm] Customer profile not found
+Error: Customer profile not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/customerPortal.controller.js:50:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T09:51:52.395Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T09:59:05.927Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T10:07:29.527Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T13:30:29.359Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T13:36:15.665Z [info] : 17/03/2026, 07:06:15 pm
+2026-03-17T13:36:15.680Z [error] : [17/03/2026, 07:06:15 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T13:36:15.704Z [info] : 17/03/2026, 07:06:15 pm
+2026-03-17T13:36:15.705Z [error] : [17/03/2026, 07:06:15 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T13:36:15.710Z [info] : 17/03/2026, 07:06:15 pm
+2026-03-17T13:36:15.711Z [error] : [17/03/2026, 07:06:15 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T13:36:15.720Z [info] : 17/03/2026, 07:06:15 pm
+2026-03-17T13:36:15.720Z [error] : [17/03/2026, 07:06:15 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T13:36:15.726Z [info] : 17/03/2026, 07:06:15 pm
+2026-03-17T13:36:15.727Z [error] : [17/03/2026, 07:06:15 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-17T13:48:42.443Z [info] : 17/03/2026, 07:18:42 pm
+2026-03-17T13:48:42.448Z [error] : [17/03/2026, 07:18:42 pm] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:275:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T13:51:53.472Z [info] : 17/03/2026, 07:21:53 pm
+2026-03-17T13:51:53.473Z [error] : [17/03/2026, 07:21:53 pm] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:275:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T13:51:57.336Z [info] : 17/03/2026, 07:21:57 pm
+2026-03-17T13:51:57.337Z [error] : [17/03/2026, 07:21:57 pm] getaddrinfo ENOTFOUND verify.twilio.com
+Error: getaddrinfo ENOTFOUND verify.twilio.com
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:94:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-17T14:03:39.447Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T14:10:57.218Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T14:15:13.345Z [info] : 17/03/2026, 07:45:13 pm
+2026-03-17T14:15:13.349Z [error] : [17/03/2026, 07:45:13 pm] status must be one of: out_for_delivery, delivered
+Error: status must be one of: out_for_delivery, delivered
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:157:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/rbac.middleware.js:34:5
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-03-17T14:15:19.619Z [info] : 17/03/2026, 07:45:19 pm
+2026-03-17T14:15:19.621Z [error] : [17/03/2026, 07:45:19 pm] status must be one of: out_for_delivery, delivered
+Error: status must be one of: out_for_delivery, delivered
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:157:11
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/rbac.middleware.js:34:5
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-03-17T15:04:37.988Z [info] : 17/03/2026, 08:34:37 pm
+2026-03-17T15:04:38.000Z [error] : [17/03/2026, 08:34:37 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:04:38.013Z [info] : 17/03/2026, 08:34:38 pm
+2026-03-17T15:04:38.013Z [error] : [17/03/2026, 08:34:38 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:04:43.343Z [info] : 17/03/2026, 08:34:43 pm
+2026-03-17T15:04:43.352Z [error] : [17/03/2026, 08:34:43 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:04:43.355Z [info] : 17/03/2026, 08:34:43 pm
+2026-03-17T15:04:43.355Z [error] : [17/03/2026, 08:34:43 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:05:09.718Z [info] : 17/03/2026, 08:35:09 pm
+2026-03-17T15:05:09.719Z [error] : [17/03/2026, 08:35:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:05:09.734Z [info] : 17/03/2026, 08:35:09 pm
+2026-03-17T15:05:09.735Z [error] : [17/03/2026, 08:35:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:05:39.716Z [info] : 17/03/2026, 08:35:39 pm
+2026-03-17T15:05:39.717Z [error] : [17/03/2026, 08:35:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:05:39.727Z [info] : 17/03/2026, 08:35:39 pm
+2026-03-17T15:05:39.728Z [error] : [17/03/2026, 08:35:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:06:09.788Z [info] : 17/03/2026, 08:36:09 pm
+2026-03-17T15:06:09.789Z [error] : [17/03/2026, 08:36:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:06:09.793Z [info] : 17/03/2026, 08:36:09 pm
+2026-03-17T15:06:09.793Z [error] : [17/03/2026, 08:36:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:06:39.771Z [info] : 17/03/2026, 08:36:39 pm
+2026-03-17T15:06:39.771Z [error] : [17/03/2026, 08:36:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:06:39.775Z [info] : 17/03/2026, 08:36:39 pm
+2026-03-17T15:06:39.775Z [error] : [17/03/2026, 08:36:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:07:09.757Z [info] : 17/03/2026, 08:37:09 pm
+2026-03-17T15:07:09.757Z [error] : [17/03/2026, 08:37:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:07:09.773Z [info] : 17/03/2026, 08:37:09 pm
+2026-03-17T15:07:09.774Z [error] : [17/03/2026, 08:37:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:07:39.776Z [info] : 17/03/2026, 08:37:39 pm
+2026-03-17T15:07:39.777Z [error] : [17/03/2026, 08:37:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:07:39.780Z [info] : 17/03/2026, 08:37:39 pm
+2026-03-17T15:07:39.780Z [error] : [17/03/2026, 08:37:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:08:09.746Z [info] : 17/03/2026, 08:38:09 pm
+2026-03-17T15:08:09.747Z [error] : [17/03/2026, 08:38:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:08:09.752Z [info] : 17/03/2026, 08:38:09 pm
+2026-03-17T15:08:09.753Z [error] : [17/03/2026, 08:38:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:08:39.761Z [info] : 17/03/2026, 08:38:39 pm
+2026-03-17T15:08:39.762Z [error] : [17/03/2026, 08:38:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:08:39.793Z [info] : 17/03/2026, 08:38:39 pm
+2026-03-17T15:08:39.794Z [error] : [17/03/2026, 08:38:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:09:09.756Z [info] : 17/03/2026, 08:39:09 pm
+2026-03-17T15:09:09.757Z [error] : [17/03/2026, 08:39:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:09:09.774Z [info] : 17/03/2026, 08:39:09 pm
+2026-03-17T15:09:09.775Z [error] : [17/03/2026, 08:39:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:09:39.811Z [info] : 17/03/2026, 08:39:39 pm
+2026-03-17T15:09:39.812Z [error] : [17/03/2026, 08:39:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:09:39.819Z [info] : 17/03/2026, 08:39:39 pm
+2026-03-17T15:09:39.819Z [error] : [17/03/2026, 08:39:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async Collection.countDocuments (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\collection.js:521:21)
+    at async model.Query.exec (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongoose\lib\query.js:4687:63)
+    at async Promise.all (index 1)
+
+
+2026-03-17T15:10:09.773Z [info] : 17/03/2026, 08:40:09 pm
+2026-03-17T15:10:09.774Z [error] : [17/03/2026, 08:40:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:10:09.789Z [info] : 17/03/2026, 08:40:09 pm
+2026-03-17T15:10:09.789Z [error] : [17/03/2026, 08:40:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:10:39.779Z [info] : 17/03/2026, 08:40:39 pm
+2026-03-17T15:10:39.780Z [error] : [17/03/2026, 08:40:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:10:39.812Z [info] : 17/03/2026, 08:40:39 pm
+2026-03-17T15:10:39.812Z [error] : [17/03/2026, 08:40:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:11:09.725Z [info] : 17/03/2026, 08:41:09 pm
+2026-03-17T15:11:09.725Z [error] : [17/03/2026, 08:41:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:11:09.727Z [info] : 17/03/2026, 08:41:09 pm
+2026-03-17T15:11:09.728Z [error] : [17/03/2026, 08:41:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:11:39.719Z [info] : 17/03/2026, 08:41:39 pm
+2026-03-17T15:11:39.720Z [error] : [17/03/2026, 08:41:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:11:39.735Z [info] : 17/03/2026, 08:41:39 pm
+2026-03-17T15:11:39.736Z [error] : [17/03/2026, 08:41:39 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.mongodb.net
+    at Topology.selectServer (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:567:9)
+    at process.processTimers (node:internal/timers:541:7)
+    at async tryOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-03-17T15:14:30.363Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted

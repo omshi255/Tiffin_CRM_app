@@ -33,6 +33,7 @@ import '../../features/dashboard/presentation/screens/reports_screen.dart';
 import '../../features/dashboard/presentation/screens/settings_screen.dart';
 import '../../features/dashboard/presentation/screens/subscriptions_screen.dart';
 import '../../features/customer_portal/presentation/screens/customer_home_screen.dart';
+import '../../features/customer_portal/presentation/screens/customer_notifications_screen.dart';
 import '../../features/admin/presentation/screens/admin_list_screen.dart';
 import '../../features/admin/presentation/screens/admin_shell.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -134,6 +135,11 @@ final class AppRouter {
         path: AppRoutes.customerHome,
         name: 'customerHome',
         builder: (context, state) => const CustomerHomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.customerNotifications,
+        name: 'customerNotifications',
+        builder: (context, state) => const CustomerNotificationsScreen(),
       ),
       GoRoute(
         path: AppRoutes.deliveryDashboard,

@@ -21,6 +21,13 @@ abstract final class ApiEndpoints {
   static const String customerMe = '/customer/me';
   static const String customerMePlan = '/customer/me/plan';
   static const String customerMeOrders = '/customer/me/orders';
+  static const String customerMeNotifications = '/customer/me/notifications';
+  static String customerMeNotificationMarkRead(String id) =>
+      '/customer/me/notifications/$id/read';
+
+  // Notifications (vendor / delivery_staff / admin)
+  static const String notifications = '/notifications';
+  static String notificationMarkRead(String id) => '/notifications/$id/read';
 
   // Items
   static const String items = '/items';

@@ -298,7 +298,7 @@ class _GenerateInvoiceSheetState extends State<_GenerateInvoiceSheet> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<CustomerModel>(
-              value: _customer,
+              initialValue: _customer,
               decoration: const InputDecoration(labelText: 'Customer'),
               items: _customers
                   .map((c) => DropdownMenuItem(

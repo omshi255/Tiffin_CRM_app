@@ -55,9 +55,9 @@ abstract final class PaymentApi {
       ApiEndpoints.paymentsCreateOrder,
       data: {
         'amount': amount,
-        if (receipt != null) 'receipt': receipt,
-        if (customerId != null) 'customerId': customerId,
-        if (invoiceId != null) 'invoiceId': invoiceId,
+        'receipt': ?receipt,
+        'customerId': ?customerId,
+        'invoiceId': ?invoiceId,
       },
     );
     final data = parseData(response);

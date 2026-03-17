@@ -2,6 +2,7 @@ import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../models/customer_model.dart';
+import '../../../models/notification_model.dart';
 import '../../orders/models/order_model.dart';
 import '../../subscriptions/models/subscription_model.dart';
 
@@ -76,6 +77,51 @@ abstract final class CustomerPortalApi {
       if (od == today) return o;
     }
     return null;
+  }
+
+  /// Notifications for the logged-in customer.
+  /// Returns { notifications: List<NotificationModel>, total, page, totalPages }.
+  static Future<Map<String, dynamic>> getMyNotifications({
+    int page = 1,
+    int limit = 20,
+    bool? isRead,
+  }) async {
+    final query = <String, dynamic>{'page': page, 'limit': limit};
+    if (isRead != null) query['isRead'] = isRead;
+    final response = await DioClient.instance.get(
+      ApiEndpoints.customerMeNotifications,
+      queryParameters: query,
+    );
+    final data = parseData(response);
+    if (data is! Map<String, dynamic>) {
+      return {
+        'notifications': <NotificationModel>[],
+        'total': 0,
+        'page': page,
+        'totalPages': 0,
+      };
+    }
+    final list = data['data'] is List ? data['data'] as List : [];
+    final notifications = list
+        .whereType<Map<String, dynamic>>()
+        .map((e) => NotificationModel.fromJson(e))
+        .toList();
+    final total = (data['total'] is num) ? (data['total'] as num).toInt() : 0;
+    final currentPage = (data['page'] is num) ? (data['page'] as num).toInt() : page;
+    final totalPages =
+        (data['totalPages'] is num) ? (data['totalPages'] as num).toInt() : 1;
+    return {
+      'notifications': notifications,
+      'total': total,
+      'page': currentPage,
+      'totalPages': totalPages,
+    };
+  }
+
+  static Future<void> markNotificationRead(String notificationId) async {
+    await DioClient.instance.patch(
+      ApiEndpoints.customerMeNotificationMarkRead(notificationId),
+    );
   }
 }
 

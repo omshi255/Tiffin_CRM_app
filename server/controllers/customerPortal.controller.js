@@ -2,6 +2,7 @@ import Joi from "joi";
 import Customer from "../models/Customer.model.js";
 import Subscription from "../models/Subscription.model.js";
 import DailyOrder from "../models/DailyOrder.model.js";
+import Notification from "../models/Notification.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
@@ -163,4 +164,77 @@ export const getMyOrders = asyncHandler(async (req, res) => {
       totalPages: Math.ceil(total / limit),
     })
   );
+});
+
+const notificationsQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(50).optional(),
+  isRead: Joi.boolean().truthy("true").falsy("false").optional(),
+});
+
+/**
+ * GET /api/v1/customer/me/notifications
+ * List in-app notifications for the logged-in customer.
+ * Query: page, limit, isRead (optional)
+ */
+export const getMyNotifications = asyncHandler(async (req, res) => {
+  const { customerId } = req.user;
+  if (!customerId) throw new ApiError(403, "Customer ID not found in token");
+
+  const { error, value } = notificationsQuerySchema.validate(req.query, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
+  const page = value.page || 1;
+  const limit = value.limit || 20;
+  const skip = (page - 1) * limit;
+
+  const filter = { customerId };
+  if (typeof value.isRead === "boolean") filter.isRead = value.isRead;
+
+  const [data, total] = await Promise.all([
+    Notification.find(filter)
+      .select("type title message data isRead sentAt createdAt")
+      .sort({ sentAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Notification.countDocuments(filter),
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(200, "Notifications fetched", {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    })
+  );
+});
+
+/**
+ * PATCH /api/v1/customer/me/notifications/:id/read
+ * Mark a notification as read. Notification must belong to this customer.
+ */
+export const markNotificationRead = asyncHandler(async (req, res) => {
+  const { customerId } = req.user;
+  if (!customerId) throw new ApiError(403, "Customer ID not found in token");
+
+  const { id } = req.params;
+  const updated = await Notification.findOneAndUpdate(
+    { _id: id, customerId },
+    { $set: { isRead: true } },
+    { new: true }
+  )
+    .select("_id type title message isRead sentAt")
+    .lean();
+
+  if (!updated) throw new ApiError(404, "Notification not found");
+
+  res.status(200).json(new ApiResponse(200, "Marked as read", updated));
 });

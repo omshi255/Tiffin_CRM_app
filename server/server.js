@@ -14,6 +14,29 @@ import publicRoutes from "./routes/public.routes.js";
 
 const app = express();
 
+// CORS first so preflight (OPTIONS) and all responses get correct headers
+const isLocalOrigin = (o) =>
+  !o || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(o);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (isLocalOrigin(origin)) return callback(null, true);
+      if (config.CORS_ORIGIN && config.CORS_ORIGIN !== "*") {
+        const allowed =
+          Array.isArray(config.CORS_ORIGIN)
+            ? config.CORS_ORIGIN.includes(origin)
+            : config.CORS_ORIGIN === origin;
+        return callback(null, allowed ? origin : false);
+      }
+      callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+    credentials: false,
+    optionsSuccessStatus: 204,
+  })
+);
+
 app.use(helmet());
 
 app.get("/health", (req, res) => {
@@ -31,14 +54,6 @@ app.use("/api/v1/webhooks", webhookRoutes);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(
-  cors({
-    origin: config.CORS_ORIGIN || "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: false,
-  })
-);
 app.use(requestId);
 app.use(morgan("combined"));
 app.use("/public", express.static("public"));

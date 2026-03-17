@@ -34,6 +34,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         title: const Text('iMeals'),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: AppColors.onSurface,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () => context.push(AppRoutes.customerNotifications),
+            tooltip: 'Notifications',
+          ),
+        ],
       ),
       body: IndexedStack(
         index: _selectedIndex,

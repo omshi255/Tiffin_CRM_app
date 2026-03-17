@@ -36,6 +36,7 @@ abstract final class AppRoutes {
 
   /// Role-based home routes (after login)
   static const String customerHome = '/customer-home';
+  static const String customerNotifications = '/customer-notifications';
   static const String deliveryDashboard = '/delivery-dashboard';
   static const String deliveryMap = '/delivery-map';
   static const String adminDashboard = '/admin-dashboard';
