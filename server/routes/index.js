@@ -13,6 +13,7 @@ import reportRoutes from "./report.routes.js";
 import dailyOrderRoutes from "./dailyOrder.routes.js";
 import deliveryRoutes from "./delivery.routes.js";
 import adminRoutes from "./admin.routes.js";
+import zoneRoutes from "./zone.routes.js";
 
 const router = Router();
 
@@ -30,5 +31,6 @@ router.use("/reports", reportRoutes);
 router.use("/daily-orders", dailyOrderRoutes);
 router.use("/delivery", deliveryRoutes);
 router.use("/admin", adminRoutes);
+router.use("/zones", zoneRoutes);
 
 export default router;

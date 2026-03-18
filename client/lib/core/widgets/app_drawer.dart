@@ -126,6 +126,14 @@ class _AppDrawerState extends State<AppDrawer> {
                     },
                   ),
                   _DrawerItem(
+                    icon: Icons.map_outlined,
+                    label: 'Delivery Zones',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      context.push(AppRoutes.zones);
+                    },
+                  ),
+                  _DrawerItem(
                     icon: Icons.restaurant_menu,
                     label: 'Menu Items',
                     onTap: () {

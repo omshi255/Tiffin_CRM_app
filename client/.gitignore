@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local secrets (sync_maps_key.dart writes these from .env — do not commit real keys)
+.env
+web/gmaps_config.js
+ios/Flutter/MapsKey.xcconfig

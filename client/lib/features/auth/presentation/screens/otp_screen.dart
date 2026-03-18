@@ -102,6 +102,7 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/notifications/notification_badge_service.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/utils/app_snackbar.dart';
@@ -182,6 +183,8 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
       final role = user.role;
       await SecureStorage.saveUserRole(role);
       await SecureStorage.saveUserId(user.id);
+
+      await NotificationBadgeService.refreshNow();
 
       await _updateFcmToken(role);
 

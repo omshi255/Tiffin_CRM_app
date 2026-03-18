@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/notifications/notification_badge_service.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -37,6 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
       await SecureStorage.saveUserRole(user.role);
       await SecureStorage.saveUserId(user.id);
+      await NotificationBadgeService.refreshNow();
       if (user.role == 'vendor' && !user.isVendorProfileComplete) {
         router.go(AppRoutes.vendorOnboarding, extra: user.phone);
         return;
@@ -51,6 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
           if (!mounted) return;
           await SecureStorage.saveUserRole(user.role);
           await SecureStorage.saveUserId(user.id);
+          await NotificationBadgeService.refreshNow();
           if (user.role == 'vendor' && !user.isVendorProfileComplete) {
             router.go(AppRoutes.vendorOnboarding, extra: user.phone);
             return;

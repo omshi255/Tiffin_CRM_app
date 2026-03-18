@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
@@ -127,39 +129,112 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
     return _defaultCenter;
   }
 
+  Widget _buildWebBody(ThemeData theme) {
+    if (_loading && _orders.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final list = _orders
+        .where(
+          (o) =>
+              o.customerLocation != null ||
+              (o.customerAddress != null &&
+                  o.customerAddress!.trim().isNotEmpty),
+        )
+        .toList();
+    if (list.isEmpty) {
+      return Center(
+        child: Card(
+          margin: const EdgeInsets.all(24),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              _orders.isEmpty
+                  ? 'No deliveries to show'
+                  : 'No address or coordinates on these orders. Open stops in Google Maps from the list below once addresses are set.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge,
+            ),
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: list.length,
+      itemBuilder: (context, i) {
+        final o = list[i];
+        final loc = o.customerLocation;
+        final name = o.customerName ?? o.customerId;
+        final addr = o.customerAddress?.trim() ?? '';
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: const Icon(Icons.place_outlined),
+            title: Text(name),
+            subtitle: Text(
+              addr.isNotEmpty
+                  ? addr
+                  : (loc != null
+                      ? '${loc.lat.toStringAsFixed(5)}, ${loc.lng.toStringAsFixed(5)}'
+                      : ''),
+            ),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () async {
+              final Uri url;
+              if (loc != null) {
+                url = Uri.parse(
+                  'https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}',
+                );
+              } else {
+                url = Uri.parse(
+                  'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(addr)}',
+                );
+              }
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mapBody = _loading && _orders.isEmpty
         ? const Center(child: CircularProgressIndicator())
-        : Stack(
-            children: [
-              GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target: _initialTarget,
-                  zoom: 14,
-                ),
-                markers: _markers,
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-                onMapCreated: (c) {
-                  _mapController = c;
-                },
-              ),
-              if (_orders.isEmpty && !_loading)
-                Center(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text(
-                        'No deliveries to show on map',
-                        style: theme.textTheme.bodyLarge,
+        : kIsWeb
+            ? _buildWebBody(theme)
+            : Stack(
+                children: [
+                  GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: _initialTarget,
+                      zoom: 14,
+                    ),
+                    markers: _markers,
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
+                    onMapCreated: (c) {
+                      _mapController = c;
+                    },
+                  ),
+                  if (_orders.isEmpty && !_loading)
+                    Center(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            'No deliveries to show on map',
+                            style: theme.textTheme.bodyLarge,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-            ],
-          );
+                ],
+              );
     if (!widget.showAppBar) return mapBody;
     return Scaffold(
       appBar: AppBar(

@@ -31,6 +31,9 @@
 
   <title>tiffin_crm</title>
   <link rel="manifest" href="manifest.json">
+  <!-- Maps: `dart run tool/sync_maps_key.dart` creates web/gmaps_config.js from .env -->
+  <script>window.__TiffinGmapsKey = '';</script>
+  <script src="gmaps_config.js"></script>
 </head>
 <body>
   <!--

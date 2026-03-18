@@ -23,7 +23,7 @@ class NotificationBellIcon extends StatelessWidget {
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            if (child != null) child,
+            ?child,
             if (count > 0)
               Positioned(
                 right: -1,

@@ -41,6 +41,12 @@ const customerSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    zoneId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Zone",
+      default: null,
+      index: true,
+    },
     landmark: {
       type: String,
       trim: true,
@@ -116,6 +122,7 @@ const customerSchema = new mongoose.Schema(
 
 customerSchema.index({ ownerId: 1, phone: 1 });
 customerSchema.index({ ownerId: 1, balance: 1 }); // low balance queries
+customerSchema.index({ ownerId: 1, zoneId: 1 });
 customerSchema.index({ location: "2dsphere" });
 customerSchema.index({ status: 1 });
 customerSchema.index({ createdAt: -1 });

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/customer_portal/data/customer_portal_api.dart';
 import '../../features/dashboard/data/notification_api.dart';
+import '../storage/secure_storage.dart';
 
 /// Global service to track unread notification count for all roles.
 final class NotificationBadgeService {
@@ -25,26 +26,40 @@ final class NotificationBadgeService {
   }
 
   static Future<void> _refresh() async {
-    int total = 0;
-    try {
-      final res = await NotificationApi.getMyNotifications(
-        page: 1,
-        limit: 1,
-        isRead: false,
-      );
-      final t = res['total'];
-      if (t is int) total += t;
-    } catch (_) {}
+    final token = await SecureStorage.getAccessToken();
+    if (token == null || token.isEmpty) {
+      if (unreadCount.value != 0) unreadCount.value = 0;
+      return;
+    }
 
-    try {
-      final res = await CustomerPortalApi.getMyNotifications(
-        page: 1,
-        limit: 1,
-        isRead: false,
-      );
-      final t = res['total'];
-      if (t is int) total += t;
-    } catch (_) {}
+    final role = (await SecureStorage.getUserRole())?.toLowerCase() ?? '';
+    int total = 0;
+
+    // Only hit the endpoint that matches the logged-in role (avoids 403 spam).
+    if (role == 'customer') {
+      try {
+        final res = await CustomerPortalApi.getMyNotifications(
+          page: 1,
+          limit: 1,
+          isRead: false,
+        );
+        final t = res['total'];
+        if (t is int) total = t;
+      } catch (_) {}
+    } else if (role == 'vendor' ||
+        role == 'delivery_staff' ||
+        role == 'delivery' ||
+        role == 'admin') {
+      try {
+        final res = await NotificationApi.getMyNotifications(
+          page: 1,
+          limit: 1,
+          isRead: false,
+        );
+        final t = res['total'];
+        if (t is int) total = t;
+      } catch (_) {}
+    }
 
     if (unreadCount.value != total) {
       unreadCount.value = total;

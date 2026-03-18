@@ -30,6 +30,7 @@ const createCustomerSchema = Joi.object({
     .required()
     .messages({ "string.empty": "Address is required" }),
   area: Joi.string().trim().allow("").optional(),
+  zoneId: Joi.string().hex().length(24).allow(null, "").optional(),
   landmark: Joi.string().trim().allow("").optional(),
   whatsapp: Joi.string().trim().allow("").optional(),
   notes: Joi.string().trim().allow("").optional(),
@@ -50,6 +51,7 @@ const updateCustomerSchema = Joi.object({
     .optional(),
   address: Joi.string().trim().allow("").optional(),
   area: Joi.string().trim().allow("").optional(),
+  zoneId: Joi.string().hex().length(24).allow(null, "").optional(),
   landmark: Joi.string().trim().allow("").optional(),
   whatsapp: Joi.string().trim().allow("").optional(),
   notes: Joi.string().trim().allow("").optional(),
@@ -219,6 +221,7 @@ export const createCustomer = asyncHandler(async (req, res) => {
     whatsapp: value.whatsapp || null,
     notes: value.notes || "",
     tags: value.tags || [],
+    zoneId: value.zoneId ? value.zoneId : null,
   };
 
   if (value.location?.coordinates?.length === 2) {
@@ -282,6 +285,10 @@ export const updateCustomer = asyncHandler(async (req, res) => {
   }
 
   const updatePayload = { ...value };
+  if (Object.prototype.hasOwnProperty.call(updatePayload, "zoneId")) {
+    // Normalize empty string → null
+    if (!updatePayload.zoneId) updatePayload.zoneId = null;
+  }
   if (value.location?.coordinates?.length === 2) {
     updatePayload.location = {
       type: "Point",

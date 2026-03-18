@@ -8157,3 +8157,772 @@ Error: Authorization header missing or invalid
     at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
 
 
+2026-03-18T14:48:52.575Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-18T14:49:06.982Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-18T14:49:57.248Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-18T14:50:09.041Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-18T14:50:22.602Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-18T14:50:36.599Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-18T15:40:30.606Z [info] : 18/03/2026, 09:10:30 pm
+2026-03-18T15:40:30.614Z [error] : [18/03/2026, 09:10:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:40:30.686Z [info] : 18/03/2026, 09:10:30 pm
+2026-03-18T15:40:30.687Z [error] : [18/03/2026, 09:10:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:41:30.794Z [info] : 18/03/2026, 09:11:30 pm
+2026-03-18T15:41:30.795Z [error] : [18/03/2026, 09:11:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:41:30.845Z [info] : 18/03/2026, 09:11:30 pm
+2026-03-18T15:41:30.845Z [error] : [18/03/2026, 09:11:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:42:30.806Z [info] : 18/03/2026, 09:12:30 pm
+2026-03-18T15:42:30.807Z [error] : [18/03/2026, 09:12:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:42:30.830Z [info] : 18/03/2026, 09:12:30 pm
+2026-03-18T15:42:30.830Z [error] : [18/03/2026, 09:12:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:43:30.806Z [info] : 18/03/2026, 09:13:30 pm
+2026-03-18T15:43:30.807Z [error] : [18/03/2026, 09:13:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:43:30.847Z [info] : 18/03/2026, 09:13:30 pm
+2026-03-18T15:43:30.848Z [error] : [18/03/2026, 09:13:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:44:30.775Z [info] : 18/03/2026, 09:14:30 pm
+2026-03-18T15:44:30.775Z [error] : [18/03/2026, 09:14:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:44:30.805Z [info] : 18/03/2026, 09:14:30 pm
+2026-03-18T15:44:30.805Z [error] : [18/03/2026, 09:14:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:45:30.804Z [info] : 18/03/2026, 09:15:30 pm
+2026-03-18T15:45:30.805Z [error] : [18/03/2026, 09:15:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:45:30.832Z [info] : 18/03/2026, 09:15:30 pm
+2026-03-18T15:45:30.832Z [error] : [18/03/2026, 09:15:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:46:30.798Z [info] : 18/03/2026, 09:16:30 pm
+2026-03-18T15:46:30.798Z [error] : [18/03/2026, 09:16:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:46:30.822Z [info] : 18/03/2026, 09:16:30 pm
+2026-03-18T15:46:30.822Z [error] : [18/03/2026, 09:16:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:47:30.746Z [info] : 18/03/2026, 09:17:30 pm
+2026-03-18T15:47:30.747Z [error] : [18/03/2026, 09:17:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:47:30.816Z [info] : 18/03/2026, 09:17:30 pm
+2026-03-18T15:47:30.816Z [error] : [18/03/2026, 09:17:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:48:30.745Z [info] : 18/03/2026, 09:18:30 pm
+2026-03-18T15:48:30.746Z [error] : [18/03/2026, 09:18:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:48:30.787Z [info] : 18/03/2026, 09:18:30 pm
+2026-03-18T15:48:30.787Z [error] : [18/03/2026, 09:18:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:49:30.747Z [info] : 18/03/2026, 09:19:30 pm
+2026-03-18T15:49:30.747Z [error] : [18/03/2026, 09:19:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:49:30.784Z [info] : 18/03/2026, 09:19:30 pm
+2026-03-18T15:49:30.784Z [error] : [18/03/2026, 09:19:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:50:30.736Z [info] : 18/03/2026, 09:20:30 pm
+2026-03-18T15:50:30.736Z [error] : [18/03/2026, 09:20:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:50:30.783Z [info] : 18/03/2026, 09:20:30 pm
+2026-03-18T15:50:30.783Z [error] : [18/03/2026, 09:20:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:51:30.793Z [info] : 18/03/2026, 09:21:30 pm
+2026-03-18T15:51:30.793Z [error] : [18/03/2026, 09:21:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:51:30.841Z [info] : 18/03/2026, 09:21:30 pm
+2026-03-18T15:51:30.842Z [error] : [18/03/2026, 09:21:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:52:30.799Z [info] : 18/03/2026, 09:22:30 pm
+2026-03-18T15:52:30.799Z [error] : [18/03/2026, 09:22:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:52:30.847Z [info] : 18/03/2026, 09:22:30 pm
+2026-03-18T15:52:30.847Z [error] : [18/03/2026, 09:22:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:53:30.799Z [info] : 18/03/2026, 09:23:30 pm
+2026-03-18T15:53:30.799Z [error] : [18/03/2026, 09:23:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:53:30.847Z [info] : 18/03/2026, 09:23:30 pm
+2026-03-18T15:53:30.847Z [error] : [18/03/2026, 09:23:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:54:30.812Z [info] : 18/03/2026, 09:24:30 pm
+2026-03-18T15:54:30.812Z [error] : [18/03/2026, 09:24:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:54:30.860Z [info] : 18/03/2026, 09:24:30 pm
+2026-03-18T15:54:30.861Z [error] : [18/03/2026, 09:24:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:55:30.805Z [info] : 18/03/2026, 09:25:30 pm
+2026-03-18T15:55:30.806Z [error] : [18/03/2026, 09:25:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:55:30.848Z [info] : 18/03/2026, 09:25:30 pm
+2026-03-18T15:55:30.848Z [error] : [18/03/2026, 09:25:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:56:30.810Z [info] : 18/03/2026, 09:26:30 pm
+2026-03-18T15:56:30.810Z [error] : [18/03/2026, 09:26:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:56:30.850Z [info] : 18/03/2026, 09:26:30 pm
+2026-03-18T15:56:30.850Z [error] : [18/03/2026, 09:26:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:57:30.860Z [info] : 18/03/2026, 09:27:30 pm
+2026-03-18T15:57:30.861Z [error] : [18/03/2026, 09:27:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:57:30.933Z [info] : 18/03/2026, 09:27:30 pm
+2026-03-18T15:57:30.934Z [error] : [18/03/2026, 09:27:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:58:30.744Z [info] : 18/03/2026, 09:28:30 pm
+2026-03-18T15:58:30.745Z [error] : [18/03/2026, 09:28:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:58:30.816Z [info] : 18/03/2026, 09:28:30 pm
+2026-03-18T15:58:30.816Z [error] : [18/03/2026, 09:28:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:59:30.839Z [info] : 18/03/2026, 09:29:30 pm
+2026-03-18T15:59:30.840Z [error] : [18/03/2026, 09:29:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T15:59:30.883Z [info] : 18/03/2026, 09:29:30 pm
+2026-03-18T15:59:30.883Z [error] : [18/03/2026, 09:29:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T16:00:30.764Z [info] : 18/03/2026, 09:30:30 pm
+2026-03-18T16:00:30.765Z [error] : [18/03/2026, 09:30:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T16:00:30.841Z [info] : 18/03/2026, 09:30:30 pm
+2026-03-18T16:00:30.842Z [error] : [18/03/2026, 09:30:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T16:01:30.811Z [info] : 18/03/2026, 09:31:30 pm
+2026-03-18T16:01:30.812Z [error] : [18/03/2026, 09:31:30 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T16:01:31.176Z [info] : 18/03/2026, 09:31:31 pm
+2026-03-18T16:01:31.176Z [error] : [18/03/2026, 09:31:31 pm] Authorization header missing or invalid
+Error: Authorization header missing or invalid
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:13:17)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at router.handle (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:186:3)
+    at router (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:60:12)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+
+
+2026-03-18T16:02:21.363Z [info] : 18/03/2026, 09:32:21 pm
+2026-03-18T16:02:21.364Z [error] : [18/03/2026, 09:32:21 pm] Access denied. Required role: customer
+Error: Access denied. Required role: customer
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/rbac.middleware.js:25:9
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:32:5)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+
+
+2026-03-18T16:03:21.643Z [info] : 18/03/2026, 09:33:21 pm
+2026-03-18T16:03:21.644Z [error] : [18/03/2026, 09:33:21 pm] Access denied. Required role: customer
+Error: Access denied. Required role: customer
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/rbac.middleware.js:25:9
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:32:5)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+
+
+2026-03-18T16:04:21.744Z [info] : 18/03/2026, 09:34:21 pm
+2026-03-18T16:04:21.745Z [error] : [18/03/2026, 09:34:21 pm] Access denied. Required role: customer
+Error: Access denied. Required role: customer
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/rbac.middleware.js:25:9
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at authMiddleware (file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/middleware/auth.middleware.js:32:5)
+    at Layer.handleRequest (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at E:\00WebDev\Fork\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+
+
+2026-03-18T16:08:40.555Z [info] : 18/03/2026, 09:38:40 pm
+2026-03-18T16:08:40.567Z [error] : [18/03/2026, 09:38:40 pm] getaddrinfo EAI_AGAIN verify.twilio.com
+Error: getaddrinfo EAI_AGAIN verify.twilio.com
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:116:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-18T16:08:58.877Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-18T17:09:16.065Z [info] : 18/03/2026, 10:39:16 pm
+2026-03-18T17:09:16.080Z [error] : [18/03/2026, 10:39:16 pm] getaddrinfo EAI_AGAIN verify.twilio.com
+Error: getaddrinfo EAI_AGAIN verify.twilio.com
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:116:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-18T17:10:27.950Z [info] : 18/03/2026, 10:40:27 pm
+2026-03-18T17:10:27.951Z [error] : [18/03/2026, 10:40:27 pm] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:293:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-18T17:10:31.361Z [info] : 18/03/2026, 10:40:31 pm
+2026-03-18T17:10:31.361Z [error] : [18/03/2026, 10:40:31 pm] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:293:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-18T17:19:47.157Z [info] : 18/03/2026, 10:49:47 pm
+2026-03-18T17:19:47.162Z [error] : [18/03/2026, 10:49:47 pm] getaddrinfo EAI_AGAIN verify.twilio.com
+Error: getaddrinfo EAI_AGAIN verify.twilio.com
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:116:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-18T17:19:49.851Z [info] : 18/03/2026, 10:49:49 pm
+2026-03-18T17:19:49.853Z [error] : [18/03/2026, 10:49:49 pm] getaddrinfo EAI_AGAIN verify.twilio.com
+Error: getaddrinfo EAI_AGAIN verify.twilio.com
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:116:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-18T17:20:10.612Z [info] : 18/03/2026, 10:50:10 pm
+2026-03-18T17:20:10.613Z [error] : [18/03/2026, 10:50:10 pm] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:293:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-03-18T17:27:01.720Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted

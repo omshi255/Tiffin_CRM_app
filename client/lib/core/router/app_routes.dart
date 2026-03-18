@@ -23,6 +23,7 @@ abstract final class AppRoutes {
   static const String deliveryStaff = '/delivery-staff';
   static const String addDeliveryStaff = '/delivery-staff/add';
   static const String editDeliveryStaff = '/delivery-staff/edit';
+  static const String zones = '/zones';
   static const String payments = '/payments';
   static const String invoices = '/invoices';
   static const String reports = '/reports';

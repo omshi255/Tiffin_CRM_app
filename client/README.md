@@ -78,8 +78,19 @@ Flutter app for the Tiffin CRM platform. Supports **four roles**: Vendor, Custom
 ---
 
 ## Environment / Config
-- **Base API URL**: `AppConfig.baseUrl` = `https://tiffin-crm-app.onrender.com/api/v1`.
-- Optional env (e.g. `.env` or `--dart-define`): `GOOGLE_MAPS_API_KEY`, `FCM_SENDER_ID`, `RAZORPAY_KEY_ID`, `TRUECALLER_APP_KEY` (see `app_config.dart`).
+- **Base API URL**: `AppConfig.baseUrl` in `lib/core/config/app_config.dart` (local vs production).
+- **`.env`** in `client/` (gitignored): put `GOOGLE_MAPS_API_KEY=...` and other secrets there.
+
+### Google Maps (`GOOGLE_MAPS_API_KEY` in `.env`)
+1. **Android** — Gradle reads `client/.env` on build and injects the key into `AndroidManifest`. Rebuild the app after changing `.env`.
+2. **Web** — Run once (or after key change):  
+   `dart run tool/sync_maps_key.dart`  
+   This writes `web/gmaps_config.js` (gitignored). Then **full restart** `flutter run -d chrome`. Enable **Maps JavaScript API** and add HTTP referrer restrictions for your dev URL (e.g. `localhost:*`).
+3. **iOS** — Same script writes `ios/Flutter/MapsKey.xcconfig` (gitignored). Then `cd ios && pod install`, rebuild. Enable **Maps SDK for iOS** for that key.
+
+Optional: `--dart-define=GOOGLE_MAPS_API_KEY=...` still works for Dart `AppConfig` if you use it elsewhere.
+
+Other optional defines: `FCM_SENDER_ID`, `RAZORPAY_KEY_ID`, `TRUECALLER_APP_KEY`.
 
 ---
 
@@ -118,7 +129,7 @@ lib/
 ## How to Run
 1. From repo root: `cd client`.
 2. `flutter pub get`.
-3. (Optional) Copy `.env.example` to `.env` and set API URL or keys if you override defaults.
+3. Copy `.env.example` to `.env`, set `GOOGLE_MAPS_API_KEY`, then run `dart run tool/sync_maps_key.dart` for web/iOS maps.
 4. `flutter run` (choose device; for mobile FCM works; web may have plugin compatibility issues with Firebase Messaging).
 
 ---

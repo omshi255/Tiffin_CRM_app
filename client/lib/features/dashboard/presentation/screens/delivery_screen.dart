@@ -152,8 +152,9 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
         orderIds: orderIds,
         onAssigned: () {
           Navigator.pop(ctx); // close assign sheet
-          if (sheetContext.mounted)
+          if (sheetContext.mounted) {
             Navigator.pop(sheetContext); // close order sheet only if mounted
+          }
           _load();
         },
       ),

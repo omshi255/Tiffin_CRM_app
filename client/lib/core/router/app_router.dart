@@ -26,6 +26,7 @@ import '../../features/dashboard/presentation/screens/invoices_screen.dart';
 import '../../features/dashboard/presentation/screens/maps_screen.dart';
 import '../../features/dashboard/presentation/screens/meal_plans_screen.dart';
 import '../../features/items/presentation/screens/items_list_screen.dart';
+import '../../features/zones/presentation/screens/zones_list_screen.dart';
 import '../../features/plans/models/plan_model.dart';
 import '../../features/plans/presentation/screens/create_plan_screen.dart';
 import '../../features/dashboard/presentation/screens/notifications_screen.dart';
@@ -324,6 +325,12 @@ final class AppRouter {
                 slideTransitionPage(state, const PaymentsScreen()),
           ),
           GoRoute(
+            path: 'zones',
+            name: 'zones',
+            pageBuilder: (context, state) =>
+                slideTransitionPage(state, const ZonesListScreen()),
+          ),
+          GoRoute(
             path: 'invoices',
             name: 'invoices',
             builder: (context, state) => const InvoicesScreen(),
@@ -361,7 +368,8 @@ final class AppRouter {
           GoRoute(
             path: 'maps',
             name: 'maps',
-            builder: (context, state) => const MapsScreen(),
+            builder: (context, state) =>
+                MapsScreen(extra: state.extra),
           ),
           GoRoute(
             path: 'staff-management',

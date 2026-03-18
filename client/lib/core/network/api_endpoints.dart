@@ -47,6 +47,10 @@ abstract final class ApiEndpoints {
   static const String deliveryStaffMe = '/delivery-staff/me';
   static String deliveryStaffById(String id) => '/delivery-staff/$id';
 
+  // Zones
+  static const String zones = '/zones';
+  static String zoneById(String id) => '/zones/$id';
+
   // Plans
   static const String plans = '/plans';
   static String planById(String id) => '/plans/$id';

@@ -32,6 +32,11 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => context.push(AppRoutes.businessProfile),
           ),
           _SettingsTile(
+            icon: Icons.map_outlined,
+            title: 'Delivery zones',
+            onTap: () => context.push(AppRoutes.zones),
+          ),
+          _SettingsTile(
             icon: Icons.receipt_long_outlined,
             title: 'Invoice settings',
             onTap: () {},
