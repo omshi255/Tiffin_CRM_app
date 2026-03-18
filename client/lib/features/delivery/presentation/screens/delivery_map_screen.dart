@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/location_helper.dart';
 import '../../data/delivery_api.dart';
@@ -89,14 +90,7 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
     setState(() => _updatingLocation = true);
     try {
       final position = await LocationHelper.getCurrentPosition();
-      if (position == null || !mounted) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not get location')),
-          );
-        }
-        return;
-      }
+      if (position == null || !mounted) return;
       await DeliveryApi.updateMe({
         'location': {
           'type': 'Point',
@@ -108,9 +102,7 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
           _myPosition = LatLng(position.latitude, position.longitude);
           _buildMarkers();
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location shared')),
-        );
+        AppSnackbar.success(context, 'Location shared');
       }
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);

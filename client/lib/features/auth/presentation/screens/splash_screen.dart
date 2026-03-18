@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../data/auth_api.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -36,14 +37,9 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
       await SecureStorage.saveUserRole(user.role);
       await SecureStorage.saveUserId(user.id);
-      if (user.role == 'vendor') {
-        final onboarded = await SecureStorage.get('vendorOnboarded') == 'true';
-        final needsOnboarding =
-            user.businessName.isEmpty && user.name.isEmpty;
-        if (needsOnboarding && !onboarded) {
-          router.go(AppRoutes.vendorOnboarding, extra: user.phone);
-          return;
-        }
+      if (user.role == 'vendor' && !user.isVendorProfileComplete) {
+        router.go(AppRoutes.vendorOnboarding, extra: user.phone);
+        return;
       }
       if (!mounted) return;
       router.go(_routeForRole(user.role));
@@ -55,15 +51,9 @@ class _SplashScreenState extends State<SplashScreen> {
           if (!mounted) return;
           await SecureStorage.saveUserRole(user.role);
           await SecureStorage.saveUserId(user.id);
-          if (user.role == 'vendor') {
-            final onboarded =
-                await SecureStorage.get('vendorOnboarded') == 'true';
-            final needsOnboarding =
-                user.businessName.isEmpty && user.name.isEmpty;
-            if (needsOnboarding && !onboarded) {
-              router.go(AppRoutes.vendorOnboarding, extra: user.phone);
-              return;
-            }
+          if (user.role == 'vendor' && !user.isVendorProfileComplete) {
+            router.go(AppRoutes.vendorOnboarding, extra: user.phone);
+            return;
           }
           if (!mounted) return;
           router.go(_routeForRole(user.role));
@@ -106,13 +96,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      backgroundColor: AppColors.primary,
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.restaurant_menu, size: 64, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 16),
-            const CircularProgressIndicator(),
+            Icon(Icons.restaurant_menu, size: 64, color: AppColors.onPrimary),
+            SizedBox(height: 16),
+            CircularProgressIndicator(color: AppColors.onPrimary),
           ],
         ),
       ),

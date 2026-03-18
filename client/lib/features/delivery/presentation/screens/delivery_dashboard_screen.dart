@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/color_utils.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/location_helper.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
+import '../../../../core/widgets/notification_bell_icon.dart';
 import '../../data/delivery_api.dart';
 import '../../../auth/data/auth_api.dart';
 import '../../../orders/data/order_api.dart';
@@ -83,25 +87,14 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     setState(() => _updatingLocation = true);
     try {
       final position = await LocationHelper.getCurrentPosition();
-      if (position == null || !mounted) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not get location. Enable location and try again.')),
-          );
-        }
-        return;
-      }
+      if (position == null || !mounted) return;
       await DeliveryApi.updateMe({
         'location': {
           'type': 'Point',
           'coordinates': [position.longitude, position.latitude],
         },
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location shared')),
-        );
-      }
+      if (mounted) AppSnackbar.success(context, 'Location shared');
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
@@ -203,10 +196,6 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           final loc = order.customerLocation;
           if (loc != null) {
             LocationHelper.openInMaps(loc.lat, loc.lng);
-          } else if (order.customerAddress != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No coordinates for this address')),
-            );
           }
         },
       ),
@@ -224,37 +213,40 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
         title: Text(titles[_selectedTab]),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: AppColors.onSurface,
-        actions: _selectedTab == 0
-            ? [
-                IconButton(
-                  icon: _updatingLocation
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.location_on_outlined),
-                  tooltip: 'Share my location',
-                  onPressed: _updatingLocation ? null : _shareMyLocation,
+        actions: [
+          NotificationBellIcon(
+            onPressed: () => context.push(AppRoutes.notifications),
+          ),
+          if (_selectedTab == 0) ...[
+            IconButton(
+              icon: _updatingLocation
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const PhosphorIcon(PhosphorIconsRegular.mapPin, size: 22),
+              tooltip: 'Share my location',
+              onPressed: _updatingLocation ? null : _shareMyLocation,
+            ),
+            IconButton(
+              icon: const PhosphorIcon(PhosphorIconsRegular.arrowsClockwise, size: 22),
+              onPressed: _loading ? null : _load,
+            ),
+            PopupMenuButton<void>(
+              itemBuilder: (_) => [
+                const PopupMenuItem(
+                  value: null,
+                  child: ListTile(
+                    leading: PhosphorIcon(PhosphorIconsRegular.signOut, size: 20),
+                    title: Text('Logout'),
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: _loading ? null : _load,
-                ),
-                PopupMenuButton<void>(
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(
-                      value: null,
-                      child: ListTile(
-                        leading: Icon(Icons.logout),
-                        title: Text('Logout'),
-                      ),
-                    ),
-                  ],
-                  onSelected: (_) => _logout(),
-                ),
-              ]
-            : null,
+              ],
+              onSelected: (_) => _logout(),
+            ),
+          ],
+        ],
         bottom: _selectedTab == 0
             ? PreferredSize(
                 preferredSize: const Size.fromHeight(48),
@@ -287,24 +279,57 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           const DeliveryProfileScreen(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedTab,
-        onTap: (i) => setState(() => _selectedTab = i),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.onSurfaceVariant,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Tasks'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.border.withValues(alpha: 0.4),
+              blurRadius: 12,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          child: BottomNavigationBar(
+            currentIndex: _selectedTab,
+            onTap: (i) {
+              HapticFeedback.lightImpact();
+              setState(() => _selectedTab = i);
+            },
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: AppColors.textHint,
+            items: [
+              BottomNavigationBarItem(
+                icon: PhosphorIcon(_selectedTab == 0 ? PhosphorIconsFill.clipboardText : PhosphorIconsRegular.clipboardText, size: 22),
+                label: 'Tasks',
+              ),
+              BottomNavigationBarItem(
+                icon: PhosphorIcon(_selectedTab == 1 ? PhosphorIconsFill.mapTrifold : PhosphorIconsRegular.mapTrifold, size: 22),
+                label: 'Map',
+              ),
+              BottomNavigationBarItem(
+                icon: PhosphorIcon(_selectedTab == 2 ? PhosphorIconsFill.user : PhosphorIconsRegular.user, size: 22),
+                label: 'Profile',
+              ),
+            ],
+          ),
+        ),
       ),
       floatingActionButton: _selectedTab == 0
           ? FloatingActionButton.extended(
-              onPressed: () => setState(() => _selectedTab = 1),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                setState(() => _selectedTab = 1);
+              },
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,
-              icon: const Icon(Icons.map),
+              icon: PhosphorIcon(PhosphorIconsRegular.mapTrifold, size: 18),
               label: const Text('View on map'),
             )
           : null,
@@ -336,26 +361,46 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                     itemBuilder: (context, index) {
                       final order = filtered[index];
                       final borderColor = statusBorderColor(order.status);
+                      final (chipBg, chipFg) = statusChipColors(order.status);
+                      final name = order.customerName ?? order.customerId;
+                      final initials = name.isNotEmpty
+                          ? name.trim().split(RegExp(r'\s+')).map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase()
+                          : '?';
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: AppColors.border, width: 1),
+                        ),
                         child: InkWell(
-                          onTap: () => _showOrderSheet(order),
-                          borderRadius: BorderRadius.circular(14),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _showOrderSheet(order);
+                          },
+                          borderRadius: BorderRadius.circular(16),
                           child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border(
-                                left: BorderSide(
-                                  color: borderColor,
-                                  width: 4,
-                                ),
+                                left: BorderSide(color: borderColor, width: 4),
                               ),
                             ),
                             child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: AppColors.successChipBg,
+                                foregroundColor: AppColors.successChipText,
+                                child: Text(
+                                  initials.length > 2 ? initials.substring(0, 2) : initials,
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
                               title: Text(
-                                order.customerName ?? order.customerId,
+                                name,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               subtitle: Column(
@@ -370,8 +415,10 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                                       ),
                                     ),
                                   Text(
-                                    '${order.slot ?? '—'} • ${order.status}',
-                                    style: theme.textTheme.bodySmall,
+                                    order.slot ?? '—',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -381,13 +428,13 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: borderColor.withValues(alpha: 0.15),
+                                  color: chipBg,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   order.status,
                                   style: theme.textTheme.labelSmall?.copyWith(
-                                    color: borderColor,
+                                    color: chipFg,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

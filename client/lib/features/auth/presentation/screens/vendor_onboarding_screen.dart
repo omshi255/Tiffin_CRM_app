@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/auth_api.dart';
@@ -21,6 +20,25 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
   final _ownerNameController = TextEditingController();
   final _addressController = TextEditingController();
   bool _saving = false;
+  bool _checkingProfile = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _redirectIfAlreadyComplete());
+  }
+
+  Future<void> _redirectIfAlreadyComplete() async {
+    try {
+      final profile = await AuthApi.getProfile();
+      if (!mounted) return;
+      if (profile.isVendorProfileComplete) {
+        context.go(AppRoutes.dashboard);
+        return;
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _checkingProfile = false);
+  }
 
   @override
   void dispose() {
@@ -34,13 +52,11 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _saving = true);
     try {
-      await AuthApi.updateProfile({
-        'businessName': _businessNameController.text.trim(),
-        'ownerName': _ownerNameController.text.trim(),
-        'name': _ownerNameController.text.trim(),
-        'address': _addressController.text.trim(),
-      });
-      await SecureStorage.set('vendorOnboarded', 'true');
+      await AuthApi.submitVendorOnboarding(
+        businessName: _businessNameController.text.trim(),
+        ownerName: _ownerNameController.text.trim(),
+        address: _addressController.text.trim(),
+      );
       if (!mounted) return;
       context.go(AppRoutes.dashboard);
     } catch (e) {
@@ -53,6 +69,12 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (_checkingProfile) {
+      return Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../network/api_exception.dart';
+import 'app_snackbar.dart';
 
 abstract final class ErrorHandler {
   static void show(BuildContext context, dynamic error) {
@@ -13,13 +14,6 @@ abstract final class ErrorHandler {
         error.toString().contains('SocketException')) {
       message = 'No internet connection.';
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    AppSnackbar.error(context, message);
   }
 }

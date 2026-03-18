@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/delivery_api.dart';
 import '../../models/delivery_staff_model.dart';
@@ -53,7 +54,7 @@ class _DeliveryStaffListScreenState extends State<DeliveryStaffListScreen> {
               try {
                 await DeliveryApi.deleteStaff(staff.id);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Removed')));
+                  AppSnackbar.success(context, 'Removed');
                   _load();
                 }
               } catch (e) {

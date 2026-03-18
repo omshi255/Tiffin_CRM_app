@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
 import '../../../../core/widgets/bottom_sheet_handle.dart';
@@ -58,9 +59,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         customerId: _customer!.id,
         onSuccess: () {
           Navigator.pop(ctx);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Wallet credited')),
-          );
+AppSnackbar.success(context, 'Wallet credited');
           _load();
         },
         onError: (e) => ErrorHandler.show(ctx, e),
@@ -95,9 +94,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               try {
                 await CustomerApi.delete(widget.customer.id);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Customer deleted')),
-                  );
+                  AppSnackbar.success(context, 'Customer deleted');
                   context.pop();
                 }
               } catch (e) {
@@ -383,9 +380,7 @@ class _CreditWalletSheetState extends State<_CreditWalletSheet> {
               onPressed: () async {
                 final amount = double.tryParse(_amountController.text.trim());
                 if (amount == null || amount <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Enter valid amount')),
-                  );
+                  AppSnackbar.error(context, 'Enter valid amount');
                   return;
                 }
                 try {

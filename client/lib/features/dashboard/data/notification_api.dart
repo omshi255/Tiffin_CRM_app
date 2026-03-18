@@ -46,4 +46,25 @@ abstract final class NotificationApi {
       ApiEndpoints.notificationMarkRead(notificationId),
     );
   }
+
+  /// Delete a single notification.
+  static Future<void> deleteNotification(String notificationId) async {
+    await DioClient.instance.delete(
+      ApiEndpoints.notificationById(notificationId),
+    );
+  }
+
+  /// Delete all read notifications for the current user.
+  static Future<void> clearReadNotifications() async {
+    await DioClient.instance.delete(
+      ApiEndpoints.notificationsClearRead,
+    );
+  }
+
+  /// Mark all notifications as read for the current user.
+  static Future<void> markAllRead() async {
+    await DioClient.instance.patch(
+      '${ApiEndpoints.notifications}/read-all',
+    );
+  }
 }

@@ -36,9 +36,10 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final id = json['_id']?.toString() ?? json['id']?.toString() ?? '';
     DateTime orderDate = DateTime.now();
-    if (json['date'] != null) {
-      if (json['date'] is String) {
-        orderDate = DateTime.tryParse(json['date'] as String) ?? orderDate;
+    final rawDate = json['orderDate'] ?? json['date'];
+    if (rawDate != null) {
+      if (rawDate is String) {
+        orderDate = DateTime.tryParse(rawDate) ?? orderDate;
       }
     }
     OrderLocation? loc;
@@ -83,11 +84,15 @@ class OrderModel {
           (json['deliveryStaffId'] is Map
               ? (json['deliveryStaffId'] as Map)['phone']?.toString()
               : null),
-      mealSlots: json['mealSlots'] is List ? json['mealSlots'] as List : null,
-      totalAmount: (json['totalAmount'] is num)
-          ? (json['totalAmount'] as num).toDouble()
-          : null,
-      slot: json['slot']?.toString(),
+      mealSlots: json['resolvedItems'] is List
+          ? json['resolvedItems'] as List
+          : (json['mealSlots'] is List ? json['mealSlots'] as List : null),
+      totalAmount: (json['amount'] is num)
+          ? (json['amount'] as num).toDouble()
+          : (json['totalAmount'] is num
+              ? (json['totalAmount'] as num).toDouble()
+              : null),
+      slot: (json['deliverySlot'] ?? json['slot'])?.toString(),
       customerLocation: loc,
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../items/data/item_api.dart';
 import '../../../items/models/item_model.dart';
@@ -87,9 +88,7 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter plan name')),
-      );
+      AppSnackbar.error(context, 'Enter plan name');
       return;
     }
     setState(() => _saving = true);
@@ -101,9 +100,7 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
         await PlanApi.create(body);
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.plan != null ? 'Plan updated' : 'Plan created')),
-        );
+        AppSnackbar.success(context, widget.plan != null ? 'Plan updated' : 'Plan created');
         if (context.mounted) Navigator.of(context).pop(true);
       }
     } catch (e) {

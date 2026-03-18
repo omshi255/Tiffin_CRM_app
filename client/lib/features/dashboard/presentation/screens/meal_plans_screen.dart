@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../plans/data/plan_api.dart';
@@ -53,9 +54,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
               try {
                 await PlanApi.delete(plan.id);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Plan deleted')),
-                  );
+                  AppSnackbar.success(context, 'Plan deleted');
                   _load();
                 }
               } catch (e) {

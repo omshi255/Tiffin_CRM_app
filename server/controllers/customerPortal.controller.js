@@ -238,3 +238,62 @@ export const markNotificationRead = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, "Marked as read", updated));
 });
+
+/**
+ * DELETE /api/v1/customer/me/notifications/:id
+ * Delete a single notification belonging to this customer.
+ */
+export const deleteNotification = asyncHandler(async (req, res) => {
+  const { customerId } = req.user;
+  if (!customerId) throw new ApiError(403, "Customer ID not found in token");
+
+  const { id } = req.params;
+  const deleted = await Notification.findOneAndDelete({
+    _id: id,
+    customerId,
+  }).lean();
+
+  if (!deleted) throw new ApiError(404, "Notification not found");
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Notification deleted", { id: deleted._id }));
+});
+
+/**
+ * DELETE /api/v1/customer/me/notifications/clear-read
+ * Delete all read notifications for this customer.
+ */
+export const clearReadNotifications = asyncHandler(async (req, res) => {
+  const { customerId } = req.user;
+  if (!customerId) throw new ApiError(403, "Customer ID not found in token");
+
+  const result = await Notification.deleteMany({
+    customerId,
+    isRead: true,
+  });
+
+  res.status(200).json(
+    new ApiResponse(200, "Read notifications cleared", {
+      deletedCount: result.deletedCount,
+    })
+  );
+});
+
+/**
+ * PATCH /api/v1/customer/me/notifications/read-all
+ * Mark all notifications as read for this customer.
+ */
+export const markAllNotificationsRead = asyncHandler(async (req, res) => {
+  const { customerId } = req.user;
+  if (!customerId) throw new ApiError(403, "Customer ID not found in token");
+
+  await Notification.updateMany(
+    { customerId },
+    { $set: { isRead: true } }
+  );
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "All notifications marked as read", null));
+});

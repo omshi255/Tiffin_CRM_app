@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../auth/data/auth_api.dart';
 import '../../../auth/models/user_model.dart';
@@ -56,9 +57,7 @@ class _DeliveryProfileScreenState extends State<DeliveryProfileScreen> {
                 fcmToken: _user!.fcmToken,
               )
             : null);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(value ? 'You are active' : 'You are inactive')),
-        );
+        AppSnackbar.success(context, value ? 'You are active' : 'You are inactive');
       }
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);

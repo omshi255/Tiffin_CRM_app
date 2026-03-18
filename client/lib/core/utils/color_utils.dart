@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
+
 final List<Color> _avatarColors = [
-  const Color(0xFF1E3A5F),
-  const Color(0xFF0EA5E9),
-  const Color(0xFF059669),
-  const Color(0xFFD97706),
-  const Color(0xFF6366F1),
-  const Color(0xFFEC4899),
-  const Color(0xFF14B8A6),
-  const Color(0xFFF59E0B),
+  AppColors.primary,
+  AppColors.primaryAccent,
+  AppColors.success,
+  AppColors.warning,
+  AppColors.cookingChipText,
+  AppColors.outForDeliveryChipText,
+  AppColors.primaryAccent,
+  AppColors.pendingChipText,
 ];
 
 Color colorFromName(String name) {
@@ -22,20 +24,21 @@ Color colorFromName(String name) {
 
 Color statusBorderColor(String status) {
   final s = status.toLowerCase();
-  if (s == 'active' || s == 'delivered' || s == 'completed') {
-    return const Color(0xFF059669); // green
-  }
-  if (s == 'processing' || s == 'cooking' || s == 'in_transit' || s == 'to_process') {
-    return const Color(0xFFD97706); // orange
-  }
-  if (s == 'out_for_delivery') {
-    return const Color(0xFF0EA5E9); // blue
-  }
-  if (s == 'expired' || s == 'cancelled' || s == 'overdue' || s == 'failed') {
-    return const Color(0xFFDC2626); // red
-  }
-  if (s == 'pending' || s == 'assigned') {
-    return const Color(0xFF94A3B8); // grey
-  }
-  return const Color(0xFF94A3B8);
+  if (s == 'active' || s == 'delivered' || s == 'completed') return AppColors.success;
+  if (s == 'processing' || s == 'cooking' || s == 'in_transit' || s == 'to_process') return AppColors.cookingChipText;
+  if (s == 'out_for_delivery') return AppColors.outForDeliveryChipText;
+  if (s == 'expired' || s == 'cancelled' || s == 'overdue' || s == 'failed') return AppColors.error;
+  if (s == 'pending' || s == 'assigned') return AppColors.textHint;
+  return AppColors.textHint;
+}
+
+/// Background and text color for status chip
+(Color, Color) statusChipColors(String status) {
+  final s = status.toLowerCase();
+  if (s == 'active' || s == 'delivered' || s == 'completed') return (AppColors.successChipBg, AppColors.successChipText);
+  if (s == 'processing' || s == 'cooking' || s == 'to_process') return (AppColors.cookingChipBg, AppColors.cookingChipText);
+  if (s == 'out_for_delivery' || s == 'in_transit') return (AppColors.outForDeliveryChipBg, AppColors.outForDeliveryChipText);
+  if (s == 'expired' || s == 'cancelled' || s == 'overdue' || s == 'failed') return (AppColors.errorContainer, AppColors.error);
+  if (s == 'pending' || s == 'assigned') return (AppColors.pendingChipBg, AppColors.pendingChipText);
+  return (AppColors.surfaceContainerHighest, AppColors.textSecondary);
 }

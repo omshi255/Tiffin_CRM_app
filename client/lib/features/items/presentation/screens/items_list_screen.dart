@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/bottom_sheet_handle.dart';
 import '../../data/item_api.dart';
@@ -74,9 +75,7 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
               try {
                 await ItemApi.delete(item.id);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Item deleted')),
-                  );
+                  AppSnackbar.success(context, 'Item deleted');
                   _load();
                 }
               } catch (e) {
@@ -420,15 +419,11 @@ class _AddEditItemBottomSheetState extends State<_AddEditItemBottomSheet> {
                   final name = _nameController.text.trim();
                   final price = double.tryParse(_priceController.text.trim());
                   if (name.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Enter name')),
-                    );
+                    AppSnackbar.error(context, 'Enter name');
                     return;
                   }
                   if (price == null || price < 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Enter valid price')),
-                    );
+                    AppSnackbar.error(context, 'Enter valid price');
                     return;
                   }
                   setState(() => _saving = true);

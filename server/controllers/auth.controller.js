@@ -20,6 +20,28 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 
+/**
+ * User object returned on login/refresh — includes vendor business fields from DB
+ * so clients don't treat completed onboarding as "empty name" on every login.
+ */
+const buildAuthUserPayload = (user, role, extra = {}) => {
+  const u = user && typeof user.toObject === "function" ? user.toObject() : user;
+  const id = u._id?.toString?.() ?? String(u._id);
+  const payload = {
+    id,
+    phone: u.phone,
+    name: (u.name || u.ownerName || "").trim(),
+    role,
+    ...extra,
+  };
+  if (role === "vendor") {
+    payload.businessName = (u.businessName || "").trim();
+    payload.ownerName = (u.ownerName || "").trim();
+    payload.address = (u.address || "").trim();
+  }
+  return payload;
+};
+
 const phoneSchema = Joi.string()
   .pattern(/^[6-9]\d{9}$/)
   .required()
@@ -236,14 +258,10 @@ export const resetPasswordController = asyncHandler(async (req, res, next) => {
   const resp = new ApiResponse(200, "Password updated", {
     accessToken,
     refreshToken,
-    user: {
-      id: user._id.toString(),
-      phone: user.phone,
-      name: user.name || "",
-      role,
+    user: buildAuthUserPayload(user, role, {
       ...(staffId && { staffId }),
       ...(customerId && { customerId }),
-    },
+    }),
   });
 
   res.status(resp.statusCode).json({
@@ -362,14 +380,10 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
   const response = new ApiResponse(200, "Login successful", {
     accessToken,
     refreshToken,
-    user: {
-      id: user._id.toString(),
-      phone: user.phone,
-      name: user.name || "",
-      role: user.role,
+    user: buildAuthUserPayload(user, role, {
       ...(staffId && { staffId }),
       ...(customerId && { customerId }),
-    },
+    }),
   });
 
   res.status(response.statusCode).json({
@@ -516,17 +530,17 @@ export const truecallerController = asyncHandler(async (req, res, next) => {
   const response = new ApiResponse(200, "Login successful", {
     accessToken: access,
     refreshToken: refresh,
-    user: {
-      id: user._id.toString(),
-      phone: user.phone,
-      name: user.name || "",
-      role,
+    user: buildAuthUserPayload(user, role, {
       ...(tcStaffId && { staffId: tcStaffId }),
       ...(tcCustomerId && { customerId: tcCustomerId }),
-    },
+    }),
   });
 
-  res.status(response.statusCode).json(response);
+  res.status(response.statusCode).json({
+    success: response.success,
+    message: response.message,
+    data: response.data,
+  });
 });
 
 /**
@@ -591,14 +605,10 @@ export const refreshTokenController = asyncHandler(async (req, res, next) => {
   const response = new ApiResponse(200, "Tokens refreshed", {
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
-    user: {
-      id: user._id.toString(),
-      phone: user.phone,
-      name: user.name || "",
-      role,
+    user: buildAuthUserPayload(user, role, {
       ...(staffId && { staffId }),
       ...(customerId && { customerId }),
-    },
+    }),
   });
 
   res.status(response.statusCode).json({
@@ -631,11 +641,12 @@ export const getMeController = asyncHandler(async (req, res, next) => {
   const response = new ApiResponse(200, "User profile", {
     id: user._id.toString(),
     phone: user.phone,
-    name: user.name || "",
+    name: user.name || user.ownerName || "",
     role: user.role,
     email: user.email,
-    businessName: user.businessName,
-    ownerName: user.ownerName,
+    businessName: user.businessName || "",
+    ownerName: user.ownerName || "",
+    address: user.address || "",
     city: user.city,
     settings: user.settings,
     loginHistory: user.loginHistory || [],
@@ -703,6 +714,7 @@ export const updateMe = asyncHandler(async (req, res) => {
     fcmToken: Joi.string().optional(),
     businessName: Joi.string().trim().optional(),
     ownerName: Joi.string().trim().optional(),
+    name: Joi.string().trim().optional(),
     city: Joi.string().trim().optional(),
     address: Joi.string().trim().optional(),
     email: Joi.string().email().optional(),
@@ -718,6 +730,9 @@ export const updateMe = asyncHandler(async (req, res) => {
   }
 
   const updatePayload = { ...value };
+  if (updatePayload.ownerName && !updatePayload.name) {
+    updatePayload.name = updatePayload.ownerName;
+  }
 
   const user = await User.findByIdAndUpdate(
     req.user.userId,
@@ -727,12 +742,69 @@ export const updateMe = asyncHandler(async (req, res) => {
 
   const response = new ApiResponse(200, "Profile updated", {
     user: {
-      id: user._id,
+      id: user._id.toString(),
       phone: user.phone,
-      businessName: user.businessName,
-      ownerName: user.ownerName,
+      name: user.name || user.ownerName || "",
+      businessName: user.businessName || "",
+      ownerName: user.ownerName || "",
+      address: user.address || "",
       city: user.city,
       fcmToken: user.fcmToken,
+    },
+  });
+
+  res.status(response.statusCode).json(response);
+});
+
+/**
+ * POST /api/v1/auth/vendor/onboarding
+ * Idempotent: updates the same vendor user; safe to call again after completion.
+ */
+export const vendorOnboardingController = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.userId).lean();
+  if (!user) throw new ApiError(404, "User not found");
+  if (user.role !== "vendor") {
+    throw new ApiError(403, "Only vendor accounts can use onboarding");
+  }
+
+  const schema = Joi.object({
+    businessName: Joi.string().trim().min(1).required(),
+    ownerName: Joi.string().trim().min(1).required(),
+    address: Joi.string().trim().min(1).required(),
+  });
+
+  const { error, value } = schema.validate(req.body || {}, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
+  const { businessName, ownerName, address } = value;
+  const updated = await User.findByIdAndUpdate(
+    req.user.userId,
+    {
+      $set: {
+        businessName,
+        ownerName,
+        address,
+        name: ownerName,
+      },
+    },
+    { new: true }
+  ).lean();
+
+  const response = new ApiResponse(200, "Onboarding saved", {
+    profileComplete: true,
+    user: {
+      id: updated._id.toString(),
+      phone: updated.phone,
+      name: updated.name || ownerName,
+      businessName: updated.businessName,
+      ownerName: updated.ownerName,
+      address: updated.address || "",
+      role: "vendor",
     },
   });
 

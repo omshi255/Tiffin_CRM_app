@@ -8,6 +8,7 @@ abstract final class ApiEndpoints {
   static const String resetPassword = '/auth/reset-password';
   static const String logout = '/auth/logout';
   static const String authMe = '/auth/me';
+  static const String vendorOnboarding = '/auth/vendor/onboarding';
   static const String changePassword = '/auth/change-password';
 
   // Customers (vendor/admin)
@@ -28,6 +29,14 @@ abstract final class ApiEndpoints {
   // Notifications (vendor / delivery_staff / admin)
   static const String notifications = '/notifications';
   static String notificationMarkRead(String id) => '/notifications/$id/read';
+  static String notificationById(String id) => '/notifications/$id';
+  static const String notificationsClearRead = '/notifications/clear-read';
+
+  // Customer portal notifications extra endpoints
+  static String customerMeNotificationById(String id) =>
+      '/customer/me/notifications/$id';
+  static const String customerMeNotificationsClearRead =
+      '/customer/me/notifications/clear-read';
 
   // Items
   static const String items = '/items';

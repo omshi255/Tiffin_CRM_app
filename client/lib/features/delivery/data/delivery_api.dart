@@ -9,30 +9,44 @@ abstract final class DeliveryApi {
     final response = await DioClient.instance.get(
       ApiEndpoints.deliveryMyDeliveries,
     );
-    final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => OrderModel.fromJson(e))
-          .toList();
-    }
-    if (data is Map<String, dynamic> && data['orders'] is List) {
-      return (data['orders'] as List)
-          .whereType<Map<String, dynamic>>()
-          .map((e) => OrderModel.fromJson(e))
-          .toList();
+    final raw = response.data;
+    if (raw is Map<String, dynamic>) {
+      final outer = raw['data'];
+      if (outer is Map<String, dynamic>) {
+        final inner = outer['data'];
+        if (inner is List) {
+          return inner
+              .whereType<Map<String, dynamic>>()
+              .map((e) => OrderModel.fromJson(e))
+              .toList();
+        }
+      }
     }
     return [];
   }
 
   static Future<List<OrderModel>> getAllDeliveries() async {
     final response = await DioClient.instance.get(ApiEndpoints.delivery);
-    final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => OrderModel.fromJson(e))
-          .toList();
+    final raw = response.data;
+    if (raw is Map<String, dynamic>) {
+      final outer = raw['data'];
+      if (outer is Map<String, dynamic>) {
+        // double nested: { data: { data: [...] } }
+        final inner = outer['data'];
+        if (inner is List) {
+          return inner
+              .whereType<Map<String, dynamic>>()
+              .map((e) => OrderModel.fromJson(e))
+              .toList();
+        }
+      }
+      // single nested: { data: [...] }
+      if (outer is List) {
+        return outer
+            .whereType<Map<String, dynamic>>()
+            .map((e) => OrderModel.fromJson(e))
+            .toList();
+      }
     }
     return [];
   }

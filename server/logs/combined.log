@@ -1263,3 +1263,8 @@ MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-02.0ytrsll.
 
 
 2026-03-17T15:14:30.363Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T15:35:32.173Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T15:35:49.457Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T15:37:41.532Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T15:39:46.039Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-17T15:46:23.050Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted

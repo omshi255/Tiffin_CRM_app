@@ -6,6 +6,7 @@ import '../../features/auth/presentation/screens/google_login_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/role_selection_screen.dart';
+import '../../features/auth/presentation/screens/app_intro_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/truecaller_screen.dart';
 import '../../features/auth/presentation/screens/vendor_onboarding_screen.dart';
@@ -52,8 +53,13 @@ final class AppRouter {
   static GoRouter get router => _router;
   static final GoRouter _router = GoRouter(
     navigatorKey: _rootKey,
-    initialLocation: AppRoutes.splash,
+    initialLocation: AppRoutes.appIntro,
     routes: <RouteBase>[
+      GoRoute(
+        path: AppRoutes.appIntro,
+        name: 'appIntro',
+        builder: (context, state) => const AppIntroScreen(),
+      ),
       GoRoute(
         path: AppRoutes.splash,
         name: 'splash',

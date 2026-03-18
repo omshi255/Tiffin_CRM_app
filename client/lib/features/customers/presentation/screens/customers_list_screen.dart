@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/color_utils.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
 import '../../../../core/widgets/animated_list_item.dart';
@@ -185,9 +186,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
               try {
                 await CustomerApi.delete(customer.id);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Customer deleted')),
-                  );
+                  AppSnackbar.success(context, 'Customer deleted');
                   _loadCustomers(reset: true);
                 }
               } catch (e) {

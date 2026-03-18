@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../customers/data/customer_api.dart';
 import '../../../payments/data/invoice_api.dart';
@@ -64,9 +65,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 try {
                   final url = await InvoiceApi.share(inv.id);
                   if (ctx.mounted && url.isNotEmpty) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text('Share link: $url')),
-                    );
+                    AppSnackbar.success(ctx, 'Share link: $url');
                   }
                 } catch (e) {
                   if (ctx.mounted) ErrorHandler.show(ctx, e);
@@ -257,9 +256,7 @@ class _GenerateInvoiceSheetState extends State<_GenerateInvoiceSheet> {
 
   Future<void> _generate() async {
     if (_customer == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select a customer')),
-      );
+      AppSnackbar.error(context, 'Select a customer');
       return;
     }
     setState(() => _loading = true);
@@ -270,9 +267,7 @@ class _GenerateInvoiceSheetState extends State<_GenerateInvoiceSheet> {
         billingEnd: _billingEnd,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invoice generated')),
-        );
+        AppSnackbar.success(context, 'Invoice generated');
         widget.onGenerated();
       }
     } catch (e) {

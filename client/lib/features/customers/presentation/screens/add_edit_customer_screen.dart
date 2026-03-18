@@ -3,6 +3,7 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/thin_divider.dart';
 import '../../../../models/customer_model.dart';
@@ -78,9 +79,7 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
             _nameController.text = name;
             final digits = phone.replaceAll(RegExp(r'\D'), '');
             _phoneController.text = digits.length > 10 ? digits.substring(digits.length - 10) : digits;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Contact imported successfully')),
-            );
+            AppSnackbar.success(context, 'Contact imported successfully');
           },
         ),
       );
@@ -116,18 +115,14 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
       }
       if (list.length > 100) list.removeRange(100, list.length);
       if (list.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No contacts with valid phone numbers')),
-        );
+        AppSnackbar.error(context, 'No contacts with valid phone numbers');
         return;
       }
       final result = await CustomerApi.bulkImport(list);
       final imported = result['imported'] as int? ?? 0;
       final skipped = result['skipped'] as int? ?? 0;
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$imported imported, $skipped skipped (duplicates)')),
-        );
+        AppSnackbar.success(context, '$imported imported, $skipped skipped (duplicates)');
         context.pop();
       }
     } catch (e) {
@@ -139,9 +134,7 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
     if (!_formKey.currentState!.validate()) return;
     final phone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
     if (phone.length != 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter 10 digit phone number')),
-      );
+      AppSnackbar.error(context, 'Enter 10 digit phone number');
       return;
     }
     setState(() => _isSaving = true);
@@ -167,9 +160,7 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
         await CustomerApi.create(body);
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget._isEditMode ? 'Customer updated' : 'Customer added')),
-        );
+        AppSnackbar.success(context, widget._isEditMode ? 'Customer updated' : 'Customer added');
         context.pop();
       }
     } catch (e) {

@@ -11,8 +11,10 @@ import {
   truecallerController,
   getMeController,
   changePasswordController,
+  vendorOnboardingController,
 } from "../controllers/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { requireRole } from "../middleware/rbac.middleware.js";
 
 const router = Router();
 
@@ -81,6 +83,12 @@ router.post("/truecaller", truecallerController);
 router.post("/refresh-token", refreshTokenLimiter, refreshTokenController);
 router.post("/logout", authMiddleware, logoutController);
 router.put("/me", authMiddleware, updateMe);
+router.post(
+  "/vendor/onboarding",
+  authMiddleware,
+  requireRole(["vendor"]),
+  vendorOnboardingController
+);
 
 router.get("/me", authMiddleware, getMeController);
 router.put("/change-password", authMiddleware, changePasswordController);

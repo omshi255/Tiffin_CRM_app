@@ -123,5 +123,23 @@ abstract final class CustomerPortalApi {
       ApiEndpoints.customerMeNotificationMarkRead(notificationId),
     );
   }
+
+  static Future<void> deleteNotification(String notificationId) async {
+    await DioClient.instance.delete(
+      ApiEndpoints.customerMeNotificationById(notificationId),
+    );
+  }
+
+  static Future<void> clearReadNotifications() async {
+    await DioClient.instance.delete(
+      ApiEndpoints.customerMeNotificationsClearRead,
+    );
+  }
+
+  static Future<void> markAllNotificationsRead() async {
+    await DioClient.instance.patch(
+      '${ApiEndpoints.customerMeNotifications}/read-all',
+    );
+  }
 }
 

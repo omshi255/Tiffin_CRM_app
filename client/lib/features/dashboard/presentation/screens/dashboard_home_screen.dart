@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/section_header.dart';
@@ -66,17 +68,36 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     if (mounted) setState(() => _ordersCount = ordersCount);
 
     try {
-      final staff = await DeliveryApi.listStaff(page: 1, limit: 50);
-      deliveryCount = staff.length;
+      final response = await DioClient.instance.get(
+        ApiEndpoints.deliveryStaff,
+        queryParameters: {'page': 1, 'limit': 1},
+      );
+      final data = parseData(response);
+      if (data is Map<String, dynamic> && data['total'] is num) {
+        deliveryCount = (data['total'] as num).toInt();
+      } else {
+        final staff = await DeliveryApi.listStaff(page: 1, limit: 500);
+        deliveryCount = staff.length;
+      }
     } catch (_) {
-      deliveryCount = 0;
+      try {
+        final staff = await DeliveryApi.listStaff(page: 1, limit: 500);
+        deliveryCount = staff.length;
+      } catch (_) {
+        deliveryCount = 0;
+      }
     }
     if (mounted) setState(() => _deliveryStaffCount = deliveryCount);
 
     try {
-      final payments = await PaymentApi.list(page: 1, limit: 100);
-      for (final p in payments) {
-        revenue += p.amount;
+      var page = 1;
+      while (page <= 40) {
+        final list = await PaymentApi.list(page: page, limit: 100);
+        for (final p in list) {
+          revenue += p.amount;
+        }
+        if (list.length < 100) break;
+        page++;
       }
     } catch (_) {
       revenue = 0;
@@ -94,8 +115,10 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     final theme = Theme.of(context);
 
     return RefreshIndicator(
+      color: AppColors.primary,
       onRefresh: _loadStats,
       child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -106,13 +129,15 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 20),
 
             const SectionHeader(title: 'Overview'),
             const SizedBox(height: 8),
 
-            if (_loading) _buildShimmer() else _buildStatsGrid(context),
+            if (_loading) _buildShimmer() else _buildStatsGrid(),
 
             const SizedBox(height: 24),
             const SectionHeader(title: 'Quick actions'),
@@ -166,244 +191,175 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   }
 
   Widget _buildShimmer() {
-    return SizedBox(
-      height: 220,
-      child: GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.15,
-        children: List.generate(4, (_) => _ShimmerCard()),
-      ),
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1.35,
+      children: List.generate(4, (_) => const _ShimmerCard()),
     );
   }
 
-  Widget _buildStatsGrid(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxHeight = 220.0;
-        return FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: constraints.maxWidth,
-            height: maxHeight,
-            child: GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.15,
-              children: [
-                _StatCard(
-                  title: 'Total Customers',
-                  value: '$_customersCount',
-                  icon: Icons.people,
-                  accentColor: AppColors.primary,
-                ),
-                _StatCard(
-                  title: "Today's Orders",
-                  value: '$_ordersCount',
-                  icon: Icons.receipt_long,
-                  accentColor: AppColors.secondary,
-                ),
-                _StatCard(
-                  title: 'Delivery Staff',
-                  value: '$_deliveryStaffCount',
-                  icon: Icons.delivery_dining,
-                  accentColor: AppColors.warning,
-                ),
-                _StatCard(
-                  title: 'Revenue (₹)',
-                  value: _revenue.toInt().toString(),
-                  icon: Icons.currency_rupee,
-                  accentColor: AppColors.success,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+  Widget _buildStatsGrid() {
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1.35,
+      children: [
+        _DashboardStatCard(
+          label: 'Total customers',
+          value: _customersCount,
+          isRevenue: false,
+        ),
+        _DashboardStatCard(
+          label: "Today's orders",
+          value: _ordersCount,
+          isRevenue: false,
+        ),
+        _DashboardStatCard(
+          label: 'Delivery staff',
+          value: _deliveryStaffCount,
+          isRevenue: false,
+        ),
+        _DashboardStatCard(
+          label: 'Revenue (₹)',
+          value: _revenue.toInt(),
+          isRevenue: true,
+        ),
+      ],
     );
   }
 }
 
-class _ShimmerCard extends StatefulWidget {
-  @override
-  State<_ShimmerCard> createState() => _ShimmerCardState();
-}
-
-class _ShimmerCardState extends State<_ShimmerCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _opacity;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-    _opacity = Tween<double>(begin: 0.3, end: 0.7).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _ShimmerCard extends StatelessWidget {
+  const _ShimmerCard();
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _opacity,
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainerHigh.withValues(
-              alpha: _opacity.value,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: AppColors.outline.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  width: 48,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: AppColors.outline.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  width: 80,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: AppColors.outline.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ],
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 36,
+            height: 28,
+            decoration: BoxDecoration(
+              color: AppColors.shimmerBase,
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
-        );
-      },
+          const SizedBox(height: 12),
+          Container(
+            width: 72,
+            height: 20,
+            decoration: BoxDecoration(
+              color: AppColors.shimmerBase,
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: 100,
+            height: 14,
+            decoration: BoxDecoration(
+              color: AppColors.shimmerHighlight,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _StatCard extends StatefulWidget {
-  const _StatCard({
-    required this.title,
+class _DashboardStatCard extends StatelessWidget {
+  const _DashboardStatCard({
+    required this.label,
     required this.value,
-    required this.icon,
-    required this.accentColor,
+    required this.isRevenue,
   });
 
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color accentColor;
-
-  @override
-  State<_StatCard> createState() => _StatCardState();
-}
-
-class _StatCardState extends State<_StatCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-
-    _scale = Tween<double>(
-      begin: 0.85,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
-
-    _controller.forward();
-  }
+  final String label;
+  final int value;
+  final bool isRevenue;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final number = double.tryParse(widget.value) ?? 0;
+    final positive = value > 0;
+    final IconData icon;
+    final Color iconColor;
+    if (isRevenue) {
+      icon = positive ? Icons.trending_up_rounded : Icons.trending_down_rounded;
+      iconColor = positive ? AppColors.trendUp : AppColors.trendDown;
+    } else {
+      icon = positive ? Icons.trending_up_rounded : Icons.trending_flat_rounded;
+      iconColor = positive ? AppColors.trendUp : AppColors.textHint;
+    }
 
-    return ScaleTransition(
-      scale: _scale,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.icon, size: 28, color: widget.accentColor),
-              const SizedBox(height: 8),
-              Flexible(
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: number),
-                  duration: const Duration(milliseconds: 900),
-                  builder: (context, value, child) {
-                    return Text(
-                      value.toInt().toString(),
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 4),
-              Flexible(
+              Expanded(
                 child: Text(
-                  widget.title,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                  _formatValue(),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                    height: 1.1,
                   ),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
                 ),
               ),
+              Icon(icon, size: 22, color: iconColor),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
+  }
+
+  String _formatValue() {
+    if (!isRevenue) return value.toString();
+    if (value >= 10000000) return '${(value / 10000000).toStringAsFixed(1)}Cr';
+    if (value >= 100000) return '${(value / 100000).toStringAsFixed(1)}L';
+    if (value >= 10000) return '${(value / 1000).toStringAsFixed(1)}k';
+    return '₹$value';
   }
 }
 
@@ -433,10 +389,13 @@ class _QuickActionTile extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

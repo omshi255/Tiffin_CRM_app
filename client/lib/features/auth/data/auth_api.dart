@@ -123,7 +123,34 @@ abstract final class AuthApi {
     );
     final data = parseData(response);
     if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
+    final nested = data['user'];
+    if (nested is Map<String, dynamic>) {
+      return UserModel.fromJson(nested);
+    }
     return UserModel.fromJson(data);
+  }
+
+  /// Idempotent vendor onboarding (POST). Prefer over PUT /me for first-time setup.
+  static Future<UserModel> submitVendorOnboarding({
+    required String businessName,
+    required String ownerName,
+    required String address,
+  }) async {
+    final response = await DioClient.instance.post(
+      ApiEndpoints.vendorOnboarding,
+      data: {
+        'businessName': businessName,
+        'ownerName': ownerName,
+        'address': address,
+      },
+    );
+    final data = parseData(response);
+    if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
+    final nested = data['user'];
+    if (nested is Map<String, dynamic>) {
+      return UserModel.fromJson(nested);
+    }
+    throw ApiException('Invalid response');
   }
 
   static Future<void> logout() async {

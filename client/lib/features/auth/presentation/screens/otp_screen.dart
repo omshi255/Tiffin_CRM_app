@@ -104,7 +104,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/auth_api.dart';
 import '../../models/user_model.dart';
@@ -195,15 +195,17 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
   Future<void> _navigateAfterLogin(BuildContext context, UserModel user) async {
     final role = user.role;
     if (role == 'vendor') {
-      final needsOnboarding =
-          (user.businessName.isEmpty) && (user.name.isEmpty);
-      final alreadyOnboarded =
-          await SecureStorage.get('vendorOnboarded') == 'true';
-      if (needsOnboarding && !alreadyOnboarded) {
-        if (!context.mounted) return;
+      // Source of truth: GET /auth/me (login payload can omit or stale-fill profile fields).
+      UserModel profile;
+      try {
+        profile = await AuthApi.getProfile();
+      } catch (_) {
+        profile = user;
+      }
+      if (!context.mounted) return;
+      if (!profile.isVendorProfileComplete) {
         context.go(AppRoutes.vendorOnboarding, extra: widget.phone);
       } else {
-        if (!context.mounted) return;
         context.go(AppRoutes.dashboard);
       }
       return;
@@ -225,29 +227,7 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.danger,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                msg,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    AppSnackbar.error(context, msg);
   }
 
   @override

@@ -3,6 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../models/notification_model.dart';
 import '../../data/customer_portal_api.dart';
+import '../../../../core/notifications/notification_badge_service.dart';
 
 class CustomerNotificationsScreen extends StatefulWidget {
   const CustomerNotificationsScreen({super.key});
@@ -35,6 +36,38 @@ class _CustomerNotificationsScreenState extends State<CustomerNotificationsScree
     }
   }
 
+  Future<void> _markAllRead() async {
+    try {
+      await CustomerPortalApi.markAllNotificationsRead();
+      await NotificationBadgeService.refreshNow();
+    } catch (_) {}
+  }
+
+  Future<void> _delete(NotificationModel n) async {
+    try {
+      await CustomerPortalApi.deleteNotification(n.id);
+      if (mounted) {
+        setState(() {
+          _notifications =
+              _notifications.where((e) => e.id != n.id).toList();
+        });
+      }
+      await NotificationBadgeService.refreshNow();
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    }
+  }
+
+  Future<void> _clearRead() async {
+    try {
+      await CustomerPortalApi.clearReadNotifications();
+      await _load();
+      await NotificationBadgeService.refreshNow();
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    }
+  }
+
   Future<void> _markRead(NotificationModel n) async {
     if (n.read) return;
     try {
@@ -52,6 +85,7 @@ class _CustomerNotificationsScreenState extends State<CustomerNotificationsScree
   @override
   void initState() {
     super.initState();
+    _markAllRead();
     _load();
   }
 
@@ -72,6 +106,14 @@ class _CustomerNotificationsScreenState extends State<CustomerNotificationsScree
         title: const Text('Notifications'),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: AppColors.onSurface,
+        actions: [
+          if (_notifications.any((n) => n.read))
+            IconButton(
+              icon: const Icon(Icons.delete_sweep_outlined),
+              tooltip: 'Clear all read',
+              onPressed: _clearRead,
+            ),
+        ],
       ),
       body: _loading && _notifications.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -121,27 +163,40 @@ class _CustomerNotificationsScreenState extends State<CustomerNotificationsScree
                           child: InkWell(
                             onTap: () => _markRead(n),
                             borderRadius: BorderRadius.circular(12),
-                            child: ListTile(
-                              title: Text(
-                                n.title,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight:
-                                      n.read ? FontWeight.normal : FontWeight.w600,
-                                ),
-                              ),
-                              subtitle: Text(
-                                n.body,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              trailing: Text(
-                                _formatTime(n.time),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
+                          child: ListTile(
+                            title: Text(
+                              n.title,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight:
+                                    n.read ? FontWeight.normal : FontWeight.w600,
                               ),
                             ),
+                            subtitle: Text(
+                              n.body,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _formatTime(n.time),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    size: 20,
+                                  ),
+                                  onPressed: () => _delete(n),
+                                  tooltip: 'Delete',
+                                ),
+                              ],
+                            ),
+                          ),
                           ),
                         );
                       },

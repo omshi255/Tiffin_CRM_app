@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../router/app_routes.dart';
 import '../storage/secure_storage.dart';
 import '../theme/app_colors.dart';
+import '../utils/app_snackbar.dart';
+import '../widgets/notification_bell_icon.dart';
 import '../../features/auth/data/auth_api.dart';
 import '../../features/profile/data/profile_api.dart';
 
@@ -16,8 +18,8 @@ class AppDrawer extends StatefulWidget {
 }
 
 class _AppDrawerState extends State<AppDrawer> {
-  static const Color _drawerBackground = Color(0xFFFAFBFC);
-  static const Color _drawerTextSecondary = Color(0xFF6B7280);
+  static final Color _drawerBackground = AppColors.background;
+  static final Color _drawerTextSecondary = AppColors.textSecondary;
 
   String _businessName = '';
   String _ownerName = '';
@@ -90,6 +92,10 @@ class _AppDrawerState extends State<AppDrawer> {
                   _DrawerItem(
                     icon: Icons.notifications_outlined,
                     label: 'Notifications',
+                    leading: const NotificationBellIcon(
+                      onPressed: null,
+                      size: 22,
+                    ),
                     onTap: () {
                       Navigator.of(context).pop();
                       context.push(AppRoutes.notifications);
@@ -194,9 +200,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     label: 'Share TiffinCRM App',
                     onTap: () {
                       Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Share TiffinCRM App')),
-                      );
+                      AppSnackbar.success(context, 'Share TiffinCRM App');
                     },
                   ),
                   _DrawerItem(
@@ -204,9 +208,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     label: 'Rate This App!',
                     onTap: () {
                       Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Rate This App!')),
-                      );
+                      AppSnackbar.success(context, 'Rate This App!');
                     },
                   ),
                   _DrawerItem(
@@ -257,7 +259,16 @@ class _DrawerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
-      color: const Color(0xFFFAFBFC),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary,
+            Color(0xFF3B1578),
+          ],
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -270,7 +281,7 @@ class _DrawerHeader extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -293,7 +304,7 @@ class _DrawerHeader extends StatelessWidget {
                               height: 16,
                               width: 120,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF3F4F6),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             )
@@ -302,8 +313,9 @@ class _DrawerHeader extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF1F2937),
+                                color: Colors.white,
                               ),
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                       const SizedBox(height: 4),
@@ -311,10 +323,11 @@ class _DrawerHeader extends StatelessWidget {
                         ownerName.isNotEmpty
                             ? ownerName
                             : 'Tap to complete profile',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF6B7280),
+                          color: Colors.white.withValues(alpha: 0.85),
                         ),
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -328,10 +341,10 @@ class _DrawerHeader extends StatelessWidget {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.close, size: 18, color: AppColors.primary),
+                  child: const Icon(Icons.close, size: 18, color: Colors.white),
                 ),
               ),
             ],
@@ -347,24 +360,27 @@ class _DrawerHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.radio_button_unchecked,
                     size: 16,
-                    color: Color(0xFF6B7280),
+                    color: Colors.white.withValues(alpha: 0.85),
                   ),
                   const SizedBox(width: 8),
-                  const Flexible(
+                  Flexible(
                     child: Text(
                       'Free Tier • 0/25 Orders Processed Today',
-                      style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right,
                     size: 18,
-                    color: Color(0xFF6B7280),
+                    color: Colors.white.withValues(alpha: 0.85),
                   ),
                 ],
               ),
@@ -381,23 +397,28 @@ class _DrawerItem extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.leading,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF1F2937), size: 22),
+      leading: leading ??
+          Icon(icon, color: AppColors.textPrimary, size: 22),
       title: Text(
         label,
         style: const TextStyle(
           fontSize: 15,
-          color: Color(0xFF1F2937),
+          color: AppColors.textPrimary,
           fontWeight: FontWeight.w500,
         ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
       ),
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),

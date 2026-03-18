@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/color_utils.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/bottom_sheet_handle.dart';
 import '../../../customers/data/customer_api.dart';
@@ -468,15 +469,11 @@ class _AssignSubscriptionSheetState extends State<_AssignSubscriptionSheet> {
 
   Future<void> _submit() async {
     if (_customer == null || _plan == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Select customer and plan')));
+      AppSnackbar.error(context, 'Select customer and plan');
       return;
     }
     if (_deliveryDays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select at least one delivery day')),
-      );
+      AppSnackbar.error(context, 'Select at least one delivery day');
       return;
     }
     setState(() => _loading = true);
@@ -492,9 +489,7 @@ class _AssignSubscriptionSheetState extends State<_AssignSubscriptionSheet> {
           'notes': _notesController.text.trim(),
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Subscription created')));
+        AppSnackbar.success(context, 'Subscription created');
         widget.onCreated();
       }
     } catch (e) {

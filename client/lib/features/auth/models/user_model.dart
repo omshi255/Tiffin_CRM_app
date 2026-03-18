@@ -27,6 +27,10 @@ class UserModel {
   final String fcmToken;
   final bool isActive;
 
+  /// Vendor onboarding is complete when business + owner name exist (matches server onboarding).
+  bool get isVendorProfileComplete =>
+      businessName.trim().isNotEmpty && ownerName.trim().isNotEmpty;
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',

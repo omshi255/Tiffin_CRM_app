@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/delivery_api.dart';
 import '../../models/delivery_staff_model.dart';
@@ -46,9 +47,7 @@ class _AddEditStaffScreenState extends State<AddEditStaffScreen> {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     if (name.isEmpty || phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name and phone required')),
-      );
+      AppSnackbar.error(context, 'Name and phone required');
       return;
     }
     final areasStr = _areasController.text.trim();
@@ -65,9 +64,7 @@ class _AddEditStaffScreenState extends State<AddEditStaffScreen> {
         await DeliveryApi.createStaff(body);
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.staff != null ? 'Updated' : 'Added')),
-        );
+        AppSnackbar.success(context, widget.staff != null ? 'Updated' : 'Added');
         if (context.mounted) Navigator.of(context).pop(true);
       }
     } catch (e) {

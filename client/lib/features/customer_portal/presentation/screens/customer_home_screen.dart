@@ -1,20 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tiffin_crm/features/orders/models/order_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/location_helper.dart';
 import '../../../../core/widgets/section_header.dart';
+import '../../../../core/widgets/notification_bell_icon.dart';
 import '../../../../models/customer_model.dart';
 import '../../data/customer_portal_api.dart';
 import '../../../auth/data/auth_api.dart';
 import '../../../orders/data/order_api.dart';
-import '../../../orders/models/order_model.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -35,10 +37,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: AppColors.onSurface,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+          NotificationBellIcon(
             onPressed: () => context.push(AppRoutes.customerNotifications),
-            tooltip: 'Notifications',
           ),
         ],
       ),
@@ -329,9 +329,7 @@ class _CustomerMyPlanTabState extends State<_CustomerMyPlanTab> {
           .toList();
       await OrderApi.updateQuantities(_todayOrder!.id, quantities);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Changes saved')),
-        );
+        AppSnackbar.success(context, 'Changes saved');
       }
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
@@ -922,9 +920,7 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
       };
       await CustomerPortalApi.updateMyProfile(body);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated')),
-        );
+        AppSnackbar.success(context, 'Profile updated');
       }
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
@@ -935,14 +931,7 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
 
   Future<void> _shareLocation() async {
     final position = await LocationHelper.getCurrentPosition();
-    if (position == null || !mounted) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not get location')),
-        );
-      }
-      return;
-    }
+    if (position == null || !mounted) return;
     try {
       await CustomerPortalApi.updateMyProfile({
         'location': {
@@ -951,9 +940,7 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
         },
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location shared with vendor')),
-        );
+        AppSnackbar.success(context, 'Location shared with vendor');
       }
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);

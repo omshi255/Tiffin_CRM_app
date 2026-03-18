@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/profile_api.dart';
 
@@ -83,9 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'pincode': _pincodeController.text.trim(),
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
-        );
+        AppSnackbar.success(context, 'Profile updated successfully');
         Navigator.of(context).pop();
       }
     } catch (e) {

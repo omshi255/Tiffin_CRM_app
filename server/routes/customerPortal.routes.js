@@ -6,6 +6,9 @@ import {
   getMyOrders,
   getMyNotifications,
   markNotificationRead,
+  deleteNotification,
+  clearReadNotifications,
+  markAllNotificationsRead,
 } from "../controllers/customerPortal.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/rbac.middleware.js";
@@ -21,5 +24,8 @@ router.get("/me/plan", getMyActivePlan);
 router.get("/me/orders", getMyOrders);
 router.get("/me/notifications", getMyNotifications);
 router.patch("/me/notifications/:id/read", markNotificationRead);
+router.delete("/me/notifications/:id", deleteNotification);
+router.delete("/me/notifications/clear-read", clearReadNotifications);
+router.patch("/me/notifications/read-all", markAllNotificationsRead);
 
 export default router;

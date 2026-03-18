@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/notification_bell_icon.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -40,6 +41,7 @@ class SettingsScreen extends StatelessWidget {
           _SettingsTile(
             icon: Icons.notifications_outlined,
             title: 'Notifications',
+            leading: const NotificationBellIcon(onPressed: null, size: 22),
             onTap: () => context.push(AppRoutes.notifications),
           ),
           _SettingsTile(
@@ -97,11 +99,13 @@ class _SettingsTile extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.onTap,
+    this.leading,
   });
 
   final IconData icon;
   final String title;
   final VoidCallback onTap;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +122,8 @@ class _SettingsTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                Icon(icon, size: 22, color: AppColors.primary),
+                leading ??
+                    Icon(icon, size: 22, color: AppColors.primary),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(

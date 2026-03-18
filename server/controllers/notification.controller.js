@@ -85,6 +85,61 @@ export const markNotificationRead = asyncHandler(async (req, res) => {
 });
 
 /**
+ * DELETE /api/v1/notifications/:id
+ * Delete a single notification for the current user/admin.
+ */
+export const deleteNotification = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const filter = { _id: id };
+  if (req.user.role !== "admin") {
+    filter.ownerId = req.user.userId;
+  }
+
+  const deleted = await Notification.findOneAndDelete(filter).lean();
+  if (!deleted) throw new ApiError(404, "Notification not found");
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Notification deleted", { id: deleted._id }));
+});
+
+/**
+ * DELETE /api/v1/notifications/clear-read
+ * Delete all read notifications for the current user/admin.
+ */
+export const clearReadNotifications = asyncHandler(async (req, res) => {
+  const filter = { isRead: true };
+  if (req.user.role !== "admin") {
+    filter.ownerId = req.user.userId;
+  }
+
+  const result = await Notification.deleteMany(filter);
+
+  res.status(200).json(
+    new ApiResponse(200, "Read notifications cleared", {
+      deletedCount: result.deletedCount,
+    })
+  );
+});
+
+/**
+ * PATCH /api/v1/notifications/read-all
+ * Mark all notifications as read for current user/admin.
+ */
+export const markAllNotificationsRead = asyncHandler(async (req, res) => {
+  const filter = {};
+  if (req.user.role !== "admin") {
+    filter.ownerId = req.user.userId;
+  }
+
+  await Notification.updateMany(filter, { $set: { isRead: true } });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "All notifications marked as read", null));
+});
+
+/**
  * POST /api/v1/notifications/test
  * Body: { customerId, type? }
  * Only vendor/admin can send test.

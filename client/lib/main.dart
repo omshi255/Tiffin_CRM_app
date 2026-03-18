@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'app.dart';
 import 'core/router/app_router.dart';
 import 'core/router/app_routes.dart';
+import 'core/notifications/notification_badge_service.dart';
 
 final FlutterLocalNotificationsPlugin _localNotifications =
     FlutterLocalNotificationsPlugin();
@@ -82,6 +83,7 @@ void main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+  await NotificationBadgeService.init();
   runApp(const ProviderScope(child: TiffinCrmApp()));
 }
 

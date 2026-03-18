@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/color_utils.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
 import '../../../../core/widgets/bottom_sheet_handle.dart';
@@ -12,7 +13,10 @@ import '../../../orders/data/order_api.dart';
 import '../../../orders/models/order_model.dart';
 
 class DeliveryScreen extends StatefulWidget {
-  const DeliveryScreen({super.key});
+  const DeliveryScreen({super.key, this.embeddedInShell = false});
+
+  /// When true (e.g. dashboard Orders tab), no duplicate [Scaffold]/[AppBar].
+  final bool embeddedInShell;
 
   @override
   State<DeliveryScreen> createState() => _DeliveryScreenState();
@@ -25,8 +29,20 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   final Set<String> _selectedIds = {};
   bool _bulkMode = false;
 
-  static const List<String> _filterLabels = ['All', 'Pending', 'Cooking', 'On the way', 'Delivered'];
-  static const List<String?> _filterValues = [null, 'pending', 'processing', 'out_for_delivery', 'delivered'];
+  static const List<String> _filterLabels = [
+    'All',
+    'Pending',
+    'Cooking',
+    'On the way',
+    'Delivered',
+  ];
+  static const List<String?> _filterValues = [
+    null,
+    'pending',
+    'processing',
+    'out_for_delivery',
+    'delivered',
+  ];
 
   @override
   void initState() {
@@ -37,7 +53,8 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final list = await OrderApi.getToday();
+      // Fetch all deliveries using the delivery API instead of only today's orders.
+      final list = await DeliveryApi.getAllDeliveries();
       if (mounted) setState(() => _orders = list);
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
@@ -67,9 +84,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
         } catch (_) {}
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Orders generated for today')),
-        );
+        AppSnackbar.success(context, 'Orders generated for today');
         await _load();
       }
     } catch (e) {
@@ -82,9 +97,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
       final dateStr = _todayDateStr();
       await OrderApi.process(date: dateStr);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Orders processed')),
-        );
+        AppSnackbar.success(context, 'Orders processed');
         await _load();
       }
     } catch (e) {
@@ -113,16 +126,17 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
           if (phone != null && phone.isNotEmpty) {
             WhatsAppHelper.openChat(phone);
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No phone number')),
-            );
+            AppSnackbar.error(context, 'No phone number');
           }
         },
       ),
     );
   }
 
-  Future<void> _openAssignSheet(BuildContext sheetContext, List<String> orderIds) async {
+  Future<void> _openAssignSheet(
+    BuildContext sheetContext,
+    List<String> orderIds,
+  ) async {
     List<DeliveryStaffModel> staff = [];
     try {
       staff = await DeliveryApi.listStaff(limit: 50, isActive: true);
@@ -137,8 +151,9 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
         staff: staff,
         orderIds: orderIds,
         onAssigned: () {
-          Navigator.pop(ctx);
-          Navigator.pop(ctx);
+          Navigator.pop(ctx); // close assign sheet
+          if (sheetContext.mounted)
+            Navigator.pop(sheetContext); // close order sheet only if mounted
           _load();
         },
       ),
@@ -162,90 +177,94 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final filtered = _filteredOrders;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daily Deliveries'),
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: AppColors.onSurface,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.playlist_add),
-            tooltip: 'Generate orders',
-            onPressed: _loading ? null : _generate,
-          ),
-          IconButton(
-            icon: const Icon(Icons.check_circle_outline),
-            tooltip: 'Process orders',
-            onPressed: _loading ? null : _process,
-          ),
-          IconButton(
-            icon: Icon(_bulkMode ? Icons.cancel : Icons.checklist),
-            tooltip: _bulkMode ? 'Cancel selection' : 'Bulk assign',
-            onPressed: _toggleBulkMode,
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: List.generate(_filterLabels.length, (i) {
-                final selected = _statusFilter == _filterValues[i];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(_filterLabels[i]),
-                    selected: selected,
-                    onSelected: (_) {
-                      setState(() => _statusFilter = _filterValues[i]);
-                    },
-                  ),
-                );
-              }),
+  Widget _filterChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: List.generate(_filterLabels.length, (i) {
+          final selected = _statusFilter == _filterValues[i];
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(
+                _filterLabels[i],
+                style: TextStyle(
+                  color: selected ? AppColors.onPrimary : AppColors.textPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              selected: selected,
+              selectedColor: AppColors.primary,
+              checkmarkColor: AppColors.onPrimary,
+              onSelected: (_) {
+                setState(() => _statusFilter = _filterValues[i]);
+              },
             ),
-          ),
-        ),
+          );
+        }),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: filtered.isEmpty
-                  ? ListView(
-                      children: [
-                        const SizedBox(height: 48),
-                        Center(
-                          child: Text(
-                            'No orders for today',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: FilledButton.icon(
-                            onPressed: _generate,
-                            icon: const Icon(Icons.add),
-                            label: const Text('Generate today\'s orders'),
-                          ),
-                        ),
-                      ],
-                    )
-                  : ListView.builder(
+    );
+  }
+
+  List<Widget> _appBarActions(Color fg) {
+    return [
+      IconButton(
+        icon: Icon(Icons.playlist_add, color: fg),
+        tooltip: 'Generate orders',
+        onPressed: _loading ? null : _generate,
+      ),
+      IconButton(
+        icon: Icon(Icons.check_circle_outline, color: fg),
+        tooltip: 'Process orders',
+        onPressed: _loading ? null : _process,
+      ),
+      IconButton(
+        icon: Icon(_bulkMode ? Icons.cancel : Icons.checklist, color: fg),
+        tooltip: _bulkMode ? 'Cancel selection' : 'Bulk assign',
+        onPressed: _toggleBulkMode,
+      ),
+    ];
+  }
+
+  Widget _bodyContent(ThemeData theme, List<OrderModel> filtered) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return RefreshIndicator(
+      color: AppColors.primary,
+      onRefresh: _load,
+      child: filtered.isEmpty
+          ? ListView(
+              children: [
+                const SizedBox(height: 48),
+                Center(
+                  child: Text(
+                    'No orders for today',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: FilledButton.icon(
+                    onPressed: _generate,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Generate today\'s orders'),
+                  ),
+                ),
+              ],
+            )
+          : ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final order = filtered[index];
                         final isLast = index == filtered.length - 1;
                         final borderColor = statusBorderColor(order.status);
-                        final selected = _bulkMode && _selectedIds.contains(order.id);
+                        final selected =
+                            _bulkMode && _selectedIds.contains(order.id);
                         return IntrinsicHeight(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -273,8 +292,11 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
                                             ),
                                           ),
                                           child: selected
-                                              ? const Icon(Icons.check,
-                                                  size: 14, color: Colors.white)
+                                              ? const Icon(
+                                                  Icons.check,
+                                                  size: 14,
+                                                  color: Colors.white,
+                                                )
                                               : null,
                                         ),
                                       )
@@ -334,21 +356,30 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
                                       ),
                                       child: ListTile(
                                         title: Text(
-                                          order.customerName ?? order.customerId,
-                                          style: theme.textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                          order.customerName ??
+                                              order.customerId,
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                         subtitle: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             if (order.customerAddress != null &&
-                                                order.customerAddress!.isNotEmpty)
+                                                order
+                                                    .customerAddress!
+                                                    .isNotEmpty)
                                               Text(
                                                 order.customerAddress!,
-                                                style: theme.textTheme.bodySmall?.copyWith(
-                                                  color: AppColors.textSecondary,
-                                                ),
+                                                style: theme.textTheme.bodySmall
+                                                    ?.copyWith(
+                                                      color: AppColors
+                                                          .textSecondary,
+                                                    ),
                                               ),
                                             Text(
                                               order.slot ?? '—',
@@ -362,15 +393,20 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: borderColor.withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(20),
+                                            color: borderColor.withValues(
+                                              alpha: 0.15,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
                                           ),
                                           child: Text(
                                             order.status,
-                                            style: theme.textTheme.labelSmall?.copyWith(
-                                              color: borderColor,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                  color: borderColor,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -383,22 +419,84 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
                         );
                       },
                     ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final filtered = _filteredOrders;
+    final body = _bodyContent(theme, filtered);
+
+    final fab = _bulkMode && _selectedIds.isNotEmpty
+        ? FloatingActionButton.extended(
+            onPressed: () => _openAssignSheet(context, _selectedIds.toList()),
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.onPrimary,
+            icon: const Icon(Icons.person_add),
+            label: Text('Assign (${_selectedIds.length})'),
+          )
+        : FloatingActionButton.extended(
+            onPressed: () => context.push(AppRoutes.maps),
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.onPrimary,
+            icon: const Icon(Icons.map),
+            label: const Text('View Map'),
+          );
+
+    if (widget.embeddedInShell) {
+      return ColoredBox(
+        color: AppColors.background,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 4, 0),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Daily orders',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      ..._appBarActions(AppColors.primary),
+                    ],
+                  ),
+                ),
+                _filterChips(),
+                Expanded(child: body),
+              ],
             ),
-      floatingActionButton: _bulkMode && _selectedIds.isNotEmpty
-          ? FloatingActionButton.extended(
-              onPressed: () => _openAssignSheet(context, _selectedIds.toList()),
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
-              icon: const Icon(Icons.person_add),
-              label: Text('Assign (${_selectedIds.length})'),
-            )
-          : FloatingActionButton.extended(
-              onPressed: () => context.push(AppRoutes.maps),
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
-              icon: const Icon(Icons.map),
-              label: const Text('View Map'),
+            Positioned(
+              right: 12,
+              bottom: 12,
+              child: fab,
             ),
+          ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Daily Deliveries'),
+        actions: _appBarActions(AppColors.onPrimary),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: _filterChips(),
+        ),
+      ),
+      body: body,
+      floatingActionButton: fab,
     );
   }
 }
@@ -420,7 +518,9 @@ class _OrderDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -437,26 +537,36 @@ class _OrderDetailSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 if (order.customerAddress != null)
-                  Text(order.customerAddress!, style: theme.textTheme.bodyMedium),
+                  Text(
+                    order.customerAddress!,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 if (order.slot != null) Text('Slot: ${order.slot}'),
                 Text('Status: ${order.status}'),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: onAssign,
-                  style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                  ),
                   child: const Text('Assign Delivery Boy'),
                 ),
                 const SizedBox(height: 8),
-                const Text('Update status', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text(
+                  'Update status',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
-                  children: ['processing', 'out_for_delivery', 'delivered'].map((s) {
-                    return OutlinedButton(
-                      onPressed: () => onStatusChange(s),
-                      child: Text(s.replaceAll('_', ' ')),
-                    );
-                  }).toList(),
+                  children: ['processing', 'out_for_delivery', 'delivered'].map(
+                    (s) {
+                      return OutlinedButton(
+                        onPressed: () => onStatusChange(s),
+                        child: Text(s.replaceAll('_', ' ')),
+                      );
+                    },
+                  ).toList(),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
@@ -511,27 +621,27 @@ class _AssignStaffSheet extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              ...staff.map((s) => ListTile(
-                    title: Text(s.name),
-                    subtitle: Text(s.phone),
-                    onTap: () async {
-                      try {
-                        if (orderIds.length == 1) {
-                          await OrderApi.assign(orderIds.first, s.id);
-                        } else {
-                          await OrderApi.assignBulk(orderIds, s.id);
-                        }
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Assigned')),
-                          );
-                          onAssigned();
-                        }
-                      } catch (e) {
-                        if (context.mounted) ErrorHandler.show(context, e);
+              ...staff.map(
+                (s) => ListTile(
+                  title: Text(s.name),
+                  subtitle: Text(s.phone),
+                  onTap: () async {
+                    try {
+                      if (orderIds.length == 1) {
+                        await OrderApi.assign(orderIds.first, s.id);
+                      } else {
+                        await OrderApi.assignBulk(orderIds, s.id);
                       }
-                    },
-                  )),
+                      if (context.mounted) {
+                        AppSnackbar.success(context, 'Assigned');
+                        onAssigned();
+                      }
+                    } catch (e) {
+                      if (context.mounted) ErrorHandler.show(context, e);
+                    }
+                  },
+                ),
+              ),
             ],
           ),
         ),

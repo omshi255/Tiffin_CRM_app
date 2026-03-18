@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../customers/data/customer_api.dart';
@@ -10,7 +11,9 @@ import '../../../payments/models/payment_model.dart';
 import '../../../../models/customer_model.dart';
 
 class PaymentsScreen extends StatefulWidget {
-  const PaymentsScreen({super.key});
+  const PaymentsScreen({super.key, this.embeddedInShell = false});
+
+  final bool embeddedInShell;
 
   @override
   State<PaymentsScreen> createState() => _PaymentsScreenState();
@@ -68,16 +71,12 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
 
   Future<void> _recordPayment() async {
     if (_selectedCustomer == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Select a customer')));
+      AppSnackbar.error(context, 'Select a customer');
       return;
     }
     final amount = double.tryParse(_amountController.text.trim());
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Enter a valid amount')));
+      AppSnackbar.error(context, 'Enter a valid amount');
       return;
     }
     setState(() => _saving = true);
@@ -88,9 +87,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
         'paymentMethod': _mode,
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Payment recorded')));
+        AppSnackbar.success(context, 'Payment recorded');
         _amountController.clear();
         setState(() => _selectedCustomer = null);
         _load();
@@ -106,21 +103,16 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Payments'),
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: AppColors.onSurface,
-      ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+    final scrollBody = _loading
+        ? const Center(child: CircularProgressIndicator())
+        : RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: _load,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                     // Collect Payment Card
                     Card(
                       child: Padding(
@@ -164,9 +156,18 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                               spacing: 8,
                               children: ['cash', 'upi', 'card', 'bank_transfer']
                                   .map((m) {
+                                    final sel = _mode == m;
                                     return ChoiceChip(
-                                      label: Text(m.replaceAll('_', ' ')),
-                                      selected: _mode == m,
+                                      label: Text(
+                                        m.replaceAll('_', ' '),
+                                        style: TextStyle(
+                                          color: sel
+                                              ? AppColors.onPrimary
+                                              : AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      selected: sel,
+                                      selectedColor: AppColors.primary,
                                       onSelected: (_) =>
                                           setState(() => _mode = m),
                                     );
@@ -293,7 +294,34 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                   ],
                 ),
               ),
+            );
+
+    if (widget.embeddedInShell) {
+      return ColoredBox(
+        color: AppColors.background,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 12, 20, 4),
+              child: Text(
+                'Finance & payments',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
             ),
+            Expanded(child: scrollBody),
+          ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Payments')),
+      body: scrollBody,
     );
   }
 }
