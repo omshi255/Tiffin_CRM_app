@@ -648,6 +648,7 @@ export const getMeController = asyncHandler(async (req, res, next) => {
     ownerName: user.ownerName || "",
     address: user.address || "",
     city: user.city,
+    fcmToken: user.fcmToken,
     settings: user.settings,
     loginHistory: user.loginHistory || [],
   });

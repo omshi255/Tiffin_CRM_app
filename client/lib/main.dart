@@ -10,6 +10,9 @@ import 'app.dart';
 import 'core/router/app_router.dart';
 import 'core/router/app_routes.dart';
 import 'core/notifications/notification_badge_service.dart';
+import 'core/storage/secure_storage.dart';
+import 'features/auth/data/auth_api.dart';
+import 'features/customer_portal/data/customer_portal_api.dart';
 
 final FlutterLocalNotificationsPlugin _localNotifications =
     FlutterLocalNotificationsPlugin();
@@ -95,6 +98,36 @@ Future<void> _setupFcm() async {
       sound: true,
     );
   } catch (_) {}
+
+  Future<void> syncToken(String token) async {
+    if (token.isEmpty) return;
+    try {
+      final role = await SecureStorage.getUserRole();
+      if (role == 'customer') {
+        await CustomerPortalApi.updateMyProfile({'fcmToken': token});
+      } else if (role != null && role.isNotEmpty) {
+        await AuthApi.updateProfile({'fcmToken': token});
+      }
+    } catch (_) {}
+  }
+
+  // Best-effort initial sync on app start (getToken can be null initially).
+  for (var i = 0; i < 3; i++) {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null && token.isNotEmpty) {
+        await syncToken(token);
+        break;
+      }
+    } catch (_) {}
+    await Future<void>.delayed(const Duration(seconds: 1));
+  }
+
+  // Keep token in sync (FCM can rotate tokens).
+  FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+    await syncToken(token);
+  });
+
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     _showForegroundNotification(message);
   });

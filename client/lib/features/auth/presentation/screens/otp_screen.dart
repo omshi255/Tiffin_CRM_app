@@ -108,6 +108,7 @@ import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/auth_api.dart';
 import '../../models/user_model.dart';
+import '../../../customer_portal/data/customer_portal_api.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key, required this.phone, this.selectedRole = 'vendor'});
@@ -150,11 +151,15 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _updateFcmToken() async {
+  Future<void> _updateFcmToken(String role) async {
     try {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null && token.isNotEmpty) {
-        await AuthApi.updateProfile({'fcmToken': token});
+        if (role == 'customer') {
+          await CustomerPortalApi.updateMyProfile({'fcmToken': token});
+        } else {
+          await AuthApi.updateProfile({'fcmToken': token});
+        }
       }
     } catch (_) {}
   }
@@ -178,7 +183,7 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
       await SecureStorage.saveUserRole(role);
       await SecureStorage.saveUserId(user.id);
 
-      await _updateFcmToken();
+      await _updateFcmToken(role);
 
       if (!mounted) return;
       setState(() => _isVerifying = false);
