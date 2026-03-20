@@ -6,17 +6,38 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/location_helper.dart';
-import '../../../../core/widgets/section_header.dart';
+// ignore: unused_import
 import '../../../../core/widgets/notification_bell_icon.dart';
 import '../../../../models/customer_model.dart';
 import '../../data/customer_portal_api.dart';
+import '../../../dashboard/data/notification_api.dart';
 import '../../../auth/data/auth_api.dart';
 import '../../../orders/data/order_api.dart';
+
+// ── iMeals Green + Violet palette ────────────────────────────────────────────
+const _green900 = Color(0xFF064E3B);
+const _green700 = Color(0xFF065F46);
+const _green600 = Color(0xFF059669);
+const _green200 = Color(0xFFA7F3D0);
+const _green100 = Color(0xFFD1FAE5);
+const _green50 = Color(0xFFF0FDF4);
+const _violet700 = Color(0xFF4C2DB8);
+const _violet600 = Color(0xFF5B35D5);
+const _violet100 = Color(0xFFEDE8FD);
+const _violet50 = Color(0xFFF5F2FF);
+const _bg = Color(0xFFF9FFFE);
+const _surface = Color(0xFFFFFFFF);
+const _border = Color(0xFFD1FAE5);
+const _divider = Color(0xFFE8FDF5);
+const _text1 = Color(0xFF111827);
+const _text2 = Color(0xFF6B7280);
+const _warning = Color(0xFFBA7517);
+const _warnSoft = Color(0xFFFAEEDA);
+const _danger = Color(0xFFD93025);
+const _dangerSoft = Color(0xFFFCECEB);
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -27,52 +48,256 @@ class CustomerHomeScreen extends StatefulWidget {
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   int _selectedIndex = 0;
+  int _unreadCount = 0;
+
+  static const _tabs = [
+    _CustomerHomeTab(),
+    _CustomerMyPlanTab(),
+    _CustomerOrdersTab(),
+    _CustomerWalletTab(),
+    _CustomerProfileTab(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final res = await NotificationApi.getMyNotifications();
+      final list = (res['notifications'] as List?) ?? [];
+      final unread = list.where((n) => n is Map && n['read'] == false).length;
+      if (mounted) setState(() => _unreadCount = unread);
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: _bg,
       appBar: AppBar(
-        title: const Text('iMeals'),
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: AppColors.onSurface,
+        backgroundColor: _surface,
+        foregroundColor: _text1,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: _green100,
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(color: _border),
+              ),
+              child: const Center(
+                child: Text(
+                  'iM',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: _green700,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'myMeals',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: _text1,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
         actions: [
-          NotificationBellIcon(
-            onPressed: () => context.push(AppRoutes.customerNotifications),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: GestureDetector(
+              onTap: () async {
+                await context.push(AppRoutes.customerNotifications);
+                if (mounted) _loadUnreadCount();
+              },
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: _green50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: _border),
+                    ),
+                    child: const Icon(
+                      Icons.notifications_outlined,
+                      size: 20,
+                      color: _green700,
+                    ),
+                  ),
+                  if (_unreadCount > 0)
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD93025),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                        child: Text(
+                          _unreadCount > 9 ? '9+' : '$_unreadCount',
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: _border),
+        ),
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: const [
-          _CustomerHomeTab(),
-          _CustomerMyPlanTab(),
-          _CustomerOrdersTab(),
-          _CustomerWalletTab(),
-          _CustomerProfileTab(),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.onSurfaceVariant,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu_outlined), label: 'My Plan'),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long_outlined), label: 'Orders'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), label: 'Wallet'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-        ],
+      body: IndexedStack(index: _selectedIndex, children: _tabs),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: _surface,
+          border: Border(top: BorderSide(color: _border, width: 1)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                _NavItem(
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: 'Home',
+                  index: 0,
+                  selected: _selectedIndex == 0,
+                  onTap: () => setState(() => _selectedIndex = 0),
+                ),
+                _NavItem(
+                  icon: Icons.restaurant_menu_outlined,
+                  activeIcon: Icons.restaurant_menu_rounded,
+                  label: 'My Plan',
+                  index: 1,
+                  selected: _selectedIndex == 1,
+                  onTap: () => setState(() => _selectedIndex = 1),
+                ),
+                _NavItem(
+                  icon: Icons.receipt_long_outlined,
+                  activeIcon: Icons.receipt_long_rounded,
+                  label: 'Orders',
+                  index: 2,
+                  selected: _selectedIndex == 2,
+                  onTap: () => setState(() => _selectedIndex = 2),
+                ),
+                _NavItem(
+                  icon: Icons.account_balance_wallet_outlined,
+                  activeIcon: Icons.account_balance_wallet_rounded,
+                  label: 'Wallet',
+                  index: 3,
+                  selected: _selectedIndex == 3,
+                  onTap: () => setState(() => _selectedIndex = 3),
+                ),
+                _NavItem(
+                  icon: Icons.person_outline_rounded,
+                  activeIcon: Icons.person_rounded,
+                  label: 'Profile',
+                  index: 4,
+                  selected: _selectedIndex == 4,
+                  onTap: () => setState(() => _selectedIndex = 4),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Custom Nav Item
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.index,
+    required this.selected,
+    required this.onTap,
+  });
+  final IconData icon, activeIcon;
+  final String label;
+  final int index;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            width: 36,
+            height: 30,
+            decoration: BoxDecoration(
+              color: selected ? _violet100 : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              selected ? activeIcon : icon,
+              size: 19,
+              color: selected ? _violet600 : _text2,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              color: selected ? _violet600 : _text2,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Home Tab
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _CustomerHomeTab extends StatefulWidget {
   const _CustomerHomeTab();
-
   @override
   State<_CustomerHomeTab> createState() => _CustomerHomeTabState();
 }
@@ -103,12 +328,11 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
     try {
       final order = await CustomerPortalApi.getTodayOrder();
       final profile = await CustomerPortalApi.getMyProfile();
-      if (mounted) {
+      if (mounted)
         setState(() {
           _todayOrder = order;
           _profile = profile;
         });
-      }
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
@@ -118,146 +342,198 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
 
   static String _statusLabel(String status) {
     final s = status.toLowerCase();
-    if (s == 'processing' || s == 'cooking' || s == 'to_process') return 'Cooking';
+    if (s == 'processing' || s == 'cooking' || s == 'to_process')
+      return 'Cooking';
     if (s == 'out_for_delivery' || s == 'in_transit') return 'On the way';
     if (s == 'delivered') return 'Delivered';
     return status;
   }
 
+  static (Color, Color) _statusColors(String status) {
+    final s = status.toLowerCase();
+    if (s == 'delivered') return (_violet600, _violet50);
+    if (s == 'out_for_delivery' || s == 'in_transit')
+      return (_violet600, _violet50);
+    if (s == 'processing' || s == 'cooking') return (_warning, _warnSoft);
+    return (_text2, _divider);
+  }
+
+  // ── 30-day daily thoughts ────────────────────────────────────────────────
+  static const _dailyThoughts = [
+    (Icons.restaurant_rounded, 'Your taste is our responsibility'),
+    (Icons.local_fire_department_rounded, 'Fresh, hot, delivered with love'),
+    (Icons.favorite_outline_rounded, 'Eat well, live well, feel well'),
+    (Icons.eco_rounded, 'Real food. Real ingredients. Real care'),
+    (Icons.star_outline_rounded, 'Every meal crafted with purpose'),
+    (Icons.lunch_dining_rounded, 'Good food is the foundation of happiness'),
+    (Icons.timer_outlined, 'On time, every time — your tiffin awaits'),
+    (Icons.spa_outlined, 'Nourish your body, fuel your day'),
+    (Icons.rice_bowl_outlined, 'Homestyle food, delivered to your door'),
+    (Icons.emoji_food_beverage_outlined, 'Taste the warmth in every bite'),
+    (Icons.local_dining_rounded, 'Made with care, served with heart'),
+    (Icons.health_and_safety_outlined, 'Wholesome meals for a wholesome you'),
+    (Icons.access_time_rounded, 'Skip the kitchen, not the nutrition'),
+    (Icons.thumb_up_outlined, 'Quality you can taste, service you can trust'),
+    (Icons.people_outline_rounded, 'Feeding families, one tiffin at a time'),
+    (Icons.kitchen_rounded, 'Just like home, only better'),
+    (Icons.water_drop_outlined, 'Freshness guaranteed in every container'),
+    (Icons.light_mode_outlined, 'Start your day right with a perfect meal'),
+    (Icons.nights_stay_outlined, 'End your day with a satisfying dinner'),
+    (Icons.breakfast_dining_rounded, 'Morning fuel prepared just for you'),
+    (Icons.volunteer_activism_outlined, 'Every meal is a promise we keep'),
+    (Icons.verified_outlined, 'Consistency is our secret ingredient'),
+    (Icons.local_shipping_outlined, 'From our kitchen to your doorstep'),
+    (Icons.forest_outlined, 'Natural ingredients, authentic flavors'),
+    (Icons.groups_outlined, 'Connecting people through great food'),
+    (Icons.wb_sunny_outlined, 'Sunshine on a plate, every single day'),
+    (Icons.bolt_outlined, 'Power your day with the right nutrition'),
+    (Icons.celebration_outlined, 'Every meal is worth celebrating'),
+    (Icons.diversity_3_outlined, 'Diverse flavors, one great service'),
+    (Icons.workspace_premium_outlined, 'Premium taste, everyday pricing'),
+  ];
+
+  (IconData, String) get _todaysThought {
+    final idx = DateTime.now().day % _dailyThoughts.length;
+    return _dailyThoughts[idx];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     if (_loading && _todayOrder == null && _profile == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(color: _green600));
     }
     final balance = _profile?.balance ?? 0.0;
     final lowBalance = balance < 100;
+    final firstName = (_profile?.name ?? 'there').split(' ').first;
+    final (thoughtIcon, thoughtText) = _todaysThought;
 
     return RefreshIndicator(
+      color: _green600,
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
         children: [
-          Text(
-            'Hello, ${_profile?.name ?? 'there'}! 👋',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 20),
-          const SectionHeader(title: "Today's meal"),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: _todayOrder == null
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'No order for today',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Your tiffin will appear here once generated.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _todayOrder!.slot ?? 'Today\'s meal',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                _statusLabel(_todayOrder!.status),
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+          // ── Greeting ──────────────────────────────────────────────────────
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hello, $firstName!',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: _text1,
+                      ),
                     ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          const SectionHeader(title: 'Wallet'),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Icon(Icons.account_balance_wallet_outlined,
-                      size: 32, color: AppColors.primary),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Balance',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      Text(
-                        '₹${balance.toStringAsFixed(0)}',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
+                    const SizedBox(height: 2),
+                    const Text(
+                      "Here's your tiffin update",
+                      style: TextStyle(fontSize: 13, color: _text2),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: _green100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _border),
+                ),
+                child: Center(
+                  child: Text(
+                    (_profile?.name ?? '?')[0].toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: _green700,
+                    ),
                   ),
-                ],
+                ),
               ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // ── Daily thought card ────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: _violet50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _violet100),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _violet100,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _violet100),
+                  ),
+                  child: Icon(thoughtIcon, size: 18, color: _violet600),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    thoughtText,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: _violet700,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+
+          const SizedBox(height: 18),
+
+          // ── Today's meal card ─────────────────────────────────────────────
+          _sectionLabel("Today's Meal"),
+          const SizedBox(height: 8),
+          _todayOrder == null ? _emptyMealCard() : _mealCard(_todayOrder!),
+
+          const SizedBox(height: 20),
+
+          // ── Wallet card ───────────────────────────────────────────────────
+          _sectionLabel('Wallet'),
+          const SizedBox(height: 8),
+          _walletCard(balance),
+
+          // ── Low balance warning ───────────────────────────────────────────
           if (lowBalance && balance >= 0) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.5)),
+                color: _warnSoft,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _warning.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded,
-                      color: AppColors.warning, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: _warning,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
                     child: Text(
                       'Low balance. Top up to avoid service interruption.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.warning,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _warning,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -270,11 +546,216 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
       ),
     );
   }
+
+  Widget _mealCard(OrderModel order) {
+    final (statusColor, statusBg) = _statusColors(order.status);
+    return Container(
+      decoration: BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _border),
+        boxShadow: [
+          BoxShadow(
+            color: _green900.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 3,
+            decoration: const BoxDecoration(
+              color: _green600,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: _green100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.lunch_dining_rounded,
+                    size: 22,
+                    color: _green700,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.slot ?? "Today's meal",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: _text1,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusBg,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: statusColor.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          _statusLabel(order.status),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: statusColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _emptyMealCard() => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: _surface,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: _border),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: _green50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _border),
+          ),
+          child: const Icon(
+            Icons.lunch_dining_outlined,
+            size: 22,
+            color: _text2,
+          ),
+        ),
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'No order for today',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _text1,
+                ),
+              ),
+              SizedBox(height: 2),
+              Text(
+                'Your tiffin will appear here once generated.',
+                style: TextStyle(fontSize: 12, color: _text2),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _walletCard(double balance) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: _surface,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: _border),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: _violet100,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.account_balance_wallet_rounded,
+            size: 22,
+            color: _violet600,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Rs.${balance.toStringAsFixed(0)}',
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: _violet700,
+              ),
+            ),
+            const Text(
+              'Available balance',
+              style: TextStyle(fontSize: 12, color: _text2),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  Widget _sectionLabel(String text) => Row(
+    children: [
+      Container(
+        width: 3,
+        height: 13,
+        decoration: BoxDecoration(
+          color: _green600,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      const SizedBox(width: 7),
+      Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: _text2,
+          letterSpacing: 1.1,
+        ),
+      ),
+    ],
+  );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// My Plan Tab
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _CustomerMyPlanTab extends StatefulWidget {
   const _CustomerMyPlanTab();
-
   @override
   State<_CustomerMyPlanTab> createState() => _CustomerMyPlanTabState();
 }
@@ -315,7 +796,9 @@ class _CustomerMyPlanTabState extends State<_CustomerMyPlanTab> {
       final itemId = e['itemId']?.toString() ?? e['_id']?.toString() ?? '';
       final name = e['name']?.toString() ?? e['itemName']?.toString() ?? 'Item';
       final q = (e['quantity'] is num) ? (e['quantity'] as num).toInt() : 1;
-      list.add(_PlanItemRow(itemId: itemId, name: name, quantity: q.clamp(1, 999)));
+      list.add(
+        _PlanItemRow(itemId: itemId, name: name, quantity: q.clamp(1, 999)),
+      );
     }
     return list;
   }
@@ -328,9 +811,7 @@ class _CustomerMyPlanTabState extends State<_CustomerMyPlanTab> {
           .map((e) => {'itemId': e.itemId, 'quantity': e.quantity})
           .toList();
       await OrderApi.updateQuantities(_todayOrder!.id, quantities);
-      if (mounted) {
-        AppSnackbar.success(context, 'Changes saved');
-      }
+      if (mounted) AppSnackbar.success(context, 'Changes saved');
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
@@ -340,22 +821,40 @@ class _CustomerMyPlanTabState extends State<_CustomerMyPlanTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(color: _green600));
     }
     if (_todayOrder == null) {
       return Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.restaurant_menu_outlined, size: 64, color: AppColors.onSurfaceVariant),
-            const SizedBox(height: 16),
-            Text(
-              'No order for today',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: AppColors.textSecondary,
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: _green100,
+                borderRadius: BorderRadius.circular(18),
               ),
+              child: const Icon(
+                Icons.restaurant_menu_outlined,
+                size: 32,
+                color: _green700,
+              ),
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'No order for today',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: _text1,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Your plan will appear here',
+              style: TextStyle(fontSize: 13, color: _text2),
             ),
           ],
         ),
@@ -365,47 +864,101 @@ class _CustomerMyPlanTabState extends State<_CustomerMyPlanTab> {
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
             children: [
-              const SectionHeader(title: 'Your plan'),
-              const SizedBox(height: 8),
-              Text(
+              _sectionLabel('Your Plan'),
+              const SizedBox(height: 4),
+              const Text(
                 'Adjust quantities (min 1). Tap Save to apply.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                style: TextStyle(fontSize: 12, color: _text2),
+              ),
+              const SizedBox(height: 14),
+              ..._items.map(
+                (item) => _PlanItemStepper(
+                  item: item,
+                  onChanged: () => setState(() {}),
                 ),
               ),
-              const SizedBox(height: 16),
-              ..._items.map((item) => _PlanItemStepper(
-                    item: item,
-                    onChanged: () => setState(() {}),
-                  )),
             ],
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
           child: SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: _saving ? null : _save,
-              style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
-              child: _saving
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+            height: 50,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [_violet700, _violet600],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(13),
+                boxShadow: [
+                  BoxShadow(
+                    color: _violet600.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: _saving ? null : _save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                ),
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    )
-                  : const Text('Save Changes'),
+              ),
             ),
           ),
         ),
       ],
     );
   }
+
+  Widget _sectionLabel(String text) => Row(
+    children: [
+      Container(
+        width: 3,
+        height: 13,
+        decoration: BoxDecoration(
+          color: _green600,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      const SizedBox(width: 7),
+      Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: _text2,
+          letterSpacing: 1.1,
+        ),
+      ),
+    ],
+  );
 }
 
 class _PlanItemRow {
@@ -420,67 +973,107 @@ class _PlanItemRow {
 }
 
 class _PlanItemStepper extends StatelessWidget {
-  const _PlanItemStepper({
-    required this.item,
-    required this.onChanged,
-  });
+  const _PlanItemStepper({required this.item, required this.onChanged});
   final _PlanItemRow item;
   final VoidCallback onChanged;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                item.name,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    decoration: BoxDecoration(
+      color: _surface,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: _border),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            item.name,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _text1,
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove_circle_outline),
-                  onPressed: item.quantity <= 1
-                      ? null
-                      : () {
-                          item.quantity--;
-                          onChanged();
-                        },
-                ),
-                Text(
-                  '${item.quantity}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: _green50,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: _border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: item.quantity <= 1
+                    ? null
+                    : () {
+                        item.quantity--;
+                        onChanged();
+                      },
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: item.quantity <= 1 ? Colors.transparent : _green100,
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(
+                    Icons.remove_rounded,
+                    size: 16,
+                    color: item.quantity <= 1 ? _text2 : _green700,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () {
-                    item.quantity++;
-                    onChanged();
-                  },
+              ),
+              SizedBox(
+                width: 28,
+                child: Center(
+                  child: Text(
+                    '${item.quantity}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: _text1,
+                    ),
+                  ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              GestureDetector(
+                onTap: () {
+                  item.quantity++;
+                  onChanged();
+                },
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: _violet100,
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: const Icon(
+                    Icons.add_rounded,
+                    size: 16,
+                    color: _violet600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Orders Tab
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _CustomerOrdersTab extends StatefulWidget {
   const _CustomerOrdersTab();
-
   @override
   State<_CustomerOrdersTab> createState() => _CustomerOrdersTabState();
 }
@@ -541,76 +1134,197 @@ class _CustomerOrdersTabState extends State<_CustomerOrdersTab> {
   void _showOrderStatusSheet(OrderModel o) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) => _OrderStatusSheet(order: o),
     );
   }
 
+  static (Color, Color, String) _statusMeta(String status) {
+    final s = status.toLowerCase();
+    if (s == 'delivered') return (_violet600, _violet50, 'Delivered');
+    if (s == 'out_for_delivery' || s == 'in_transit')
+      return (_violet600, _violet50, 'On the way');
+    if (s == 'processing' || s == 'cooking')
+      return (_warning, _warnSoft, 'Cooking');
+    return (_text2, _divider, status);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Column(
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: List.generate(_statusLabels.length, (i) {
-              final selected = _statusFilter == _statusValues[i];
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(_statusLabels[i]),
-                  selected: selected,
-                  onSelected: (_) {
-                    setState(() => _statusFilter = _statusValues[i]);
-                    _load();
-                  },
-                ),
-              );
-            }),
+        // Filter chips
+        Container(
+          color: _surface,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            child: Row(
+              children: List.generate(_statusLabels.length, (i) {
+                final sel = _statusFilter == _statusValues[i];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() => _statusFilter = _statusValues[i]);
+                      _load();
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: sel ? _green700 : _green50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: sel ? _green700 : _border),
+                      ),
+                      child: Text(
+                        _statusLabels[i],
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: sel ? Colors.white : _text2,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
           ),
         ),
         Expanded(
           child: _loading && _orders.isEmpty
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator(color: _green600))
               : RefreshIndicator(
+                  color: _green600,
                   onRefresh: _load,
                   child: _orders.isEmpty
                       ? ListView(
                           children: [
-                            const SizedBox(height: 48),
+                            const SizedBox(height: 80),
                             Center(
-                              child: Text(
-                                'No orders yet',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 64,
+                                    height: 64,
+                                    decoration: BoxDecoration(
+                                      color: _green100,
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    child: const Icon(
+                                      Icons.receipt_long_outlined,
+                                      size: 32,
+                                      color: _green700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 14),
+                                  const Text(
+                                    'No orders yet',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: _text1,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
                           itemCount: _orders.length,
-                          itemBuilder: (context, index) {
-                            final o = _orders[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: ListTile(
-                                title: Text(
-                                  o.slot ?? 'Daily tiffin',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  '${o.date.day}/${o.date.month}/${o.date.year} • ${o.status}',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
+                          itemBuilder: (ctx, i) {
+                            final o = _orders[i];
+                            final (sc, sb, sl) = _statusMeta(o.status);
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: InkWell(
                                 onTap: () => _showOrderStatusSheet(o),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: _surface,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: _border),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: _green100,
+                                          borderRadius: BorderRadius.circular(
+                                            11,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.lunch_dining_outlined,
+                                          size: 20,
+                                          color: _green700,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              o.slot ?? 'Daily tiffin',
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                                color: _text1,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '${o.date.day.toString().padLeft(2, '0')}/'
+                                              '${o.date.month.toString().padLeft(2, '0')}/'
+                                              '${o.date.year}',
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: _text2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 9,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: sb,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: sc.withValues(alpha: 0.3),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          sl,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: sc,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             );
                           },
@@ -632,128 +1346,234 @@ class _OrderStatusSheet extends StatelessWidget {
     'On the Way',
     'Delivered',
   ];
+  static const List<IconData> _icons = [
+    Icons.shopping_bag_outlined,
+    Icons.restaurant_outlined,
+    Icons.delivery_dining_rounded,
+    Icons.check_circle_outline_rounded,
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final status = order.status.toLowerCase();
     int currentStep = 1;
-    if (status == 'pending' || status == 'assigned') {
+    if (status == 'pending' || status == 'assigned')
       currentStep = 1;
-    } else if (status == 'processing' || status == 'cooking' || status == 'to_process') {
+    else if (status == 'processing' ||
+        status == 'cooking' ||
+        status == 'to_process')
       currentStep = 2;
-    } else if (status == 'out_for_delivery' || status == 'in_transit') {
+    else if (status == 'out_for_delivery' || status == 'in_transit')
       currentStep = 3;
-    } else if (status == 'delivered') {
+    else if (status == 'delivered')
       currentStep = 4;
-    }
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
+    return Container(
+      decoration: const BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 28,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
             children: [
-              Text(
-                'Order status',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: _green100,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: const Icon(
+                  Icons.receipt_long_rounded,
+                  size: 20,
+                  color: _green700,
                 ),
               ),
-              const SizedBox(height: 24),
-              ...List.generate(4, (i) {
-                final done = (i + 1) <= currentStep;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: done ? AppColors.success : AppColors.outline,
-                        ),
-                        child: done
-                            ? const Icon(Icons.check, size: 18, color: Colors.white)
-                            : null,
+              const SizedBox(width: 12),
+              const Text(
+                'Order Status',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: _text1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ...List.generate(4, (i) {
+            final done = (i + 1) <= currentStep;
+            final active = (i + 1) == currentStep;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: done ? _green600 : _green50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: done ? _green600 : _border,
+                        width: active ? 2 : 1,
                       ),
-                      const SizedBox(width: 12),
-                      Text(
-                        _steps[i],
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: done ? FontWeight.w600 : FontWeight.w400,
-                          color: done ? AppColors.textPrimary : AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                    ),
+                    child: Icon(
+                      done ? Icons.check_rounded : _icons[i],
+                      size: 17,
+                      color: done ? Colors.white : _text2,
+                    ),
                   ),
-                );
-              }),
-              if (status == 'out_for_delivery' || status == 'in_transit') ...[
-                const SizedBox(height: 16),
-                if (order.deliveryStaffName != null || order.deliveryStaffPhone != null)
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
+                  const SizedBox(width: 12),
+                  Text(
+                    _steps[i],
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: done ? FontWeight.w700 : FontWeight.w400,
+                      color: done ? _text1 : _text2,
+                    ),
+                  ),
+                  if (active) ...[
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _violet100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Now',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _violet600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
+          if (status == 'out_for_delivery' || status == 'in_transit') ...[
+            const SizedBox(height: 4),
+            if (order.deliveryStaffName != null ||
+                order.deliveryStaffPhone != null)
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: _green50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _border),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: _green100,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.delivery_dining_rounded,
+                        size: 20,
+                        color: _green700,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.delivery_dining, color: AppColors.primary),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  order.deliveryStaffName ?? 'Delivery partner',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                if (order.deliveryStaffPhone != null)
-                                  Text(
-                                    order.deliveryStaffPhone!,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                              ],
+                          Text(
+                            order.deliveryStaffName ?? 'Delivery partner',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: _text1,
                             ),
                           ),
-                          if (order.deliveryStaffPhone != null &&
-                              order.deliveryStaffPhone!.isNotEmpty)
-                            IconButton(
-                              icon: const Icon(Icons.call),
-                              onPressed: () {
-                                final uri = Uri.parse(
-                                    'tel:${order.deliveryStaffPhone!.replaceAll(RegExp(r'\D'), '')}');
-                                launchUrl(uri);
-                              },
+                          if (order.deliveryStaffPhone != null)
+                            Text(
+                              order.deliveryStaffPhone!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: _text2,
+                              ),
                             ),
                         ],
                       ),
                     ),
-                  ),
-              ],
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+                    if (order.deliveryStaffPhone?.isNotEmpty == true)
+                      GestureDetector(
+                        onTap: () => launchUrl(
+                          Uri.parse(
+                            'tel:${order.deliveryStaffPhone!.replaceAll(RegExp(r'\D'), '')}',
+                          ),
+                        ),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: _violet100,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.call_rounded,
+                            size: 17,
+                            color: _violet600,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ],
+          ],
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: _text2),
+            child: const Text(
+              'Close',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Wallet Tab
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _CustomerWalletTab extends StatefulWidget {
   const _CustomerWalletTab();
-
   @override
   State<_CustomerWalletTab> createState() => _CustomerWalletTabState();
 }
@@ -782,67 +1602,94 @@ class _CustomerWalletTabState extends State<_CustomerWalletTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(color: _green600));
     }
     final balance = _profile?.balance ?? 0.0;
     final lowBalance = balance < 100;
 
     return RefreshIndicator(
+      color: _green600,
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
         children: [
-          const SectionHeader(title: 'Current balance'),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                children: [
-                  Icon(Icons.account_balance_wallet_outlined,
-                      size: 40, color: AppColors.primary),
-                  const SizedBox(width: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '₹${balance.toStringAsFixed(0)}',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        'Available balance',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+          _sectionLabel('Current Balance'),
+          const SizedBox(height: 10),
+          // Balance hero
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _border),
+              boxShadow: [
+                BoxShadow(
+                  color: _green900.withValues(alpha: 0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: _violet100,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                ],
-              ),
+                  child: const Icon(
+                    Icons.account_balance_wallet_rounded,
+                    size: 26,
+                    color: _violet600,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Rs.${balance.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: _violet700,
+                      ),
+                    ),
+                    const Text(
+                      'Available balance',
+                      style: TextStyle(fontSize: 12, color: _text2),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           if (lowBalance && balance >= 0) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                color: _warnSoft,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _warning.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: AppColors.warning),
-                  const SizedBox(width: 12),
-                  Expanded(
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: _warning,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
                     child: Text(
                       'Low balance. Please top up to continue service.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.warning,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _warning,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -852,36 +1699,82 @@ class _CustomerWalletTabState extends State<_CustomerWalletTab> {
             ),
           ],
           const SizedBox(height: 24),
-          const SectionHeader(title: 'Transaction history'),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                'No transactions yet.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
+          _sectionLabel('Transaction History'),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: _green50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _border),
+                  ),
+                  child: const Icon(
+                    Icons.receipt_outlined,
+                    size: 18,
+                    color: _text2,
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                const Text(
+                  'No transactions yet.',
+                  style: TextStyle(fontSize: 13, color: _text2),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _sectionLabel(String text) => Row(
+    children: [
+      Container(
+        width: 3,
+        height: 13,
+        decoration: BoxDecoration(
+          color: _green600,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      const SizedBox(width: 7),
+      Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: _text2,
+          letterSpacing: 1.1,
+        ),
+      ),
+    ],
+  );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Profile Tab
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _CustomerProfileTab extends StatefulWidget {
   const _CustomerProfileTab();
-
   @override
   State<_CustomerProfileTab> createState() => _CustomerProfileTabState();
 }
 
 class _CustomerProfileTabState extends State<_CustomerProfileTab> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _addressController = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  final _addressCtrl = TextEditingController();
   CustomerModel? _profile;
   bool _loading = true;
   bool _saving = false;
@@ -898,8 +1791,8 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
       final profile = await CustomerPortalApi.getMyProfile();
       if (mounted) {
         _profile = profile;
-        _nameController.text = profile.name;
-        _addressController.text = profile.address ?? '';
+        _nameCtrl.text = profile.name;
+        _addressCtrl.text = profile.address ?? '';
         setState(() => _loading = false);
       }
     } catch (e) {
@@ -914,14 +1807,11 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _saving = true);
     try {
-      final body = <String, dynamic>{
-        'name': _nameController.text.trim(),
-        'address': _addressController.text.trim(),
-      };
-      await CustomerPortalApi.updateMyProfile(body);
-      if (mounted) {
-        AppSnackbar.success(context, 'Profile updated');
-      }
+      await CustomerPortalApi.updateMyProfile({
+        'name': _nameCtrl.text.trim(),
+        'address': _addressCtrl.text.trim(),
+      });
+      if (mounted) AppSnackbar.success(context, 'Profile updated');
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
@@ -939,93 +1829,10 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
           'coordinates': [position.longitude, position.latitude],
         },
       });
-      if (mounted) {
-        AppSnackbar.success(context, 'Location shared with vendor');
-      }
+      if (mounted) AppSnackbar.success(context, 'Location shared with vendor');
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
     }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _addressController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    final p = _profile;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'My Profile',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 4),
-            if (p != null)
-              Text(
-                p.phone,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _addressController,
-              decoration: const InputDecoration(labelText: 'Address'),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _shareLocation,
-              icon: const Icon(Icons.location_on_outlined),
-              label: const Text('Share location with vendor'),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _saving ? null : _save,
-              style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
-              child: _saving
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text('Save'),
-            ),
-            const SizedBox(height: 24),
-            OutlinedButton.icon(
-              onPressed: _logout,
-              icon: const Icon(Icons.logout),
-              label: const Text('Logout'),
-              style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _logout() async {
@@ -1036,5 +1843,247 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
     if (!mounted) return;
     context.go(AppRoutes.roleSelection);
   }
-}
 
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _addressCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: _green600));
+    }
+    final initial = (_profile?.name ?? '?')[0].toUpperCase();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Identity card ──────────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _border),
+              boxShadow: [
+                BoxShadow(
+                  color: _green900.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: _green100,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: _border),
+                  ),
+                  child: Center(
+                    child: Text(
+                      initial,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: _green700,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _profile?.name ?? '',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: _text1,
+                        ),
+                      ),
+                      if (_profile?.phone != null)
+                        Text(
+                          _profile!.phone,
+                          style: const TextStyle(fontSize: 12, color: _text2),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── Share location ─────────────────────────────────────────────────
+          InkWell(
+            onTap: _shareLocation,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              decoration: BoxDecoration(
+                color: _green50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _border),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: _green100,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: _green200),
+                    ),
+                    child: const Icon(
+                      Icons.my_location_rounded,
+                      size: 18,
+                      color: _green700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Share Location with Vendor',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: _green900,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Help us deliver faster to your door',
+                          style: TextStyle(fontSize: 11, color: _text2),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: _text2,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ── Logout ─────────────────────────────────────────────────────────
+          InkWell(
+            onTap: _logout,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              decoration: BoxDecoration(
+                color: _dangerSoft,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _danger.withValues(alpha: 0.22)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.logout_rounded, size: 16, color: _danger),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Logout',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: _danger,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _greenField(
+    TextEditingController ctrl,
+    String label,
+    IconData icon, {
+    String? Function(String?)? validator,
+    int maxLines = 1,
+  }) => TextFormField(
+    controller: ctrl,
+    validator: validator,
+    maxLines: maxLines,
+    style: const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: _text1,
+    ),
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(fontSize: 13, color: _text2),
+      prefixIcon: Padding(
+        padding: const EdgeInsets.only(left: 14, right: 10),
+        child: Icon(icon, size: 18, color: _green700),
+      ),
+      prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+      filled: true,
+      fillColor: _green50,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(11),
+        borderSide: const BorderSide(color: _border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(11),
+        borderSide: const BorderSide(color: _green600, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(11),
+        borderSide: const BorderSide(color: _danger),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(11),
+        borderSide: const BorderSide(color: _danger, width: 1.5),
+      ),
+    ),
+  );
+
+  Widget _sectionLabel(String text) => Row(
+    children: [
+      Container(
+        width: 3,
+        height: 13,
+        decoration: BoxDecoration(
+          color: _green600,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      const SizedBox(width: 7),
+      Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: _text2,
+          letterSpacing: 1.1,
+        ),
+      ),
+    ],
+  );
+}
