@@ -7598,3 +7598,27 @@ Error: Invalid or expired OTP
     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
     at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
 
+[21/03/2026, 12:06:09 pm] Invalid or expired OTP
+Error: Invalid or expired OTP
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/auth.controller.js:293:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[21/03/2026, 12:07:44 pm] Plan is not active or not found
+Error: Plan is not active or not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/subscription.controller.js:309:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[21/03/2026, 12:13:40 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:131:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[21/03/2026, 12:14:06 pm] Customer not found
+Error: Customer not found
+    at file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/controllers/payment.controller.js:131:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///E:/00WebDev/Fork/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+

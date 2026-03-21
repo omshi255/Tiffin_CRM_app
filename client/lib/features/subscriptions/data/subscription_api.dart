@@ -63,6 +63,11 @@ abstract final class SubscriptionApi {
     await DioClient.instance.put(ApiEndpoints.subscriptionCancel(id));
   }
 
+  /// Permanent delete (vendor/admin). Same path as GET — uses DELETE.
+  static Future<void> delete(String id) async {
+    await DioClient.instance.delete(ApiEndpoints.subscriptionById(id));
+  }
+
   static Future<void> pause(
     String id, {
     required DateTime pausedFrom,

@@ -5,6 +5,7 @@ import {
   createSubscription,
   renewSubscription,
   cancelSubscription,
+  deleteSubscription,
   pauseSubscription,
   unpauseSubscription,
 } from "../controllers/subscription.controller.js";
@@ -21,6 +22,7 @@ router.get("/:id", requireRole(["vendor", "admin"]), getSubscriptionById);
 router.post("/", requireRole(["vendor", "admin"]), createSubscription);
 router.put("/:id/renew", requireRole(["vendor", "admin"]), renewSubscription);
 router.put("/:id/cancel", requireRole(["vendor", "admin"]), cancelSubscription);
+router.delete("/:id", requireRole(["vendor", "admin"]), deleteSubscription);
 
 // Vendor/admin + customer can pause/unpause
 router.put("/:id/pause", requireRole(["vendor", "admin", "customer"]), pauseSubscription);

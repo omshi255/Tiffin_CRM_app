@@ -17,8 +17,13 @@ const ORDER_STATUSES = [
   "skipped",
 ];
 
+// Allow portal users to update contact + profile fields (phone is the login identity for many flows).
+const PHONE_PATTERN = /^\d{10,15}$/;
+
 const updateProfileSchema = Joi.object({
   name: Joi.string().trim().min(1).optional(),
+  phone: Joi.string().trim().pattern(PHONE_PATTERN).optional(),
+  whatsapp: Joi.string().trim().allow(null, "").optional(),
   address: Joi.string().trim().allow("").optional(),
   fcmToken: Joi.string().optional(),
   location: Joi.object({
@@ -56,10 +61,10 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 
 /**
  * PUT /api/v1/customer/me
- * Allows updating name, address, location, fcmToken only.
+ * Allows updating name, phone, whatsapp, address, location, fcmToken.
  */
 export const updateMyProfile = asyncHandler(async (req, res) => {
-  const { customerId } = req.user;
+  const { customerId, ownerId: ownerIdFromToken } = req.user;
   if (!customerId) throw new ApiError(403, "Customer ID not found in token");
 
   const { error, value } = updateProfileSchema.validate(req.body, {
@@ -76,6 +81,47 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
       type: "Point",
       coordinates: value.location.coordinates,
     };
+  }
+
+  // If only phone changes, keep WhatsApp in sync when it matched the old number (typical case).
+  if (value.phone !== undefined) {
+    const existing = await Customer.findOne({
+      _id: customerId,
+      isDeleted: { $ne: true },
+    })
+      .select("phone whatsapp ownerId")
+      .lean();
+
+    if (!existing) throw new ApiError(404, "Customer profile not found");
+
+    const ownerId =
+      ownerIdFromToken || existing.ownerId?.toString?.() || null;
+    if (!ownerId) {
+      throw new ApiError(403, "Owner context not found for this customer");
+    }
+
+    const dup = await Customer.findOne({
+      ownerId,
+      phone: value.phone,
+      _id: { $ne: customerId },
+      isDeleted: { $ne: true },
+    })
+      .select("_id")
+      .lean();
+    if (dup) {
+      throw new ApiError(
+        409,
+        "This phone number is already used for another customer under this business"
+      );
+    }
+
+    if (value.whatsapp === undefined) {
+      const wa = existing.whatsapp;
+      const prevPhone = existing.phone;
+      if (!wa || wa === prevPhone) {
+        updatePayload.whatsapp = value.phone;
+      }
+    }
   }
 
   const updated = await Customer.findOneAndUpdate(
