@@ -32,6 +32,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   int _paymentsTotal = 0;
   int _paymentsTotalPages = 1;
   bool _loadingMore = false;
+
   /// Sum of amounts for payments created today (separate query; not limited to current page).
   double _todayCollected = 0;
 
@@ -58,11 +59,14 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   static const _successSoft = Color(0xFFE6F4EA);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  double get _totalOverdue => _overdue.fold(0.0, (s, i) => s + i.amount);
+  double get _totalOverdue => _overdue.fold(0.0, (s, i) => s + (i.amount));
 
-  String _fmt(double v) => v >= 1000
-      ? '₹${(v / 1000).toStringAsFixed(1)}k'
-      : '₹${v.toStringAsFixed(0)}';
+  String _fmt(double? v) {
+    final val = v ?? 0;
+    return val >= 1000
+        ? '₹${(val / 1000).toStringAsFixed(1)}k'
+        : '₹${val.toStringAsFixed(0)}';
+  }
 
   String _fmtDate(DateTime? d) => d != null
       ? '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}'
@@ -109,8 +113,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
           .whereType<Map<String, dynamic>>()
           .map((e) => CustomerModel.fromJson(e))
           .toList();
-      final todaySum =
-          todayRes.items.fold<double>(0, (s, p) => s + p.amount);
+      final todaySum = todayRes.items.fold<double>(0, (s, p) => s + p.amount);
       if (mounted) {
         setState(() {
           _payments = payRes.items;
@@ -134,8 +137,10 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
     setState(() => _loadingMore = true);
     try {
       final nextPage = _paymentsPage + 1;
-      final res =
-          await PaymentApi.list(page: nextPage, limit: _historyPageSize);
+      final res = await PaymentApi.list(
+        page: nextPage,
+        limit: _historyPageSize,
+      );
       if (!mounted) return;
       setState(() {
         _payments = [..._payments, ...res.items];
