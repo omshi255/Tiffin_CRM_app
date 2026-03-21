@@ -499,9 +499,11 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     try {
       var page = 1;
       while (page <= 40) {
-        final list = await PaymentApi.list(page: page, limit: 100);
-        for (final p in list) { revenue += p.amount; }
-        if (list.length < 100) break;
+        final result = await PaymentApi.list(page: page, limit: 100);
+        for (final p in result.items) {
+          revenue += p.amount;
+        }
+        if (page >= result.totalPages || result.items.isEmpty) break;
         page++;
       }
     } catch (_) {}
@@ -509,7 +511,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
 
     try {
       final payments = await PaymentApi.list(page: 1, limit: 5);
-      if (mounted) setState(() => _recentPayments = payments);
+      if (mounted) setState(() => _recentPayments = payments.items);
     } catch (_) {}
   }
 

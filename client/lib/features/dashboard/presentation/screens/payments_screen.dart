@@ -26,6 +26,15 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   String _mode = 'cash';
   bool _saving = false;
 
+  // Payment history pagination (server: GET /payments?page&limit)
+  static const int _historyPageSize = 20;
+  int _paymentsPage = 1;
+  int _paymentsTotal = 0;
+  int _paymentsTotalPages = 1;
+  bool _loadingMore = false;
+  /// Sum of amounts for payments created today (separate query; not limited to current page).
+  double _todayCollected = 0;
+
   // ── Palette ───────────────────────────────────────────────────────────────
   static const _violet900 = Color(0xFF2D1B69);
   static const _violet800 = Color(0xFF3D2490);
@@ -49,16 +58,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   static const _successSoft = Color(0xFFE6F4EA);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  double get _totalCollectedToday => _payments
-      .where((p) {
-        final n = DateTime.now();
-        return p.paymentDate != null &&
-            p.paymentDate!.year == n.year &&
-            p.paymentDate!.month == n.month &&
-            p.paymentDate!.day == n.day;
-      })
-      .fold(0.0, (s, p) => s + p.amount);
-
   double get _totalOverdue => _overdue.fold(0.0, (s, i) => s + i.amount);
 
   String _fmt(double v) => v >= 1000
@@ -93,7 +92,16 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final payRes = await PaymentApi.list(limit: 50);
+      final payRes = await PaymentApi.list(limit: _historyPageSize);
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      final todayRes = await PaymentApi.list(
+        page: 1,
+        limit: 500,
+        fromDate: startOfDay.toIso8601String(),
+        toDate: endOfDay.toIso8601String(),
+      );
       final overdueList = await InvoiceApi.getOverdue();
       final custRes = await CustomerApi.list(limit: 100, status: 'active');
       final rawList = (custRes['data'] as List?) ?? [];
@@ -101,9 +109,15 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
           .whereType<Map<String, dynamic>>()
           .map((e) => CustomerModel.fromJson(e))
           .toList();
+      final todaySum =
+          todayRes.items.fold<double>(0, (s, p) => s + p.amount);
       if (mounted) {
         setState(() {
-          _payments = payRes;
+          _payments = payRes.items;
+          _paymentsPage = payRes.page;
+          _paymentsTotal = payRes.total;
+          _paymentsTotalPages = payRes.totalPages;
+          _todayCollected = todaySum;
           _overdue = overdueList;
           _customers = customers;
         });
@@ -112,6 +126,27 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadMorePayments() async {
+    if (_loadingMore || _paymentsPage >= _paymentsTotalPages) return;
+    setState(() => _loadingMore = true);
+    try {
+      final nextPage = _paymentsPage + 1;
+      final res =
+          await PaymentApi.list(page: nextPage, limit: _historyPageSize);
+      if (!mounted) return;
+      setState(() {
+        _payments = [..._payments, ...res.items];
+        _paymentsPage = res.page;
+        _paymentsTotal = res.total;
+        _paymentsTotalPages = res.totalPages;
+      });
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
     }
   }
 
@@ -168,7 +203,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                   const SizedBox(height: 10),
                   _overdueSection(),
                   const SizedBox(height: 24),
-                  _sectionLabel('Payment History', _payments.length),
+                  _sectionLabel('Payment History', _paymentsTotal),
                   const SizedBox(height: 10),
                   _historySection(),
                 ],
@@ -251,7 +286,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
         Expanded(
           child: _StatTile(
             label: "Today's Collection",
-            value: _fmt(_totalCollectedToday),
+            value: _fmt(_todayCollected),
             icon: Icons.trending_up_rounded,
             iconBg: _successSoft,
             iconColor: _success,
@@ -273,7 +308,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
         Expanded(
           child: _StatTile(
             label: 'Payments',
-            value: '${_payments.length}',
+            value: '$_paymentsTotal',
             icon: Icons.receipt_long_rounded,
             iconBg: _violet100,
             iconColor: _violet600,
@@ -610,16 +645,43 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
       );
     }
     return Column(
-      children: _payments
-          .map(
-            (p) => _PaymentTile(
-              payment: p,
-              fmtDate: _fmtDate,
-              fmtAmt: _fmt,
-              methodIcon: _methodIcon,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ..._payments.map(
+          (p) => _PaymentTile(
+            payment: p,
+            fmtDate: _fmtDate,
+            fmtAmt: _fmt,
+            methodIcon: _methodIcon,
+          ),
+        ),
+        if (_paymentsPage < _paymentsTotalPages) ...[
+          const SizedBox(height: 14),
+          OutlinedButton.icon(
+            onPressed: _loadingMore ? null : _loadMorePayments,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _violet700,
+              side: const BorderSide(color: _border),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-          )
-          .toList(),
+            icon: _loadingMore
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.expand_more_rounded),
+            label: Text(
+              _loadingMore
+                  ? 'Loading…'
+                  : 'Load more (${_payments.length} / $_paymentsTotal)',
+            ),
+          ),
+        ],
+      ],
     );
   }
 

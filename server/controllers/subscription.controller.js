@@ -37,7 +37,7 @@ const createSubscriptionSchema = Joi.object({
 const renewSubscriptionSchema = Joi.object({
   startDate: Joi.date().iso().required(),
   endDate: Joi.date().iso().min(Joi.ref("startDate")).required(),
-}).optional();
+});
 
 const listQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).optional(),
@@ -314,8 +314,8 @@ export const renewSubscription = asyncHandler(async (req, res) => {
     (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
   const totalAmount = plan.price * totalDays;
 
-  const updated = await Subscription.findByIdAndUpdate(
-    id,
+  const updated = await Subscription.findOneAndUpdate(
+    { _id: id, ownerId },
     {
       $set: {
         startDate,
@@ -323,6 +323,8 @@ export const renewSubscription = asyncHandler(async (req, res) => {
         status: "active",
         totalAmount,
       },
+      // Renew = new term; remove pause fields entirely (MongoDB $unset).
+      $unset: { pausedFrom: 1, pausedUntil: 1 },
     },
     { new: true, runValidators: true }
   )
@@ -476,6 +478,34 @@ export const cancelSubscription = asyncHandler(async (req, res) => {
     .lean();
 
   const response = new ApiResponse(200, "Subscription cancelled", updated);
+  res.status(response.statusCode).json({
+    success: response.success,
+    message: response.message,
+    data: response.data,
+  });
+});
+
+/**
+ * DELETE /api/v1/subscriptions/:id
+ * Permanently removes the subscription document (vendor/admin).
+ * Prefer PUT /:id/cancel for a reversible “cancelled” state.
+ */
+export const deleteSubscription = asyncHandler(async (req, res) => {
+  const ownerId = req.user.userId;
+  const { id } = req.params;
+
+  const existing = await Subscription.findOne({ _id: id, ownerId })
+    .populate("customerId", "name phone address")
+    .populate("planId", "planName price planType")
+    .lean();
+
+  if (!existing) {
+    throw new ApiError(404, "Subscription not found");
+  }
+
+  await Subscription.deleteOne({ _id: id, ownerId });
+
+  const response = new ApiResponse(200, "Subscription deleted", existing);
   res.status(response.statusCode).json({
     success: response.success,
     message: response.message,
