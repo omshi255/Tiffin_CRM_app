@@ -10,12 +10,13 @@ abstract final class ApiEndpoints {
   static const String authMe = '/auth/me';
   static const String vendorOnboarding = '/auth/vendor/onboarding';
   static const String changePassword = '/auth/change-password';
-
+  static String subscriptionUpdate(String id) => '/subscriptions/$id'; // ✅ ADD
   // Customers (vendor/admin)
   static const String customers = '/customers';
   static String customerById(String id) => '/customers/$id';
   static const String customersBulk = '/customers/bulk';
-  static String customerWalletCredit(String id) => '/customers/$id/wallet/credit';
+  static String customerWalletCredit(String id) =>
+      '/customers/$id/wallet/credit';
   static String customerPlans(String id) => '/customers/$id/plans';
 
   // Customer portal (self-service)
@@ -72,7 +73,8 @@ abstract final class ApiEndpoints {
   static const String dailyOrdersGenerateWeek = '/daily-orders/generate-week';
   static String dailyOrderAssign(String id) => '/daily-orders/$id/assign';
   static String dailyOrderStatus(String id) => '/daily-orders/$id/status';
-  static String dailyOrderQuantities(String id) => '/daily-orders/$id/quantities';
+  static String dailyOrderQuantities(String id) =>
+      '/daily-orders/$id/quantities';
   static String dailyOrderAccept(String id) => '/daily-orders/$id/accept';
   static String dailyOrderReject(String id) => '/daily-orders/$id/reject';
 

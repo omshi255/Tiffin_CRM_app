@@ -77,6 +77,13 @@ abstract final class SubscriptionApi {
     );
   }
 
+  static Future<void> toggleAutoRenew(String id, bool value) async {
+    await DioClient.instance.put(
+      ApiEndpoints.subscriptionRenew(id), // renew endpoint reuse
+      data: {'autoRenew': value},
+    );
+  }
+
   static Future<void> unpause(String id) async {
     await DioClient.instance.put(ApiEndpoints.subscriptionUnpause(id));
   }

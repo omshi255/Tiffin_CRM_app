@@ -267,12 +267,20 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
         },
         onPause: () async {
           final now = DateTime.now();
-          final pausedUntil = DateTime(now.year, now.month + 1, now.day);
+          // ✅ Date picker se user choose kare
+          final picked = await showDatePicker(
+            context: ctx,
+            initialDate: now.add(const Duration(days: 7)),
+            firstDate: now,
+            lastDate: now.add(const Duration(days: 365)),
+            helpText: 'Pause until when?',
+          );
+          if (picked == null) return;
           try {
             await SubscriptionApi.pause(
               sub.id,
               pausedFrom: now,
-              pausedUntil: pausedUntil,
+              pausedUntil: picked,
             );
             if (ctx.mounted) Navigator.pop(ctx);
             _load();
@@ -283,6 +291,46 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
         onUnpause: () async {
           try {
             await SubscriptionApi.unpause(sub.id);
+            if (ctx.mounted) Navigator.pop(ctx);
+            _load();
+          } catch (e) {
+            if (ctx.mounted) ErrorHandler.show(ctx, e);
+          }
+        },
+        // ✅ Cancel callback add karo
+        onCancel: () async {
+          final confirm = await showDialog<bool>(
+            context: ctx,
+            builder: (dCtx) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                'Cancel Subscription',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+              content: const Text(
+                'Are you sure you want to cancel this subscription?',
+                style: TextStyle(fontSize: 13),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dCtx, false),
+                  child: const Text('No'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(dCtx, true),
+                  child: const Text(
+                    'Yes, Cancel',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          );
+          if (confirm != true) return;
+          try {
+            await SubscriptionApi.cancel(sub.id);
             if (ctx.mounted) Navigator.pop(ctx);
             _load();
           } catch (e) {
@@ -648,6 +696,7 @@ class _SubscriptionDetailSheet extends StatefulWidget {
     required this.onViewCustomer,
     required this.onPause,
     required this.onUnpause,
+    required this.onCancel,
   });
 
   final SubscriptionModel subscription;
@@ -655,6 +704,7 @@ class _SubscriptionDetailSheet extends StatefulWidget {
   final VoidCallback onViewCustomer;
   final VoidCallback onPause;
   final VoidCallback onUnpause;
+  final VoidCallback onCancel;
 
   @override
   State<_SubscriptionDetailSheet> createState() =>
@@ -671,13 +721,37 @@ class _SubscriptionDetailSheetState extends State<_SubscriptionDetailSheet> {
     _autoRenew = widget.subscription.autoRenew;
   }
 
+  // Future<void> _toggleAutoRenew() async {
+  //   setState(() => _renewLoading = true);
+  //   try {
+  //     // Uses the renew endpoint to patch autoRenew field
+  //     await DioClient.instance.put(
+  //       '\${ApiEndpoints.subscriptions}/\${widget.subscription.id}',
+  //       data: {'autoRenew': !_autoRenew},
+  //     );
+  //     setState(() => _autoRenew = !_autoRenew);
+  //   } catch (e) {
+  //     if (mounted) ErrorHandler.show(context, e);
+  //   } finally {
+  //     if (mounted) setState(() => _renewLoading = false);
+  //   }
+  // }
   Future<void> _toggleAutoRenew() async {
     setState(() => _renewLoading = true);
     try {
-      // Uses the renew endpoint to patch autoRenew field
       await DioClient.instance.put(
-        '\${ApiEndpoints.subscriptions}/\${widget.subscription.id}',
-        data: {'autoRenew': !_autoRenew},
+        ApiEndpoints.subscriptionRenew(widget.subscription.id),
+        data: {
+          'startDate': widget.subscription.startDate
+              .toIso8601String()
+              .split('T')
+              .first,
+          'endDate': widget.subscription.endDate
+              .toIso8601String()
+              .split('T')
+              .first,
+          'autoRenew': !_autoRenew, // ✅ toggle value
+        },
       );
       setState(() => _autoRenew = !_autoRenew);
     } catch (e) {
@@ -981,6 +1055,14 @@ class _SubscriptionDetailSheetState extends State<_SubscriptionDetailSheet> {
                       ),
                     ],
                     const SizedBox(height: 10),
+                    _pauseBtn(
+                      'Cancel Subscription',
+                      const Color(0xFF991B1B),
+                      const Color(0xFFFEF2F2),
+                      const Color(0xFFFCA5A5),
+                      widget.onCancel,
+                    ),
+                    const SizedBox(height: 10),
                     _filledBtn('Close', () => Navigator.pop(context)),
                   ],
                 ),
@@ -1103,7 +1185,9 @@ class _SubscriptionDetailSheetState extends State<_SubscriptionDetailSheet> {
     String label,
     Color fg,
     Color bg,
+
     Color border,
+
     VoidCallback onTap,
   ) {
     return GestureDetector(
