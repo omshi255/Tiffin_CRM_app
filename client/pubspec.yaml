@@ -78,6 +78,7 @@ dependencies:
   intl: ^0.20.2
   connectivity_plus: ^7.0.0
   phosphor_flutter: ^2.1.0
+  web: ^1.0.0
  
 
 dev_dependencies:

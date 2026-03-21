@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../router/app_routes.dart';
@@ -20,8 +22,14 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   // ── Violet palette (matches PaymentsScreen) ───────────────────────────────
   static const _violet700 = Color(0xFF4C2DB8);
+  // ignore: duplicate_ignore
+  // ignore: unused_field
   static const _violet600 = Color(0xFF5B35D5);
+  // ignore: duplicate_ignore
+  // ignore: unused_field
   static const _violet100 = Color(0xFFEDE8FD);
+  // ignore: duplicate_ignore
+  // ignore: unused_field
   static const _violet50 = Color(0xFFF5F2FF);
   static const _bg = Color(0xFFF6F4FF);
   static const _border = Color(0xFFE4DFF7);

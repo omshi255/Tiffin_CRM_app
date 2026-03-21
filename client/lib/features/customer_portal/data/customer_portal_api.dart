@@ -80,7 +80,6 @@ abstract final class CustomerPortalApi {
   }
 
   /// Notifications for the logged-in customer.
-  /// Returns { notifications: List<NotificationModel>, total, page, totalPages }.
   static Future<Map<String, dynamic>> getMyNotifications({
     int page = 1,
     int limit = 20,

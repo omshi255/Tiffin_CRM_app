@@ -191,6 +191,7 @@ class ProfileScreen extends StatelessWidget {
 
 class _ProfileTile extends StatelessWidget {
   const _ProfileTile({
+    // ignore: unused_element_parameter
     super.key,
     required this.icon,
     required this.title,

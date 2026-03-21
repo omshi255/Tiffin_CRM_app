@@ -64,6 +64,7 @@ class _SupportScreenState extends State<SupportScreen> {
       'https://wa.me/$number?text=Hello, I need support with TiffinCRM app.',
     );
     if (await canLaunchUrl(uri))
+      // ignore: curly_braces_in_flow_control_structures
       await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 

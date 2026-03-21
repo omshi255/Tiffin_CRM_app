@@ -22,13 +22,16 @@ class _CustomerNotificationsScreenState
   static const _green50   = Color(0xFFF0FDF4);
   static const _violet600 = Color(0xFF5B35D5);
   static const _violet100 = Color(0xFFEDE8FD);
+  // ignore: unused_field
   static const _violet50  = Color(0xFFF5F2FF);
   static const _bg        = Color(0xFFF9FFFE);
   static const _surface   = Color(0xFFFFFFFF);
   static const _border    = Color(0xFFD1FAE5);
+  // ignore: unused_field
   static const _divider   = Color(0xFFE8FDF5);
   static const _text1     = Color(0xFF111827);
   static const _text2     = Color(0xFF6B7280);
+  // ignore: unused_field
   static const _danger    = Color(0xFFD93025);
   static const _warning   = Color(0xFFBA7517);
   static const _warnSoft  = Color(0xFFFAEEDA);
@@ -64,6 +67,7 @@ class _CustomerNotificationsScreenState
   Future<void> _delete(NotificationModel n) async {
     try {
       await CustomerPortalApi.deleteNotification(n.id);
+      // ignore: curly_braces_in_flow_control_structures
       if (mounted) setState(() =>
           _notifications = _notifications.where((e) => e.id != n.id).toList());
       await NotificationBadgeService.refreshNow();

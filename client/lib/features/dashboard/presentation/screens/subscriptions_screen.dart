@@ -319,7 +319,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
           // ── Violet header ──
           Container(
             width: double.infinity,
-            decoration: const BoxDecoration(color: const Color(0xFF7B3FE4)),
+            decoration: const BoxDecoration(color: Color(0xFF7B3FE4)),
             child: SafeArea(
               bottom: false,
               child: Padding(

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element_parameter
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
@@ -154,6 +156,7 @@ class SettingsScreen extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
+  // ignore:
   const _SectionLabel({super.key, required this.label});
   final String label;
 

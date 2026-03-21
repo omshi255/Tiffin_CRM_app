@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/color_utils.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
@@ -19,7 +17,6 @@ class _P {
   static const v600 = Color(0xFF7C3AED);
   static const v500 = Color(0xFF8B5CF6);
   static const v400 = Color(0xFFA78BFA);
-  static const v300 = Color(0xFFC4B5FD);
   static const v200 = Color(0xFFDDD6FE);
   static const v100 = Color(0xFFEDE9FE);
   static const v50 = Color(0xFFF5F3FF);
@@ -421,6 +418,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   );
 
   // Embedded shell title row actions
+  // ignore: unused_element
   List<Widget> _appBarActions(Color fg) => [
     IconButton(
       icon: Icon(Icons.playlist_add, color: fg),

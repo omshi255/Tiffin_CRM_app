@@ -17,6 +17,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   static const _violet600 = Color(0xFF5B35D5);
   static const _violet500 = Color(0xFF6C42F5);
   static const _violet100 = Color(0xFFEDE8FD);
+  // ignore: unused_field
   static const _violet50 = Color(0xFFF5F2FF);
   static const _bg = Color(0xFFF6F4FF);
   static const _surface = Color(0xFFFFFFFF);
@@ -567,6 +568,7 @@ extension _LetExt<T> on T {
 
 class _VioletField extends StatelessWidget {
   const _VioletField({
+    // ignore: unused_element_parameter
     super.key,
     required this.controller,
     required this.label,
@@ -615,6 +617,7 @@ class _VioletField extends StatelessWidget {
         labelStyle: const TextStyle(fontSize: 13, color: _textSecondary),
         hintStyle: TextStyle(
           fontSize: 13,
+          // ignore: deprecated_member_use
           color: _textSecondary.withOpacity(0.5),
         ),
         prefixIcon: Padding(

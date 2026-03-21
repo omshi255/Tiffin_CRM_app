@@ -347,6 +347,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
 
 class _PlanCard extends StatelessWidget {
   const _PlanCard({
+    // ignore: unused_element_parameter
     super.key,
     required this.plan,
     this.isCustom = false,

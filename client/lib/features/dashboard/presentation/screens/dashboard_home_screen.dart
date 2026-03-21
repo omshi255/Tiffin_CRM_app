@@ -766,6 +766,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _recentPayments.length,
+                  // ignore: unnecessary_underscores
                   separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.border, indent: 16, endIndent: 16),
                   itemBuilder: (context, index) {
                     final p = _recentPayments[index];

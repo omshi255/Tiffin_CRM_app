@@ -1,15 +1,15 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/color_utils.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
 import '../../../../core/widgets/animated_list_item.dart';
 import '../../../../core/widgets/lottie_empty_state.dart';
-import '../../../../core/widgets/thin_divider.dart';
 import '../../../../models/customer_model.dart';
 import '../../data/customer_api.dart';
 
@@ -17,23 +17,26 @@ import '../../data/customer_api.dart';
 class _P {
   static const g1 = Color(0xFF7B3FE4);
   static const v700 = Color(0xFF5B21B6);
-  static const v200 = Color(0xFFDDD6FE);
   static const v100 = Color(0xFFEDE9FE);
   static const s900 = Color(0xFF0F172A);
   static const s600 = Color(0xFF475569);
-  static const s500 = Color(0xFF64748B);
   static const s400 = Color(0xFF94A3B8);
   static const s300 = Color(0xFFCBD5E1);
   static const s200 = Color(0xFFE2E8F0);
   static const s100 = Color(0xFFF8FAFC);
   static const bg = Color(0xFFF0EBFF);
+
   static const greenBg = Color(0xFFF0FDF4);
+
   static const greenTxt = Color(0xFF166534);
+
   static const greenBdr = Color(0xFF86EFAC);
   static const redBg = Color(0xFFFEF2F2);
   static const redTxt = Color(0xFF991B1B);
   static const redBdr = Color(0xFFFCA5A5);
+
   static const amberBg = Color(0xFFFFFBEB);
+
   static const amberTxt = Color(0xFF92400E);
   static const amberBdr = Color(0xFFFCD34D);
   static const green = Color(0xFF22C55E);
@@ -183,11 +186,13 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
 
   Future<void> _refresh() => _loadCustomers(reset: true);
 
+  // ignore: unused_element
   static String _initials(String name) {
     final parts = name.trim().split(RegExp(r'\s+'));
     if (parts.isEmpty) return '?';
-    if (parts.length == 1)
+    if (parts.length == 1) {
       return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '?';
+    }
     return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
   }
 
@@ -461,7 +466,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                             padding: EdgeInsets.zero,
                             itemCount:
                                 filtered.length + (_isLoadingMore ? 1 : 0),
-                            separatorBuilder: (_, __) => const Divider(
+                            separatorBuilder: (_, _) => const Divider(
                               height: 0.5,
                               thickness: 0.5,
                               color: _P.s200,
@@ -483,14 +488,22 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                                 index: index,
                                 child: _CustomerRow(
                                   customer: customer,
-                                  onTap: () => context.push(
-                                    AppRoutes.customerDetail,
-                                    extra: customer,
-                                  ),
-                                  onEdit: () => context.push(
-                                    AppRoutes.editCustomer,
-                                    extra: customer,
-                                  ),
+                                  onTap: () async {
+                                    await context.push(
+                                      AppRoutes.customerDetail,
+                                      extra: customer,
+                                    );
+                                    _loadCustomers(
+                                      reset: true,
+                                    ); // detail/edit se wapas aane pe list refresh
+                                  },
+                                  onEdit: () async {
+                                    await context.push(
+                                      AppRoutes.editCustomer,
+                                      extra: customer,
+                                    );
+                                    _loadCustomers(reset: true);
+                                  },
                                   onWhatsApp: () =>
                                       WhatsAppHelper.openChat(customer.phone),
                                   onDelete: () =>
@@ -539,8 +552,9 @@ class _CustomerRow extends StatelessWidget {
   static String _initials(String name) {
     final parts = name.trim().split(RegExp(r'\s+'));
     if (parts.isEmpty) return '?';
-    if (parts.length == 1)
+    if (parts.length == 1) {
       return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '?';
+    }
     return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
   }
 

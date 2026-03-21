@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
+// ignore: unused_import
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
@@ -24,6 +25,7 @@ class _P {
   static const v50 = Color(0xFFF5F3FF);
   static const bg = Color(0xFFF0EBFF);
   static const s900 = Color(0xFF0F172A);
+  // ignore: unused_field
   static const s700 = Color(0xFF334155);
   static const s600 = Color(0xFF475569);
   static const s500 = Color(0xFF64748B);
@@ -146,6 +148,7 @@ String _initials(String name) {
   final parts = name.trim().split(RegExp(r'\s+'));
   if (parts.isEmpty) return '?';
   if (parts.length == 1)
+    // ignore: curly_braces_in_flow_control_structures
     return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '?';
   return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
 }
@@ -361,7 +364,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   color: Colors.white,
                   size: 18,
                 ),
-                onPressed: () => context.push(AppRoutes.editCustomer, extra: c),
+                onPressed: () async {
+                  await context.push(AppRoutes.editCustomer, extra: c);
+                  _load(); // edit se wapas aane ke baad refresh
+                },
               ),
               IconButton(
                 icon: const Icon(

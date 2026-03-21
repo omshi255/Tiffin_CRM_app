@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print
+// ignore: dangling_library_doc_comments
 /// Reads GOOGLE_MAPS_API_KEY from `.env` and syncs to web + iOS.
 /// Run from `client/`: `dart run tool/sync_maps_key.dart`
 import 'dart:convert';

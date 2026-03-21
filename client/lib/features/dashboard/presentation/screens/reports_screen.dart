@@ -178,7 +178,6 @@ class _ReportsScreenState extends State<ReportsScreen>
 
 class _ReportTab extends StatelessWidget {
   const _ReportTab({
-    super.key,
     required this.periodLabel,
     required this.revenue,
   });
@@ -477,7 +476,6 @@ class _ReportTab extends StatelessWidget {
 
 class _StatCard extends StatelessWidget {
   const _StatCard({
-    super.key,
     required this.label,
     required this.value,
     required this.icon,
@@ -548,7 +546,6 @@ class _StatCard extends StatelessWidget {
 
 class _BreakdownRow extends StatelessWidget {
   const _BreakdownRow({
-    super.key,
     required this.label,
     required this.value,
     required this.color,

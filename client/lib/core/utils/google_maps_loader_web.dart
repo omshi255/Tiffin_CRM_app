@@ -1,20 +1,38 @@
 import 'dart:async';
-import 'dart:html' as html;
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe' show JSObjectUnsafeUtilExtension;
+import 'package:web/web.dart' as web;
 
+// ─── JS Interop declarations ──────────────────────────────────────────────────
+@JS('google')
+external JSObject? get _google;
+
+@JS('google.maps')
+external JSObject? get _googleMaps;
+
+@JS('__TiffinGmapsKey')
+external JSString? get _gmapsKey;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 bool _isGoogleMapsAvailable() {
-  final google = (html.window as dynamic)['google'];
-  if (google == null) return false;
-  final maps = (google as dynamic)['maps'];
-  return maps != null;
+  try {
+    return _google != null && _googleMaps != null;
+  } catch (_) {
+    return false;
+  }
 }
 
 String? _readMapsKey() {
-  final raw = (html.window as dynamic)['__TiffinGmapsKey'];
-  final key = raw?.toString() ?? '';
-  if (key.isEmpty || key == 'YOUR_GOOGLE_MAPS_API_KEY') return null;
-  return key;
+  try {
+    final key = _gmapsKey?.toDart ?? '';
+    if (key.isEmpty || key == 'YOUR_GOOGLE_MAPS_API_KEY') return null;
+    return key;
+  } catch (_) {
+    return null;
+  }
 }
 
+// ─── Main loader ──────────────────────────────────────────────────────────────
 Future<bool> ensureGoogleMapsLoaded({
   Duration timeout = const Duration(seconds: 8),
 }) async {
@@ -24,35 +42,39 @@ Future<bool> ensureGoogleMapsLoaded({
   if (key == null) return false;
 
   const scriptId = 'tiffin-google-maps-js';
-  final existing = html.document.getElementById(scriptId);
   final desiredSrc =
       'https://maps.googleapis.com/maps/api/js?key=${Uri.encodeComponent(key)}';
 
-  // Debug helpers to verify loader execution in the browser console.
-  (html.window as dynamic)['__TiffinGmapsLoaderCalled'] = true;
-  (html.window as dynamic)['__TiffinGmapsDesiredSrc'] = desiredSrc;
+  // Debug markers visible in browser console
+  _setWindowProp('__TiffinGmapsLoaderCalled', true.toJS);
+  _setWindowProp('__TiffinGmapsDesiredSrc', desiredSrc.toJS);
 
-  if (existing == null || existing.getAttribute('src') != desiredSrc) {
+  final existing = web.document.getElementById(scriptId);
+  final existingSrc = existing?.getAttribute('src') ?? '';
+
+  if (existing == null || existingSrc != desiredSrc) {
     existing?.remove();
-    final script = html.ScriptElement()
+
+    final script = web.document.createElement('script') as web.HTMLScriptElement
       ..id = scriptId
       ..type = 'text/javascript'
       ..src = desiredSrc;
-    // Some embedded runners may not expose `head` immediately; append to the
-    // first available container.
-    if (html.document.head != null) {
-      html.document.head!.append(script);
-    } else if (html.document.body != null) {
-      html.document.body!.append(script);
+
+    final head = web.document.head;
+    final body = web.document.body;
+
+    if (head != null) {
+      head.append(script);
+    } else if (body != null) {
+      body.append(script);
     } else {
-      html.document.documentElement?.append(script);
+      web.document.documentElement?.append(script);
     }
 
-    // Mark that we attempted script injection.
-    (html.window as dynamic)['__TiffinGmapsInjected'] = true;
+    _setWindowProp('__TiffinGmapsInjected', true.toJS);
   }
 
-  // Wait for `window.google.maps` to become available.
+  // Poll until google.maps is available or timeout
   final deadline = DateTime.now().add(timeout);
   while (DateTime.now().isBefore(deadline)) {
     if (_isGoogleMapsAvailable()) return true;
@@ -62,3 +84,13 @@ Future<bool> ensureGoogleMapsLoaded({
   return _isGoogleMapsAvailable();
 }
 
+// ─── Helper: set property on window object ────────────────────────────────────
+@JS('Object.defineProperty')
+// ignore: unused_element
+external void _defineProperty(JSObject obj, JSString prop, JSObject descriptor);
+
+void _setWindowProp(String name, JSAny value) {
+  try {
+    (web.window as JSObject).setProperty(name.toJS, value);
+  } catch (_) {}
+}
