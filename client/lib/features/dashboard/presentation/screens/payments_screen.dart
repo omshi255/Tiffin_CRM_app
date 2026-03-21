@@ -102,13 +102,19 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
       final endOfDay = startOfDay.add(const Duration(days: 1));
       final todayRes = await PaymentApi.list(
         page: 1,
-        limit: 500,
+        limit: 100,
         fromDate: startOfDay.toIso8601String(),
         toDate: endOfDay.toIso8601String(),
       );
       final overdueList = await InvoiceApi.getOverdue();
       final custRes = await CustomerApi.list(limit: 100, status: 'active');
-      final rawList = (custRes['data'] as List?) ?? [];
+      final custData = custRes['data'];
+      List<dynamic> rawList = [];
+      if (custData is Map<String, dynamic>) {
+        rawList = (custData['data'] as List?) ?? [];
+      } else if (custData is List) {
+        rawList = custData;
+      }
       final customers = rawList
           .whereType<Map<String, dynamic>>()
           .map((e) => CustomerModel.fromJson(e))

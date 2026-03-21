@@ -27,25 +27,38 @@ class DeliveryDashboardScreen extends StatefulWidget {
 }
 
 class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
-  // ── Violet palette ────────────────────────────────────────────────────────
-  static const _violet900 = Color(0xFF2D1B69);
-  static const _violet700 = Color(0xFF4C2DB8);
-  static const _violet600 = Color(0xFF5B35D5);
-  static const _violet500 = Color(0xFF6C42F5);
-  static const _violet100 = Color(0xFFEDE8FD);
-  static const _violet50 = Color(0xFFF5F2FF);
-  static const _bg = Color(0xFFF6F4FF);
+  // ── Amber × Violet mixed palette ──────────────────────────────────────────
+  static const _violet900 = Color(0xFF1E0A4A);
+  static const _violet800 = Color(0xFF3B0FA0);
+  static const _violet700 = Color(0xFF5B21B6);
+  static const _violet600 = Color(0xFF7C3AED);
+  static const _violet500 = Color(0xFF8B5CF6);
+  static const _violet200 = Color(0xFFDDD6FE);
+  static const _violet100 = Color(0xFFEDE9FE);
+  static const _violet50 = Color(0xFFF5F3FF);
+
+  static const _amber700 = Color(0xFFB45309);
+  static const _amber600 = Color(0xFFD97706);
+  static const _amber400 = Color(0xFFFBBF24);
+  static const _amber100 = Color(0xFFFEF3C7);
+  static const _amber50 = Color(0xFFFFFBEB);
+
+  // Gradient hero: deep violet → amber glow
+  static const _gradStart = Color(0xFFD97706);
+  static const _gradMid = Color(0xFFF59E0B);
+  static const _gradEnd = Color(0xFFFBBF24);
+
+  static const _bg = Color(0xFFFAF8FF);
   static const _surface = Color(0xFFFFFFFF);
-  static const _border = Color(0xFFE4DFF7);
-  static const _divider = Color(0xFFEEEBFA);
+  static const _border = Color(0xFFEDE9FE);
+  static const _divider = Color(0xFFF0EBFF);
   static const _textPrimary = Color(0xFF1A0E45);
-  static const _textSecondary = Color(0xFF7B6DAB);
-  static const _success = Color(0xFF0F7B0F);
-  static const _successSoft = Color(0xFFE6F4EA);
-  static const _danger = Color(0xFFD93025);
-  static const _dangerSoft = Color(0xFFFCECEB);
-  static const _warning = Color(0xFFBA7517);
-  static const _warningSoft = Color(0xFFFAEEDA);
+  static const _textSecondary = Color(0xFF7C6DAB);
+
+  static const _success = Color(0xFF059669);
+  static const _successSoft = Color(0xFFD1FAE5);
+  static const _danger = Color(0xFFDC2626);
+  static const _dangerSoft = Color(0xFFFEE2E2);
 
   // ── State ─────────────────────────────────────────────────────────────────
   List<OrderModel> _orders = [];
@@ -167,9 +180,12 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
               final controller = TextEditingController();
               return AlertDialog(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-                title: const Text('Reject delivery'),
+                title: const Text(
+                  'Reject delivery',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
                 content: TextField(
                   controller: controller,
                   decoration: InputDecoration(
@@ -227,21 +243,16 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
         },
         onWhatsApp: () {
           final phone = order.customerPhone;
-          if (phone != null && phone.isNotEmpty) {
-            WhatsAppHelper.openChat(phone);
-          }
+          if (phone != null && phone.isNotEmpty) WhatsAppHelper.openChat(phone);
         },
         onCall: () {
           final phone = order.customerPhone;
-          if (phone != null && phone.isNotEmpty) {
+          if (phone != null && phone.isNotEmpty)
             WhatsAppHelper.callPhone(phone);
-          }
         },
         onOpenMaps: () {
           final loc = order.customerLocation;
-          if (loc != null) {
-            LocationHelper.openInMaps(loc.lat, loc.lng);
-          }
+          if (loc != null) LocationHelper.openInMaps(loc.lat, loc.lng);
         },
       ),
     );
@@ -256,7 +267,16 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     return Scaffold(
       backgroundColor: _bg,
       appBar: AppBar(
-        backgroundColor: _violet700,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [_gradStart, _gradMid, _gradEnd],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -264,18 +284,16 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           tabTitles[_selectedTab],
           style: const TextStyle(
             fontSize: 17,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
             color: Colors.white,
-            letterSpacing: 0.2,
+            letterSpacing: 0.3,
           ),
         ),
         actions: [
-          // Notification bell
           NotificationBellIcon(
             onPressed: () => context.push(AppRoutes.notifications),
           ),
           if (_selectedTab == 0) ...[
-            // Share location
             IconButton(
               icon: _updatingLocation
                   ? const SizedBox(
@@ -294,7 +312,6 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
               tooltip: 'Share my location',
               onPressed: _updatingLocation ? null : _shareMyLocation,
             ),
-            // Refresh
             IconButton(
               icon: const PhosphorIcon(
                 PhosphorIconsRegular.arrowsClockwise,
@@ -303,11 +320,10 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
               ),
               onPressed: _loading ? null : _load,
             ),
-            // Logout menu
             PopupMenuButton<void>(
               icon: const Icon(Icons.more_vert, color: Colors.white),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
               itemBuilder: (_) => [
                 PopupMenuItem(
@@ -331,7 +347,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                       const Text(
                         'Logout',
                         style: TextStyle(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: _danger,
                         ),
                       ),
@@ -344,9 +360,15 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
         ],
         bottom: _selectedTab == 0
             ? PreferredSize(
-                preferredSize: const Size.fromHeight(50),
+                preferredSize: const Size.fromHeight(52),
                 child: Container(
-                  color: _violet700,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [_gradStart, _gradMid],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
@@ -360,28 +382,29 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                               () => _statusFilter = _filterValues[i],
                             ),
                             child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 160),
+                              duration: const Duration(milliseconds: 180),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
                                 color: selected
-                                    ? Colors.white
-                                    : Colors.white.withValues(alpha: 0.15),
+                                    ? _amber400
+                                    : Colors.white.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: selected
-                                      ? Colors.white
-                                      : Colors.white.withValues(alpha: 0.3),
+                                      ? _amber600
+                                      : Colors.white.withOpacity(0.3),
+                                  width: selected ? 1.5 : 1,
                                 ),
                               ),
                               child: Text(
                                 _filterLabels[i],
                                 style: TextStyle(
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: selected ? _violet700 : Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  color: selected ? _violet900 : Colors.white,
                                 ),
                               ),
                             ),
@@ -402,22 +425,23 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           const DeliveryProfileScreen(),
         ],
       ),
+
       // ── Bottom nav ─────────────────────────────────────────────────────────
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: _surface,
-          border: Border(top: BorderSide(color: _border)),
+          border: Border(top: BorderSide(color: _border, width: 1)),
           boxShadow: [
             BoxShadow(
-              color: _violet900.withValues(alpha: 0.06),
-              blurRadius: 16,
+              color: _violet900.withOpacity(0.08),
+              blurRadius: 20,
               offset: const Offset(0, -4),
             ),
           ],
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -435,9 +459,6 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                     HapticFeedback.lightImpact();
                     setState(() => _selectedTab = 0);
                   },
-                  violet600: _violet600,
-                  violet100: _violet100,
-                  textSecondary: _textSecondary,
                 ),
                 _NavTab(
                   icon: PhosphorIconsRegular.mapTrifold,
@@ -448,9 +469,6 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                     HapticFeedback.lightImpact();
                     setState(() => _selectedTab = 1);
                   },
-                  violet600: _violet600,
-                  violet100: _violet100,
-                  textSecondary: _textSecondary,
                 ),
                 _NavTab(
                   icon: PhosphorIconsRegular.user,
@@ -461,15 +479,13 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                     HapticFeedback.lightImpact();
                     setState(() => _selectedTab = 2);
                   },
-                  violet600: _violet600,
-                  violet100: _violet100,
-                  textSecondary: _textSecondary,
                 ),
               ],
             ),
           ),
         ),
       ),
+
       floatingActionButton: _selectedTab == 0
           ? FloatingActionButton.extended(
               onPressed: () {
@@ -478,7 +494,10 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
               },
               backgroundColor: _violet600,
               foregroundColor: Colors.white,
-              elevation: 4,
+              elevation: 6,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               icon: const PhosphorIcon(
                 PhosphorIconsRegular.mapTrifold,
                 size: 18,
@@ -496,7 +515,17 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   Widget _buildTasksBody(List<OrderModel> filtered) {
     if (_loading) {
       return Center(
-        child: CircularProgressIndicator(color: _violet600, strokeWidth: 2.5),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: _violet600, strokeWidth: 2.5),
+            const SizedBox(height: 12),
+            Text(
+              'Loading deliveries…',
+              style: TextStyle(color: _textSecondary, fontSize: 13),
+            ),
+          ],
+        ),
       );
     }
 
@@ -511,11 +540,16 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                   child: Column(
                     children: [
                       Container(
-                        width: 72,
-                        height: 72,
+                        width: 76,
+                        height: 76,
                         decoration: BoxDecoration(
-                          color: _violet100,
-                          borderRadius: BorderRadius.circular(20),
+                          gradient: const LinearGradient(
+                            colors: [_violet100, _amber100],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: _violet200),
                         ),
                         child: const Icon(
                           Icons.inbox_outlined,
@@ -528,12 +562,12 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                         'No deliveries assigned',
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: _textPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'Pull down to refresh',
                         style: TextStyle(fontSize: 13, color: _textSecondary),
                       ),
@@ -563,30 +597,34 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           HapticFeedback.lightImpact();
           _showOrderSheet(order);
         },
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
             color: _surface,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: _border),
             boxShadow: [
               BoxShadow(
-                color: _violet900.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+                color: _violet900.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
           child: IntrinsicHeight(
             child: Row(
               children: [
-                // Left status bar
+                // Left accent bar — gradient violet→amber
                 Container(
                   width: 4,
                   decoration: BoxDecoration(
-                    color: statusMeta.$1,
+                    gradient: LinearGradient(
+                      colors: [statusMeta.$1, _amber400],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                     borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(14),
+                      left: Radius.circular(16),
                     ),
                   ),
                 ),
@@ -599,13 +637,18 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                     ),
                     child: Row(
                       children: [
-                        // Avatar
+                        // Avatar — violet/amber gradient bg
                         Container(
-                          width: 42,
-                          height: 42,
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
-                            color: _violet100,
-                            borderRadius: BorderRadius.circular(12),
+                            gradient: const LinearGradient(
+                              colors: [_violet100, _amber100],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(13),
+                            border: Border.all(color: _violet200),
                           ),
                           child: Center(
                             child: Text(
@@ -648,20 +691,39 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 3),
                               Row(
                                 children: [
-                                  const Icon(
-                                    Icons.access_time_rounded,
-                                    size: 11,
-                                    color: _textSecondary,
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    order.slot ?? '—',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: _textSecondary,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _amber50,
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: _amber400.withOpacity(0.4),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time_rounded,
+                                          size: 10,
+                                          color: _amber700,
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          order.slot ?? '—',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                            color: _amber700,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -675,19 +737,22 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 9,
-                            vertical: 4,
+                            vertical: 5,
                           ),
                           decoration: BoxDecoration(
                             color: statusMeta.$2,
-                            borderRadius: BorderRadius.circular(7),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: statusMeta.$1.withOpacity(0.3),
+                            ),
                           ),
                           child: Text(
                             statusMeta.$3,
                             style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
                               color: statusMeta.$1,
-                              letterSpacing: 0.3,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ),
@@ -696,8 +761,8 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                   ),
                 ),
                 // Chevron
-                const Padding(
-                  padding: EdgeInsets.only(right: 10),
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
                   child: Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
@@ -724,15 +789,14 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     return name[0].toUpperCase();
   }
 
-  /// Returns (accent color, bg color, label)
   (Color, Color, String) _statusMeta(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
       case 'assigned':
-        return (_warning, _warningSoft, 'PENDING');
+        return (_amber600, _amber100, 'PENDING');
       case 'processing':
       case 'cooking':
-        return (const Color(0xFF854F0B), const Color(0xFFFAEEDA), 'COOKING');
+        return (_amber700, _amber50, 'COOKING');
       case 'out_for_delivery':
       case 'in_transit':
         return (_violet600, _violet100, 'ON THE WAY');
@@ -757,9 +821,6 @@ class _NavTab extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    required this.violet600,
-    required this.violet100,
-    required this.textSecondary,
     this.badge = 0,
   });
 
@@ -768,8 +829,12 @@ class _NavTab extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final Color violet600, violet100, textSecondary;
   final int badge;
+
+  static const _violet600 = Color(0xFF7C3AED);
+  static const _violet100 = Color(0xFFEDE9FE);
+  static const _amber400 = Color(0xFFFBBF24);
+  static const _textSecondary = Color(0xFF7C6DAB);
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -787,16 +852,20 @@ class _NavTab extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 6,
+                  vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: selected ? violet100 : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
+                  color: selected ? _violet100 : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  // Amber bottom glow when selected
+                  border: selected
+                      ? Border(bottom: BorderSide(color: _amber400, width: 2))
+                      : null,
                 ),
                 child: PhosphorIcon(
                   selected ? iconFill : icon,
                   size: 22,
-                  color: selected ? violet600 : textSecondary,
+                  color: selected ? _violet600 : _textSecondary,
                 ),
               ),
               if (badge > 0)
@@ -807,7 +876,9 @@ class _NavTab extends StatelessWidget {
                     width: 16,
                     height: 16,
                     decoration: const BoxDecoration(
-                      color: Color(0xFFD93025),
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFD97706), Color(0xFFDC2626)],
+                      ),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -830,7 +901,7 @@ class _NavTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-              color: selected ? violet600 : textSecondary,
+              color: selected ? _violet600 : _textSecondary,
             ),
           ),
         ],
@@ -864,19 +935,25 @@ class _OrderActionSheet extends StatelessWidget {
   final VoidCallback onCall;
   final VoidCallback onOpenMaps;
 
-  static const _violet700 = Color(0xFF4C2DB8);
-  static const _violet600 = Color(0xFF5B35D5);
-  static const _violet100 = Color(0xFFEDE8FD);
-  static const _violet50 = Color(0xFFF5F2FF);
+  static const _violet900 = Color(0xFF1E0A4A);
+  static const _violet700 = Color(0xFF5B21B6);
+  static const _violet600 = Color(0xFF7C3AED);
+  static const _violet100 = Color(0xFFEDE9FE);
+  static const _violet50 = Color(0xFFF5F3FF);
+  static const _amber700 = Color(0xFFB45309);
+  static const _amber600 = Color(0xFFD97706);
+  static const _amber400 = Color(0xFFFBBF24);
+  static const _amber100 = Color(0xFFFEF3C7);
+  static const _amber50 = Color(0xFFFFFBEB);
   static const _surface = Color(0xFFFFFFFF);
-  static const _border = Color(0xFFE4DFF7);
-  static const _divider = Color(0xFFEEEBFA);
+  static const _border = Color(0xFFEDE9FE);
+  static const _divider = Color(0xFFF0EBFF);
   static const _textPrimary = Color(0xFF1A0E45);
-  static const _textSecondary = Color(0xFF7B6DAB);
-  static const _success = Color(0xFF0F7B0F);
-  static const _successSoft = Color(0xFFE6F4EA);
-  static const _danger = Color(0xFFD93025);
-  static const _dangerSoft = Color(0xFFFCECEB);
+  static const _textSecondary = Color(0xFF7C6DAB);
+  static const _success = Color(0xFF059669);
+  static const _successSoft = Color(0xFFD1FAE5);
+  static const _danger = Color(0xFFDC2626);
+  static const _dangerSoft = Color(0xFFFEE2E2);
 
   @override
   Widget build(BuildContext context) {
@@ -892,7 +969,7 @@ class _OrderActionSheet extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: _surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.fromLTRB(
         20,
@@ -904,112 +981,133 @@ class _OrderActionSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Handle bar
+          // Handle bar — amber tinted
           Center(
             child: Container(
-              width: 36,
+              width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: _divider,
+                gradient: const LinearGradient(colors: [_violet600, _amber600]),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
-          // Customer info
-          Row(
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: _violet100,
-                  borderRadius: BorderRadius.circular(13),
-                ),
-                child: Center(
-                  child: Text(
-                    _getInitials(order.customerName ?? order.customerId),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: _violet700,
-                    ),
-                  ),
-                ),
+          // Customer info — violet/amber gradient header
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFF5F3FF), Color(0xFFFFFBEB)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order.customerName ?? order.customerId,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [_violet700, _amber600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _getInitials(order.customerName ?? order.customerId),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: _textPrimary,
+                        color: Colors.white,
                       ),
                     ),
-                    if (order.customerAddress != null)
-                      Text(
-                        order.customerAddress!,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: _textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ),
-              // Status badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: _violet100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  order.status.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: _violet600,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.customerName ?? order.customerId,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: _textPrimary,
+                        ),
+                      ),
+                      if (order.customerAddress != null)
+                        Text(
+                          order.customerAddress!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: _textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                // Status badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [_violet100, _amber100],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: _violet600.withOpacity(0.2)),
+                  ),
+                  child: Text(
+                    order.status.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: _violet700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          // Slot info
+          // Slot chip
           if (order.slot != null) ...[
             const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
               decoration: BoxDecoration(
-                color: _violet50,
-                borderRadius: BorderRadius.circular(9),
-                border: Border.all(color: _border),
+                color: _amber50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: _amber400.withOpacity(0.4)),
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
                     Icons.access_time_rounded,
                     size: 14,
-                    color: _textSecondary,
+                    color: _amber700,
                   ),
                   const SizedBox(width: 7),
                   Text(
                     'Slot: ${order.slot}',
                     style: const TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: _textPrimary,
+                      fontWeight: FontWeight.w700,
+                      color: _amber700,
                     ),
                   ),
                 ],
@@ -1017,11 +1115,11 @@ class _OrderActionSheet extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Divider(color: _divider, height: 1),
           const SizedBox(height: 16),
 
-          // ── Accept / Reject ────────────────────────────────────────────
+          // Accept / Reject
           if (needsAcceptReject) ...[
             Row(
               children: [
@@ -1051,7 +1149,7 @@ class _OrderActionSheet extends StatelessWidget {
             const SizedBox(height: 10),
           ],
 
-          // ── Start delivery ─────────────────────────────────────────────
+          // Start delivery
           if (canStart && !needsAcceptReject) ...[
             _SheetButton(
               label: 'Start Delivery',
@@ -1065,7 +1163,7 @@ class _OrderActionSheet extends StatelessWidget {
             const SizedBox(height: 10),
           ],
 
-          // ── Mark delivered ─────────────────────────────────────────────
+          // Mark delivered
           if (canDeliver) ...[
             _SheetButton(
               label: 'Mark Delivered',
@@ -1079,16 +1177,16 @@ class _OrderActionSheet extends StatelessWidget {
             const SizedBox(height: 10),
           ],
 
-          // ── Contact actions ────────────────────────────────────────────
+          // Contact row
           Row(
             children: [
               Expanded(
                 child: _SheetButton(
                   label: 'WhatsApp',
                   icon: Icons.chat_outlined,
-                  bg: const Color(0xFFE6F4EA),
-                  fg: const Color(0xFF1B7A3A),
-                  border: const Color(0xFF1B7A3A),
+                  bg: const Color(0xFFD1FAE5),
+                  fg: const Color(0xFF065F46),
+                  border: const Color(0xFF059669),
                   onTap: onWhatsApp,
                 ),
               ),
@@ -1108,9 +1206,9 @@ class _OrderActionSheet extends StatelessWidget {
                 child: _SheetButton(
                   label: 'Maps',
                   icon: Icons.map_outlined,
-                  bg: const Color(0xFFE6F1FB),
-                  fg: const Color(0xFF185FA5),
-                  border: const Color(0xFF185FA5),
+                  bg: _amber50,
+                  fg: _amber700,
+                  border: _amber600,
                   onTap: onOpenMaps,
                 ),
               ),
@@ -1167,25 +1265,38 @@ class _SheetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(11),
+    borderRadius: BorderRadius.circular(12),
     child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 6),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: border.withOpacity(0.35)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border.withOpacity(0.4)),
+        boxShadow: filled
+            ? [
+                BoxShadow(
+                  color: fg.withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ]
+            : null,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: fg),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: fg,
+          Icon(icon, size: 15, color: fg),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: fg,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
