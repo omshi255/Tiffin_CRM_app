@@ -384,6 +384,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _truecallerSigningIn = false;
 
+  /// Truecaller SDK is Android-only (use [defaultTargetPlatform] so `dart:io` is not required — web-safe).
+  bool get _isAndroidDevice =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
   static final RegExp _phoneRegex = RegExp(r'^[6-9]\d{9}$');
 
   @override

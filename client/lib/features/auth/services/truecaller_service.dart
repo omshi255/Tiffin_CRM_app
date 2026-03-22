@@ -9,6 +9,10 @@ import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:truecaller_sdk/truecaller_sdk.dart';
 
+/// Android without importing `dart:io` (keeps Flutter web builds working).
+bool _isAndroidPlatform() =>
+    !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
 /// Outcome of attempting Truecaller OAuth (PKCE) sign-in.
 ///
 /// On [ok] == true, [authorizationCode] must be sent to your backend together with
@@ -63,9 +67,6 @@ abstract final class TruecallerSdk {
   static Future<bool> get isUsable async => TruecallerService.instance.isOAuthFlowUsable;
 }
 
-bool _isAndroidDevice() =>
-    !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-
 /// Handles SDK init, usability checks, OAuth PKCE setup, and [TcSdk.streamCallbackData] listening.
 final class TruecallerService {
   TruecallerService._();
@@ -77,7 +78,7 @@ final class TruecallerService {
   /// Step 1: Call once on Android before [isOAuthFlowUsable] / [signInWithTruecaller].
   /// Uses [TcSdkOptions.OPTION_VERIFY_ONLY_TC_USERS] so non-Truecaller users fall back to OTP in-app.
   Future<void> initialize() async {
-    if (!_isAndroidDevice()) return;
+    if (!_isAndroidPlatform()) return;
     if (_initialized) return;
 
     // Initialize native SDK — consent UI is customized via defaults in plugin.
@@ -89,7 +90,7 @@ final class TruecallerService {
 
   /// Whether the device can run the OAuth flow (Truecaller installed & eligible).
   Future<bool> get isOAuthFlowUsable async {
-    if (kIsWeb || !Platform.isAndroid) return false;
+    if (kIsWeb || !_isAndroidPlatform()) return false;
     if (!_initialized) await initialize();
     final dynamic usable = await TcSdk.isOAuthFlowUsable;
     return usable == true;
@@ -106,7 +107,7 @@ final class TruecallerService {
   /// Returns [TruecallerSignInOutcome.failure] with [TruecallerSignInOutcome.requiresOtpFallback] for
   /// user dismiss, missing app, or [TcSdkCallbackResult.verification] (manual path — use OTP).
   Future<TruecallerSignInOutcome> signInWithTruecaller() async {
-    if (!_isAndroidDevice()) {
+    if (!_isAndroidPlatform()) {
       return TruecallerSignInOutcome.failure(
         'Truecaller is only available on Android',
         otpFallback: true,
