@@ -1,13 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <!-- Truecaller SDK: used when verifying non–Truecaller users (OPTION_VERIFY_ALL_USERS) or manual flows -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS"/>
     <application
         android:label="tiffin_crm"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Truecaller OAuth Client ID: injected at build from client/.env (TRUECALLER_CLIENT_ID) via Gradle -->
+        <meta-data
+            android:name="com.truecaller.android.sdk.ClientId"
+            android:value="${TRUECALLER_CLIENT_ID}"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

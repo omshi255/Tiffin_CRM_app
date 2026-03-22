@@ -92,6 +92,8 @@ Optional: `--dart-define=GOOGLE_MAPS_API_KEY=...` still works for Dart `AppConfi
 
 Other optional defines: `FCM_SENDER_ID`, `RAZORPAY_KEY_ID`, `TRUECALLER_APP_KEY`.
 
+**Truecaller (Android)** — set `TRUECALLER_CLIENT_ID` in `client/.env` (same file as Maps). Gradle injects it into `AndroidManifest` at build time; rebuild after changing `.env`. Optional: `TRUECALLER_APP_KEY` for server-side use.
+
 ---
 
 ## Project Structure (Relevant Parts)

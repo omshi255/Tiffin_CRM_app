@@ -80,6 +80,7 @@ dependencies:
   phosphor_flutter: ^2.1.0
   web: ^1.0.0
   shared_preferences: ^2.5.4
+  truecaller_sdk: ^1.2.0
  
 
 dev_dependencies:
