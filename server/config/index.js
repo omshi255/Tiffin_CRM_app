@@ -96,6 +96,10 @@ export default {
   TRUECALLER_API_KEY: process.env.TRUECALLER_API_KEY || "",
   // override host if default `api4.truecaller.com` cannot be resolved
   TRUECALLER_BASE_URL: process.env.TRUECALLER_BASE_URL || "",
+  // OAuth Client Id (same as Android manifest) — required for PKCE token exchange
+  TRUECALLER_CLIENT_ID: process.env.TRUECALLER_CLIENT_ID || "",
+  TRUECALLER_OAUTH_TOKEN_URL: process.env.TRUECALLER_OAUTH_TOKEN_URL || "",
+  TRUECALLER_OAUTH_USERINFO_URL: process.env.TRUECALLER_OAUTH_USERINFO_URL || "",
   // enable mock mode: returns a fake profile in development
   TRUECALLER_MOCK: process.env.TRUECALLER_MOCK || "false",
 

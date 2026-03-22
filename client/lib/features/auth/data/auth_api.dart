@@ -69,7 +69,7 @@ abstract final class AuthApi {
       receiveTimeout: const Duration(seconds: 30),
     ));
     final response = await dio.post(
-      ApiEndpoints.truecallerVerify,
+      ApiEndpoints.truecaller,
       data: <String, dynamic>{
         'accessToken': accessToken,
         if (codeVerifier != null) 'codeVerifier': codeVerifier,

@@ -85,6 +85,9 @@ const resetPasswordSchema = Joi.object({
 
 const truecallerSchema = Joi.object({
   accessToken: Joi.string().required(),
+  // Flutter Truecaller SDK (OAuth PKCE) sends authorization code as `accessToken` plus:
+  codeVerifier: Joi.string().optional().allow(null, ""),
+  oauthState: Joi.string().optional().allow(null, ""),
   // profile may be supplied by client to avoid extra API call;
   // if present we still verify the token for security, but it
   // allows UI code to pass along name/phone it already received.
@@ -411,14 +414,21 @@ export const truecallerController = asyncHandler(async (req, res, next) => {
     throw new ApiError(400, msg);
   }
 
-  const { accessToken, profile: clientProfile } = value;
+  const { accessToken, profile: clientProfile, codeVerifier } = value;
   let profile = clientProfile || null;
 
-  // always verify token to ensure it's valid and coming from Truecaller
+  // Flutter SDK sends OAuth authorization code as `accessToken` + PKCE `codeVerifier`.
+  // Legacy clients may send a raw token without code_verifier → old verify endpoint.
   try {
-    const remoteProfile = await truecallerService.verifyToken(accessToken);
-    // use remote profile as authoritative, but if client provided name/phone
-    // we can merge basic fields to reduce churn
+    let remoteProfile;
+    if (codeVerifier && String(codeVerifier).trim().length > 0) {
+      remoteProfile = await truecallerService.verifyOAuthPkce({
+        authorizationCode: accessToken,
+        codeVerifier: String(codeVerifier).trim(),
+      });
+    } else {
+      remoteProfile = await truecallerService.verifyToken(accessToken);
+    }
     profile = { ...remoteProfile, ...profile };
   } catch (err) {
     const msg = err.message || "unknown error";
@@ -432,6 +442,12 @@ export const truecallerController = asyncHandler(async (req, res, next) => {
   // profile object typically contains phoneNumber and name fields
   const phoneRaw = profile.phoneNumber || profile.phone || "";
   const phone = String(phoneRaw).replace(/^\+91/, "").trim();
+  if (!phone || phone.replace(/\D/g, "").length < 10) {
+    throw new ApiError(
+      422,
+      "Could not determine a valid phone number from Truecaller. Ensure userinfo includes phone scope."
+    );
+  }
   const tcId = profile.truecallerId || profile.id || "";
 
   const resolved = await resolveRoleForPhone(phone);
