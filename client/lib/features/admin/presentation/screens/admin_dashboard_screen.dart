@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -9,6 +10,12 @@ import '../../../auth/data/auth_api.dart';
 import '../../data/admin_api.dart';
 import '../../models/admin_stats_model.dart';
 import 'admin_list_screen.dart';
+
+String _formatINRAmount(double n) =>
+    NumberFormat.decimalPattern('en_IN').format(n.round());
+
+String _formatCount(int n) =>
+    NumberFormat.decimalPattern('en_IN').format(n);
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({
@@ -106,49 +113,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         children: [
                           _StatCard(
                             title: 'Vendors',
-                            value: '${s.totalVendors}',
+                            value: _formatCount(s.totalVendors),
                             icon: Icons.store,
                             color: AppColors.primary,
                           ),
                           _StatCard(
                             title: 'Customers',
-                            value: '${s.totalCustomers}',
+                            value: _formatCount(s.totalCustomers),
                             icon: Icons.people,
                             color: AppColors.secondary,
                           ),
                           _StatCard(
                             title: 'Orders',
-                            value: '${s.totalOrders}',
+                            value: _formatCount(s.totalOrders),
                             icon: Icons.receipt_long,
                             color: AppColors.warning,
                           ),
                           _StatCard(
-                            title: 'Revenue',
-                            value: '₹${s.totalRevenue.toStringAsFixed(0)}',
+                            title: 'Revenue (30 days)',
+                            value: '₹${_formatINRAmount(s.totalRevenue)}',
                             icon: Icons.currency_rupee,
                             color: AppColors.success,
                           ),
                           _StatCard(
                             title: "Today's orders",
-                            value: '${s.todayOrders}',
+                            value: _formatCount(s.todayOrders),
                             icon: Icons.today,
                             color: AppColors.tertiary,
                           ),
                           _StatCard(
                             title: "Today's revenue",
-                            value: '₹${s.todayRevenue.toStringAsFixed(0)}',
+                            value: '₹${_formatINRAmount(s.todayRevenue)}',
                             icon: Icons.trending_up,
                             color: AppColors.success,
                           ),
                           _StatCard(
-                            title: 'Active plans',
-                            value: '${s.activeSubscriptions}',
+                            title: 'Active subscriptions',
+                            value: _formatCount(s.activeSubscriptions),
                             icon: Icons.assignment,
                             color: AppColors.primary,
                           ),
                           _StatCard(
                             title: 'Pending orders',
-                            value: '${s.pendingOrders}',
+                            value: _formatCount(s.pendingOrders),
                             icon: Icons.pending_actions,
                             color: AppColors.warning,
                           ),

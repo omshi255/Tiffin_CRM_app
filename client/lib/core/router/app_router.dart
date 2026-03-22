@@ -46,6 +46,8 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 final class AppRouter {
   AppRouter._();
 
+  static bool onboardingSeen = false;
+
   static final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>(
     debugLabel: 'root',
   );
@@ -55,6 +57,12 @@ final class AppRouter {
   static final GoRouter _router = GoRouter(
     navigatorKey: _rootKey,
     initialLocation: AppRoutes.appIntro,
+    redirect: (context, state) {
+      if (state.matchedLocation == AppRoutes.onboarding && AppRouter.onboardingSeen) {
+        return AppRoutes.roleSelection;
+      }
+      return null;
+    },
     routes: <RouteBase>[
       GoRoute(
         path: AppRoutes.appIntro,

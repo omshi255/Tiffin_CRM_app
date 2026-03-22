@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
@@ -32,9 +33,9 @@ class _AppIntroScreenState extends State<AppIntroScreen> {
       context.go(AppRoutes.splash);
       return;
     }
-    final seen = await SecureStorage.get('app_intro_seen');
+    final appIntroSeen = await SecureStorage.get('app_intro_seen');
     if (!mounted) return;
-    if (seen == 'true') {
+    if (appIntroSeen == 'true') {
       context.go(AppRoutes.roleSelection);
       return;
     }
@@ -46,7 +47,13 @@ class _AppIntroScreenState extends State<AppIntroScreen> {
     if (!mounted) return;
     await SecureStorage.set('app_intro_seen', 'true');
     if (!mounted) return;
-    context.go(AppRoutes.roleSelection);
+    final prefs = await SharedPreferences.getInstance();
+    final seen = prefs.getBool('onboarding_seen') ?? false;
+    if (seen) {
+      context.go(AppRoutes.roleSelection);
+    } else {
+      context.go(AppRoutes.onboarding);
+    }
   }
 
   @override

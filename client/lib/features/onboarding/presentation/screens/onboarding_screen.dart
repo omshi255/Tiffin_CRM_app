@@ -402,6 +402,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -516,7 +517,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -525,7 +526,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextButton(
-                  onPressed: () => context.go(AppRoutes.login),
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('onboarding_seen', true);
+                    if (context.mounted) context.go(AppRoutes.roleSelection);
+                  },
                   child: Text(
                     'Skip',
                     style: theme.textTheme.labelLarge?.copyWith(
@@ -690,14 +695,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () {
+            onTap: () async {
               if (!isLastPage) {
                 _pageController.nextPage(
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeInOutCubic,
                 );
               } else {
-                context.go(AppRoutes.login);
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('onboarding_seen', true);
+                if (context.mounted) context.go(AppRoutes.roleSelection);
               }
             },
             child: Center(

@@ -131,12 +131,33 @@ class _AdminListScreenState extends State<AdminListScreen> {
               onRefresh: _load,
               child: _items.isEmpty
                   ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        const SizedBox(height: 48),
+                        SizedBox(
+                          height: MediaQuery.sizeOf(context).height * 0.35,
+                        ),
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 56,
+                          color: AppColors.textSecondary.withValues(alpha: 0.6),
+                        ),
+                        const SizedBox(height: 16),
                         Center(
                           child: Text(
-                            'No data',
-                            style: theme.textTheme.bodyLarge?.copyWith(
+                            'No records yet',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: AppColors.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Text(
+                            'When data exists for this category, it will appear here. Pull down to refresh.',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -150,13 +171,33 @@ class _AdminListScreenState extends State<AdminListScreen> {
                         final item = _items[index];
                         return Card(
                           margin: const EdgeInsets.only(bottom: 8),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: theme.colorScheme.outlineVariant
+                                  .withValues(alpha: 0.5),
+                            ),
+                          ),
                           child: ListTile(
-                            title: Text(_itemTitle(item)),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            title: Text(
+                              _itemTitle(item),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             subtitle: _itemSubtitle(item) != null
-                                ? Text(
-                                    _itemSubtitle(item)!,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      _itemSubtitle(item)!,
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
                                     ),
                                   )
                                 : null,
@@ -186,11 +227,13 @@ class _AdminListScreenState extends State<AdminListScreen> {
       return '${item.customerName ?? item.customerId} • ₹${item.amount.toStringAsFixed(0)}';
     }
     if (item is Map<String, dynamic>) {
-      return item['businessName']?.toString() ??
-          item['ownerName']?.toString() ??
-          item['name']?.toString() ??
-          item['_id']?.toString() ??
-          '—';
+      final business = item['businessName']?.toString().trim();
+      if (business != null && business.isNotEmpty) return business;
+      final owner = item['ownerName']?.toString().trim();
+      if (owner != null && owner.isNotEmpty) return owner;
+      final name = item['name']?.toString().trim();
+      if (name != null && name.isNotEmpty) return name;
+      return item['_id']?.toString() ?? '—';
     }
     return '—';
   }
@@ -201,7 +244,27 @@ class _AdminListScreenState extends State<AdminListScreen> {
     if (item is InvoiceModel) return item.status;
     if (item is SubscriptionModel) return '${item.status} • ${item.deliverySlot}';
     if (item is Map<String, dynamic>) {
-      return item['phone']?.toString() ?? item['email']?.toString();
+      final parts = <String>[];
+      final phone = item['phone']?.toString().trim();
+      if (phone != null && phone.isNotEmpty) parts.add(phone);
+      final email = item['email']?.toString().trim();
+      if (email != null && email.isNotEmpty) parts.add(email);
+      final owner = item['ownerName']?.toString().trim();
+      final business = item['businessName']?.toString().trim();
+      if (owner != null &&
+          owner.isNotEmpty &&
+          business != null &&
+          business.isNotEmpty &&
+          owner != business) {
+        parts.insert(0, owner);
+      }
+      final city = item['city']?.toString().trim();
+      if (city != null && city.isNotEmpty) parts.add(city);
+      final active = item['isActive'];
+      if (active is bool) {
+        parts.add(active ? 'Active' : 'Inactive');
+      }
+      return parts.isEmpty ? null : parts.join(' · ');
     }
     return null;
   }

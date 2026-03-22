@@ -11,12 +11,29 @@ import '../../orders/models/order_model.dart';
 import '../../payments/models/payment_model.dart';
 import '../../payments/models/invoice_model.dart';
 
+/// Admin list endpoints return `{ data: [...], total, page, ... }` inside `data`.
+List<dynamic> _adminListRows(dynamic data) {
+  if (data is List) return data;
+  if (data is Map) {
+    final inner = data['data'];
+    if (inner is List) return inner;
+    if (data['vendors'] is List) return data['vendors'] as List;
+  }
+  return [];
+}
+
+Map<String, dynamic> _rowMap(dynamic e) {
+  if (e is Map<String, dynamic>) return e;
+  if (e is Map) return Map<String, dynamic>.from(e);
+  return {};
+}
+
 abstract final class AdminApi {
   static Future<AdminStatsModel> getStats() async {
     final response = await DioClient.instance.get(ApiEndpoints.adminStats);
     final data = parseData(response);
-    if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
-    return AdminStatsModel.fromJson(data);
+    if (data is! Map) throw ApiException('Invalid response');
+    return AdminStatsModel.fromJson(Map<String, dynamic>.from(data as Map));
   }
 
   static Future<List<dynamic>> getVendors({
@@ -31,9 +48,7 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) return data;
-    if (data is Map && data['vendors'] is List) return data['vendors'] as List;
-    return [];
+    return _adminListRows(data);
   }
 
   static Future<List<CustomerModel>> getCustomers({
@@ -50,13 +65,11 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => CustomerModel.fromJson(e))
-          .toList();
-    }
-    return [];
+    return _adminListRows(data)
+        .map(_rowMap)
+        .where((m) => m.isNotEmpty)
+        .map(CustomerModel.fromJson)
+        .toList();
   }
 
   static Future<List<DeliveryStaffModel>> getDeliveryStaff({
@@ -73,13 +86,11 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => DeliveryStaffModel.fromJson(e))
-          .toList();
-    }
-    return [];
+    return _adminListRows(data)
+        .map(_rowMap)
+        .where((m) => m.isNotEmpty)
+        .map(DeliveryStaffModel.fromJson)
+        .toList();
   }
 
   static Future<List<PlanModel>> getPlans({
@@ -96,13 +107,11 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => PlanModel.fromJson(e))
-          .toList();
-    }
-    return [];
+    return _adminListRows(data)
+        .map(_rowMap)
+        .where((m) => m.isNotEmpty)
+        .map(PlanModel.fromJson)
+        .toList();
   }
 
   static Future<List<ItemModel>> getItems({
@@ -119,13 +128,11 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => ItemModel.fromJson(e))
-          .toList();
-    }
-    return [];
+    return _adminListRows(data)
+        .map(_rowMap)
+        .where((m) => m.isNotEmpty)
+        .map(ItemModel.fromJson)
+        .toList();
   }
 
   static Future<List<SubscriptionModel>> getSubscriptions({
@@ -142,13 +149,11 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => SubscriptionModel.fromJson(e))
-          .toList();
-    }
-    return [];
+    return _adminListRows(data)
+        .map(_rowMap)
+        .where((m) => m.isNotEmpty)
+        .map(SubscriptionModel.fromJson)
+        .toList();
   }
 
   static Future<List<OrderModel>> getOrders({
@@ -167,13 +172,11 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => OrderModel.fromJson(e))
-          .toList();
-    }
-    return [];
+    return _adminListRows(data)
+        .map(_rowMap)
+        .where((m) => m.isNotEmpty)
+        .map(OrderModel.fromJson)
+        .toList();
   }
 
   static Future<List<PaymentModel>> getPayments({
@@ -188,13 +191,11 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => PaymentModel.fromJson(e))
-          .toList();
-    }
-    return [];
+    return _adminListRows(data)
+        .map(_rowMap)
+        .where((m) => m.isNotEmpty)
+        .map(PaymentModel.fromJson)
+        .toList();
   }
 
   static Future<List<InvoiceModel>> getInvoices({
@@ -211,12 +212,10 @@ abstract final class AdminApi {
       queryParameters: query,
     );
     final data = parseData(response);
-    if (data is List) {
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map((e) => InvoiceModel.fromJson(e))
-          .toList();
-    }
-    return [];
+    return _adminListRows(data)
+        .map(_rowMap)
+        .where((m) => m.isNotEmpty)
+        .map(InvoiceModel.fromJson)
+        .toList();
   }
 }

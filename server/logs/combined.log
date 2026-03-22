@@ -8965,3 +8965,4 @@ Error: Customer not found
 
 
 2026-03-21T06:45:31.835Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-03-22T05:54:31.351Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted

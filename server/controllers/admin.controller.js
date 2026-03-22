@@ -530,6 +530,8 @@ export const listAllNotifications = asyncHandler(async (req, res) => {
 export const getSystemStats = asyncHandler(async (req, res) => {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
   const monthAgo = new Date();
   monthAgo.setMonth(monthAgo.getMonth() - 1);
 
@@ -543,6 +545,8 @@ export const getSystemStats = asyncHandler(async (req, res) => {
     todayOrders,
     todayDelivered,
     monthlyRevenue,
+    totalOrdersAllTime,
+    todayRevenueAgg,
   ] = await Promise.all([
     User.countDocuments({ role: "vendor" }),
     User.countDocuments({ role: "vendor", isActive: true }),
@@ -561,6 +565,16 @@ export const getSystemStats = asyncHandler(async (req, res) => {
       },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]),
+    DailyOrder.countDocuments({}),
+    Payment.aggregate([
+      {
+        $match: {
+          status: "captured",
+          createdAt: { $gte: today, $lt: tomorrow },
+        },
+      },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]),
   ]);
 
   res.status(200).json(
@@ -570,6 +584,7 @@ export const getSystemStats = asyncHandler(async (req, res) => {
       deliveryStaff: { total: totalDeliveryStaff },
       plans: { active: totalPlans },
       subscriptions: { active: activeSubscriptions },
+      totalOrders: totalOrdersAllTime,
       todayOrders: {
         total: todayOrders,
         delivered: todayDelivered,
@@ -577,6 +592,7 @@ export const getSystemStats = asyncHandler(async (req, res) => {
       },
       revenue: {
         last30Days: monthlyRevenue[0]?.total || 0,
+        today: todayRevenueAgg[0]?.total || 0,
       },
     })
   );

@@ -19,32 +19,61 @@ class AdminStatsModel {
   final int activeSubscriptions;
   final int pendingOrders;
 
+  static int _int(dynamic v) {
+    if (v is num) return v.toInt();
+    return 0;
+  }
+
+  static double _double(dynamic v) {
+    if (v is num) return v.toDouble();
+    return 0;
+  }
+
+  /// Supports flat keys (legacy) and nested shape from GET /admin/stats.
   factory AdminStatsModel.fromJson(Map<String, dynamic> json) {
+    if (json['vendors'] is Map || json['customers'] is Map) {
+      final vendors = json['vendors'];
+      final customers = json['customers'];
+      final subscriptions = json['subscriptions'];
+      final todayOrdersMap = json['todayOrders'];
+      final revenue = json['revenue'];
+      return AdminStatsModel(
+        totalVendors: _int(
+          vendors is Map ? vendors['total'] : json['totalVendors'],
+        ),
+        totalCustomers: _int(
+          customers is Map ? customers['total'] : json['totalCustomers'],
+        ),
+        totalOrders: _int(json['totalOrders']),
+        totalRevenue: _double(
+          revenue is Map ? revenue['last30Days'] : json['totalRevenue'],
+        ),
+        todayOrders: _int(
+          todayOrdersMap is Map ? todayOrdersMap['total'] : json['todayOrders'],
+        ),
+        todayRevenue: _double(
+          revenue is Map ? revenue['today'] : json['todayRevenue'],
+        ),
+        activeSubscriptions: _int(
+          subscriptions is Map
+              ? subscriptions['active']
+              : json['activeSubscriptions'],
+        ),
+        pendingOrders: _int(
+          todayOrdersMap is Map ? todayOrdersMap['pending'] : json['pendingOrders'],
+        ),
+      );
+    }
+
     return AdminStatsModel(
-      totalVendors: (json['totalVendors'] is num)
-          ? (json['totalVendors'] as num).toInt()
-          : 0,
-      totalCustomers: (json['totalCustomers'] is num)
-          ? (json['totalCustomers'] as num).toInt()
-          : 0,
-      totalOrders: (json['totalOrders'] is num)
-          ? (json['totalOrders'] as num).toInt()
-          : 0,
-      totalRevenue: (json['totalRevenue'] is num)
-          ? (json['totalRevenue'] as num).toDouble()
-          : 0,
-      todayOrders: (json['todayOrders'] is num)
-          ? (json['todayOrders'] as num).toInt()
-          : 0,
-      todayRevenue: (json['todayRevenue'] is num)
-          ? (json['todayRevenue'] as num).toDouble()
-          : 0,
-      activeSubscriptions: (json['activeSubscriptions'] is num)
-          ? (json['activeSubscriptions'] as num).toInt()
-          : 0,
-      pendingOrders: (json['pendingOrders'] is num)
-          ? (json['pendingOrders'] as num).toInt()
-          : 0,
+      totalVendors: _int(json['totalVendors']),
+      totalCustomers: _int(json['totalCustomers']),
+      totalOrders: _int(json['totalOrders']),
+      totalRevenue: _double(json['totalRevenue']),
+      todayOrders: _int(json['todayOrders']),
+      todayRevenue: _double(json['todayRevenue']),
+      activeSubscriptions: _int(json['activeSubscriptions']),
+      pendingOrders: _int(json['pendingOrders']),
     );
   }
 }
