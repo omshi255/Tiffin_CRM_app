@@ -346,12 +346,11 @@
 //   }
 // }
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/notifications/notification_badge_service.dart';
+import '../../../../core/platform/android_device.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -384,9 +383,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _truecallerSigningIn = false;
 
-  /// Truecaller SDK is Android-only (use [defaultTargetPlatform] so `dart:io` is not required — web-safe).
-  bool get _isAndroidDevice =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  /// Truecaller SDK is Android-only (`Platform.isAndroid` via conditional `dart:io` — web-safe).
+  bool get _isAndroidDevice => isAndroidDevice;
 
   static final RegExp _phoneRegex = RegExp(r'^[6-9]\d{9}$');
 
@@ -395,15 +393,24 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _phoneController.addListener(_onPhoneChanged);
     _prepareTruecallerOption();
+    Future.delayed(const Duration(seconds: 5), () {
+      if (!mounted) return;
+      if (_checkingTruecaller) {
+        setState(() {
+          _checkingTruecaller = false;
+          _truecallerUsable = false;
+        });
+      }
+    });
   }
 
-  /// iOS / web: skip SDK entirely. Android: init plugin + check OAuth usability.
+  /// iOS / web: skip SDK entirely. Android: init plugin + check OAuth usability (max ~5s).
   Future<void> _prepareTruecallerOption() async {
     if (!_isAndroidDevice) return;
+    if (!mounted) return;
     setState(() => _checkingTruecaller = true);
     try {
-      await TruecallerService.instance.initialize();
-      final usable = await TruecallerSdk.isUsable;
+      final usable = await TruecallerService.instance.checkTruecallerUsable();
       if (mounted) setState(() => _truecallerUsable = usable);
     } catch (_) {
       if (mounted) setState(() => _truecallerUsable = false);
