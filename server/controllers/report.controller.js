@@ -19,7 +19,8 @@ export const getSummary = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid period. Use daily, weekly, monthly.");
   }
 
-  const ownerId = req.user.userId;
+  // Vendor: scoped to their ownerId. Admin: system-wide (no owner filter).
+  const ownerId = req.user.role === "admin" ? null : req.user.userId;
   const data = await getSummaryReport(ownerId, period);
 
   const response = new ApiResponse(200, "Summary report fetched", data);
@@ -30,7 +31,7 @@ export const getSummary = asyncHandler(async (req, res) => {
  * GET /api/v1/reports/today-deliveries
  */
 export const getTodayDeliveries = asyncHandler(async (req, res) => {
-  const ownerId = req.user.userId;
+  const ownerId = req.user.role === "admin" ? null : req.user.userId;
   const data = await getTodayDeliveriesReport(ownerId);
 
   const response = new ApiResponse(200, "Today's deliveries fetched", data);
@@ -41,7 +42,7 @@ export const getTodayDeliveries = asyncHandler(async (req, res) => {
  * GET /api/v1/reports/expiring-subscriptions?days=7
  */
 export const getExpiringSubscriptions = asyncHandler(async (req, res) => {
-  const ownerId = req.user.userId;
+  const ownerId = req.user.role === "admin" ? null : req.user.userId;
   const days = parseInt(req.query.days ?? "7", 10);
 
   if (isNaN(days) || days < 1 || days > 90) {
@@ -62,7 +63,7 @@ export const getExpiringSubscriptions = asyncHandler(async (req, res) => {
  * GET /api/v1/reports/pending-payments
  */
 export const getPendingPayments = asyncHandler(async (req, res) => {
-  const ownerId = req.user.userId;
+  const ownerId = req.user.role === "admin" ? null : req.user.userId;
   const data = await getPendingPaymentsReport(ownerId);
 
   const response = new ApiResponse(200, "Pending payments report fetched", data);

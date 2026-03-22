@@ -24,10 +24,42 @@ const getDateRange = (period) => {
 
 /**
  * Summary: active subs + revenue (captured payments) + delivered orders.
- * Scoped by ownerId.
+ * Scoped by ownerId. When ownerId is null (admin), aggregates system-wide.
  */
 export const getSummaryReport = async (ownerId, period = "monthly") => {
   const { start, end } = getDateRange(period);
+
+  if (ownerId == null) {
+    const [activeSubscriptions, revenue, deliveries] = await Promise.all([
+      Subscription.countDocuments({ status: "active" }),
+      Payment.aggregate([
+        {
+          $match: {
+            status: "captured",
+            createdAt: { $gte: start, $lte: end },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: "$amount" },
+          },
+        },
+      ]),
+      DailyOrder.countDocuments({
+        orderDate: { $gte: start, $lte: end },
+        status: "delivered",
+      }),
+    ]);
+
+    return {
+      activeSubscriptions,
+      revenue: revenue[0]?.totalRevenue || 0,
+      deliveries,
+      period,
+    };
+  }
+
   const ownerOid = new mongoose.Types.ObjectId(ownerId);
 
   const [activeSubscriptions, revenue, deliveries] = await Promise.all([
@@ -73,13 +105,18 @@ export const getTodayDeliveriesReport = async (ownerId) => {
   const tomorrow = new Date(today);
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 
-  const orders = await DailyOrder.find({
-    ownerId,
+  const filter = {
     orderDate: { $gte: today, $lt: tomorrow },
-  })
+  };
+  if (ownerId != null) filter.ownerId = ownerId;
+
+  const orders = await DailyOrder.find(filter)
     .populate("customerId", "name phone address area")
     .populate("deliveryStaffId", "name phone")
-    .select("status customerId deliveryStaffId deliverySlot mealType amount orderDate")
+    .populate("ownerId", "businessName ownerName phone")
+    .select(
+      "status customerId deliveryStaffId ownerId deliverySlot mealType amount orderDate"
+    )
     .lean();
 
   const grouped = {};
@@ -111,11 +148,13 @@ export const getExpiringSubscriptionsReport = async (ownerId, days = 7) => {
   const future = new Date(today);
   future.setUTCDate(future.getUTCDate() + parseInt(days, 10));
 
-  const subscriptions = await Subscription.find({
-    ownerId,
+  const subFilter = {
     status: "active",
     endDate: { $gte: today, $lte: future },
-  })
+  };
+  if (ownerId != null) subFilter.ownerId = ownerId;
+
+  const subscriptions = await Subscription.find(subFilter)
     .populate("customerId", "name phone address")
     .populate("planId", "planName price")
     .sort({ endDate: 1 })
@@ -132,22 +171,28 @@ export const getExpiringSubscriptionsReport = async (ownerId, days = 7) => {
  * Invoices with unpaid/partial status OR customers with negative wallet balance.
  */
 export const getPendingPaymentsReport = async (ownerId) => {
+  const invoiceFilter = {
+    paymentStatus: { $in: ["unpaid", "partial"] },
+    isVoid: { $ne: true },
+  };
+  if (ownerId != null) invoiceFilter.ownerId = ownerId;
+
+  const customerFilter = {
+    balance: { $lt: 0 },
+    isDeleted: { $ne: true },
+  };
+  if (ownerId != null) customerFilter.ownerId = ownerId;
+
   const [unpaidInvoices, negativeBalanceCustomers] = await Promise.all([
-    Invoice.find({
-      ownerId,
-      paymentStatus: { $in: ["unpaid", "partial"] },
-      isVoid: { $ne: true },
-    })
+    Invoice.find(invoiceFilter)
       .populate("customerId", "name phone")
+      .populate("ownerId", "businessName ownerName phone")
       .sort({ createdAt: -1 })
       .lean(),
 
-    Customer.find({
-      ownerId,
-      balance: { $lt: 0 },
-      isDeleted: { $ne: true },
-    })
-      .select("name phone balance address")
+    Customer.find(customerFilter)
+      .select("name phone balance address ownerId")
+      .populate("ownerId", "businessName ownerName phone")
       .lean(),
   ]);
 

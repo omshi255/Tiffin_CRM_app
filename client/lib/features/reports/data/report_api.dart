@@ -10,16 +10,25 @@ abstract final class ReportApi {
       queryParameters: {'period': period},
     );
     final data = parseData(response);
-    if (data is Map<String, dynamic>) return data;
+    if (data is Map) return Map<String, dynamic>.from(data);
     return {};
   }
 
+  /// Order rows for today (legacy helper — API returns `{ orders, total, ... }`).
   static Future<List<dynamic>> getTodayDeliveries() async {
+    final payload = await getTodayDeliveriesPayload();
+    final orders = payload['orders'];
+    if (orders is List) return orders;
+    return [];
+  }
+
+  /// Full payload: `date`, `total`, `summary` (counts by status), `orders`.
+  static Future<Map<String, dynamic>> getTodayDeliveriesPayload() async {
     final response =
         await DioClient.instance.get(ApiEndpoints.reportsTodayDeliveries);
     final data = parseData(response);
-    if (data is List) return data;
-    return [];
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return {};
   }
 
   static Future<List<dynamic>> getExpiringSubscriptions({int days = 7}) async {
@@ -29,14 +38,18 @@ abstract final class ReportApi {
     );
     final data = parseData(response);
     if (data is List) return data;
+    if (data is Map) {
+      final subs = data['subscriptions'];
+      if (subs is List) return subs;
+    }
     return [];
   }
 
-  static Future<List<dynamic>> getPendingPayments() async {
+  static Future<Map<String, dynamic>> getPendingPayments() async {
     final response =
         await DioClient.instance.get(ApiEndpoints.reportsPendingPayments);
     final data = parseData(response);
-    if (data is List) return data;
-    return [];
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return {};
   }
 }
