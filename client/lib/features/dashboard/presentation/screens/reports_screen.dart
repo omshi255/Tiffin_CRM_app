@@ -206,7 +206,12 @@ class _ReportTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        20,
+        16,
+        MediaQuery.of(context).padding.bottom + 32,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

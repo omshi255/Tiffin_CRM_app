@@ -211,7 +211,12 @@ class _AddEditZoneScreenState extends State<AddEditZoneScreen> {
       body: AbsorbPointer(
         absorbing: _saving,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            20,
+            16,
+            MediaQuery.of(context).padding.bottom + 40,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

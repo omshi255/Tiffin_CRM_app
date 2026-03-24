@@ -255,7 +255,12 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               child: _invoices.isEmpty
                   ? _buildEmpty()
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        16,
+                        16,
+                        MediaQuery.of(context).padding.bottom + 100,
+                      ),
                       itemCount: _invoices.length,
                       itemBuilder: (ctx, i) => _buildInvoiceCard(_invoices[i]),
                     ),
@@ -296,6 +301,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
   // ── Empty state ───────────────────────────────────────────────────────────
   Widget _buildEmpty() => ListView(
+    padding: EdgeInsets.only(
+      bottom: MediaQuery.of(context).padding.bottom + 24,
+    ),
     children: [
       const SizedBox(height: 80),
       Center(
@@ -560,7 +568,9 @@ class _InvoiceDetailSheet extends StatelessWidget {
         20,
         12,
         20,
-        MediaQuery.of(context).viewInsets.bottom + 28,
+        MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            28,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -920,7 +930,9 @@ class _GenerateInvoiceSheetState extends State<_GenerateInvoiceSheet> {
         20,
         12,
         20,
-        MediaQuery.of(context).viewInsets.bottom + 28,
+        MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            28,
       ),
       child: SingleChildScrollView(
         child: Column(

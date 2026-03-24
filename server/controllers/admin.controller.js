@@ -597,3 +597,77 @@ export const getSystemStats = asyncHandler(async (req, res) => {
     })
   );
 });
+
+// ─── vendor stats (per-vendor customer / subscription counts) ─────────────────
+
+/**
+ * GET /api/v1/admin/vendors/stats
+ * Per-vendor customer totals and subscription-status breakdown (distinct customers).
+ */
+export const getVendorStats = asyncHandler(async (req, res) => {
+  const [vendors, customerTotals, subCounts] = await Promise.all([
+    User.find({ role: "vendor" })
+      .select("_id businessName ownerName")
+      .lean(),
+    Customer.aggregate([
+      { $match: { isDeleted: { $ne: true } } },
+      { $group: { _id: "$ownerId", totalCustomers: { $sum: 1 } } },
+    ]),
+    Subscription.aggregate([
+      {
+        $group: {
+          _id: {
+            ownerId: "$ownerId",
+            customerId: "$customerId",
+            status: "$status",
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            ownerId: "$_id.ownerId",
+            status: "$_id.status",
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+  ]);
+
+  const customerMap = Object.fromEntries(
+    customerTotals.map((r) => [r._id.toString(), r.totalCustomers])
+  );
+
+  const subByVendor = {};
+  for (const row of subCounts) {
+    const vid = row._id.ownerId.toString();
+    if (!subByVendor[vid]) {
+      subByVendor[vid] = { active: 0, paused: 0, expired: 0 };
+    }
+    const st = row._id.status;
+    const c = row.count;
+    if (st === "active") subByVendor[vid].active = c;
+    else if (st === "paused") subByVendor[vid].paused = c;
+    else if (st === "expired" || st === "cancelled") {
+      subByVendor[vid].expired += c;
+    }
+  }
+
+  const rows = vendors
+    .map((v) => {
+      const id = v._id.toString();
+      const sub = subByVendor[id] || { active: 0, paused: 0, expired: 0 };
+      return {
+        vendorId: id,
+        vendorName: v.businessName || v.ownerName || "—",
+        totalCustomers: customerMap[id] || 0,
+        activeCustomers: sub.active,
+        pausedCustomers: sub.paused,
+        expiredCustomers: sub.expired,
+      };
+    })
+    .sort((a, b) => b.totalCustomers - a.totalCustomers);
+
+  res.status(200).json(new ApiResponse(200, "Vendor stats fetched", rows));
+});

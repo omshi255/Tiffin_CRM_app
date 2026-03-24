@@ -62,4 +62,27 @@ abstract final class AppSnackbar {
       ),
     );
   }
+
+  static void info(BuildContext context, String message) {
+    HapticFeedback.lightImpact();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: AppColors.onSurface,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        backgroundColor: AppColors.surfaceContainerHigh,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.border),
+        ),
+      ),
+    );
+  }
 }

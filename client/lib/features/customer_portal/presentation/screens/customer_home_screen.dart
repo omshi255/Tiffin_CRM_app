@@ -414,7 +414,12 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
       color: _green600,
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          20,
+          16,
+          MediaQuery.of(context).padding.bottom + 32,
+        ),
         children: [
           // ── Greeting ──────────────────────────────────────────────────────
           Row(
@@ -867,7 +872,12 @@ class _CustomerMyPlanTabState extends State<_CustomerMyPlanTab> {
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              20,
+              16,
+              MediaQuery.of(context).padding.bottom + 8,
+            ),
             children: [
               _sectionLabel('Your Plan'),
               const SizedBox(height: 4),
@@ -886,7 +896,12 @@ class _CustomerMyPlanTabState extends State<_CustomerMyPlanTab> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            0,
+            16,
+            MediaQuery.of(context).padding.bottom + 20,
+          ),
           child: SizedBox(
             height: 50,
             child: DecoratedBox(
@@ -1164,7 +1179,12 @@ class _CustomerOrdersTabState extends State<_CustomerOrdersTab> {
           color: _surface,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              10,
+              16,
+              MediaQuery.of(context).padding.bottom + 10,
+            ),
             child: Row(
               children: List.generate(_statusLabels.length, (i) {
                 final sel = _statusFilter == _statusValues[i];
@@ -1209,6 +1229,10 @@ class _CustomerOrdersTabState extends State<_CustomerOrdersTab> {
                   onRefresh: _load,
                   child: _orders.isEmpty
                       ? ListView(
+                          padding: EdgeInsets.only(
+                            bottom:
+                                MediaQuery.of(context).padding.bottom + 24,
+                          ),
                           children: [
                             const SizedBox(height: 80),
                             Center(
@@ -1243,7 +1267,12 @@ class _CustomerOrdersTabState extends State<_CustomerOrdersTab> {
                           ],
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                          padding: EdgeInsets.fromLTRB(
+                            16,
+                            12,
+                            16,
+                            MediaQuery.of(context).padding.bottom + 32,
+                          ),
                           itemCount: _orders.length,
                           itemBuilder: (ctx, i) {
                             final o = _orders[i];
@@ -1385,7 +1414,9 @@ class _OrderStatusSheet extends StatelessWidget {
         20,
         12,
         20,
-        MediaQuery.of(context).viewInsets.bottom + 28,
+        MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            28,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1620,7 +1651,12 @@ class _CustomerWalletTabState extends State<_CustomerWalletTab> {
       color: _green600,
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          20,
+          16,
+          MediaQuery.of(context).padding.bottom + 32,
+        ),
         children: [
           _sectionLabel('Current Balance'),
           const SizedBox(height: 10),
@@ -1867,7 +1903,12 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
     final initial = (_profile?.name ?? '?')[0].toUpperCase();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        20,
+        16,
+        MediaQuery.of(context).padding.bottom + 40,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

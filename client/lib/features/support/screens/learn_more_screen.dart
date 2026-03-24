@@ -145,7 +145,12 @@ class LearnMoreScreen extends StatelessWidget {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          20,
+          16,
+          MediaQuery.of(context).padding.bottom + 40,
+        ),
         children: [
           // ── Hero ──────────────────────────────────────────────────────────
           Container(

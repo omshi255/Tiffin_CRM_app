@@ -4,6 +4,9 @@ import Invoice from "../models/Invoice.model.js";
 import DailyOrder from "../models/DailyOrder.model.js";
 import User from "../models/User.model.js";
 import Customer from "../models/Customer.model.js";
+import Subscription from "../models/Subscription.model.js";
+import Payment from "../models/Payment.model.js";
+import Item from "../models/Item.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
@@ -22,6 +25,19 @@ const generateSchema = Joi.object({
   subscriptionId: Joi.string().hex().length(24).optional(),
   billingStart: Joi.date().iso().required(),
   billingEnd: Joi.date().iso().min(Joi.ref("billingStart")).required(),
+});
+
+/** yyyy-MM-dd → UTC midnight (same as daily orders). */
+const parseOrderDayUTC = (d) => {
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, day));
+};
+
+const dailyReceiptQuerySchema = Joi.object({
+  customerId: Joi.string().hex().length(24).required(),
+  date: Joi.string()
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
+    .required(),
 });
 
 export const listInvoices = asyncHandler(async (req, res) => {
@@ -157,6 +173,193 @@ export const generateInvoiceForRange = asyncHandler(async (req, res) => {
     ...(usedFallback && { warning: "Generated using non-delivered orders" }),
   });
   res.status(response.statusCode).json(response);
+});
+
+/**
+ * GET /api/v1/invoices/daily?customerId=&date=yyyy-MM-dd
+ */
+export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
+  const ownerId = req.user.userId;
+  const { error, value } = dailyReceiptQuerySchema.validate(req.query, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
+  const customerId = new mongoose.Types.ObjectId(value.customerId);
+  const dayStart = parseOrderDayUTC(value.date);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+
+  const customer = await Customer.findById(customerId).lean();
+  if (!customer) {
+    throw new ApiError(404, "Customer not found");
+  }
+  if (customer.ownerId.toString() !== ownerId.toString()) {
+    throw new ApiError(403, "Customer does not belong to this vendor");
+  }
+
+  const subscription = await Subscription.findOne({
+    ownerId,
+    customerId,
+    startDate: { $lte: dayEnd },
+    endDate: { $gte: dayStart },
+  })
+    .populate("planId")
+    .lean();
+
+  const orders = await DailyOrder.find({
+    ownerId,
+    customerId,
+    orderDate: dayStart,
+  })
+    .sort({ mealType: 1 })
+    .lean();
+
+  const slotToDelivery = new Map();
+
+  const addDelivery = (slotKey, items) => {
+    if (!slotToDelivery.has(slotKey)) {
+      slotToDelivery.set(slotKey, { slot: slotKey, items: [] });
+    }
+    const d = slotToDelivery.get(slotKey);
+    d.items.push(...items);
+  };
+
+  let subtotal = 0;
+
+  if (orders.length) {
+    for (const order of orders) {
+      const slotKey =
+        order.mealType === "both" || order.mealType === "all"
+          ? order.mealType
+          : order.mealType;
+
+      const lineItems = [];
+      if (order.resolvedItems?.length) {
+        for (const ri of order.resolvedItems) {
+          const qty = ri.quantity ?? 1;
+          const unitPrice = ri.unitPrice ?? 0;
+          const lineTotal =
+            ri.subtotal != null ? ri.subtotal : qty * unitPrice;
+          subtotal += lineTotal;
+          lineItems.push({
+            name: ri.itemName || "Item",
+            quantity: qty,
+            unitPrice,
+            total: lineTotal,
+          });
+        }
+      } else if (order.amount != null) {
+        subtotal += order.amount;
+        lineItems.push({
+          name: "Order",
+          quantity: 1,
+          unitPrice: order.amount,
+          total: order.amount,
+        });
+      }
+
+      addDelivery(slotKey, lineItems);
+    }
+  } else if (subscription?.planId) {
+    const plan = subscription.planId;
+    const mealSlots = plan.mealSlots || [];
+    const itemIds = [
+      ...new Set(
+        mealSlots.flatMap((s) =>
+          (s.items || []).map((i) => i.itemId).filter(Boolean)
+        )
+      ),
+    ];
+
+    const items = itemIds.length
+      ? await Item.find({
+          _id: { $in: itemIds },
+          ownerId,
+        }).lean()
+      : [];
+    const idToItem = Object.fromEntries(
+      items.map((it) => [it._id.toString(), it])
+    );
+
+    for (const ms of mealSlots) {
+      const slotKey = ms.slot || "meal";
+      const lineItems = [];
+      for (const si of ms.items || []) {
+        const it = idToItem[si.itemId?.toString()];
+        const qty = si.quantity ?? 1;
+        const unitPrice = it?.unitPrice ?? 0;
+        const lineTotal = qty * unitPrice;
+        subtotal += lineTotal;
+        lineItems.push({
+          name: it?.name || "Item",
+          quantity: qty,
+          unitPrice,
+          total: lineTotal,
+        });
+      }
+      if (lineItems.length) addDelivery(slotKey, lineItems);
+    }
+  }
+
+  const deliveries = [...slotToDelivery.values()];
+
+  const tax = 0;
+  const grandTotal = subtotal + tax;
+
+  const paidAgg = await Payment.aggregate([
+    {
+      $match: {
+        ownerId: new mongoose.Types.ObjectId(ownerId),
+        customerId,
+        status: "captured",
+        paymentDate: { $gte: dayStart, $lt: dayEnd },
+      },
+    },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
+  ]);
+  const paidAmount = paidAgg[0]?.total ?? 0;
+
+  const dueAmount = grandTotal - paidAmount;
+
+  const runningAgg = await Invoice.aggregate([
+    {
+      $match: {
+        ownerId: new mongoose.Types.ObjectId(ownerId),
+        customerId,
+        isVoid: { $ne: true },
+        balanceDue: { $gt: 0 },
+      },
+    },
+    { $group: { _id: null, total: { $sum: "$balanceDue" } } },
+  ]);
+  const runningBalance = runningAgg[0]?.total ?? 0;
+
+  const payload = {
+    customer: {
+      name: customer.name,
+      phone: customer.phone,
+      address: customer.address,
+    },
+    date: value.date,
+    deliveries,
+    subtotal,
+    tax,
+    grandTotal,
+    paidAmount,
+    dueAmount,
+    runningBalance,
+  };
+
+  const response = new ApiResponse(200, "Daily receipt fetched", payload);
+  res.status(response.statusCode).json({
+    success: response.success,
+    message: response.message,
+    data: response.data,
+  });
 });
 
 export const getInvoiceById = asyncHandler(async (req, res) => {

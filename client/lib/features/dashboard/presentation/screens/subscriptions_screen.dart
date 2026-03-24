@@ -361,7 +361,10 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _AppPurple.bg,
-      body: Column(
+      body: SafeArea(
+        top: false,
+        bottom: true,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Violet header ──
@@ -482,6 +485,10 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
                     color: _AppPurple.v600,
                     child: _list.isEmpty
                         ? ListView(
+                            padding: EdgeInsets.only(
+                              bottom:
+                                  MediaQuery.of(context).padding.bottom + 24,
+                            ),
                             children: [
                               const SizedBox(height: 60),
                               Center(
@@ -515,7 +522,12 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
                             ],
                           )
                         : ListView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              0,
+                              16,
+                              MediaQuery.of(context).padding.bottom + 100,
+                            ),
                             itemCount: _list.length,
                             itemBuilder: (context, index) {
                               final sub = _list[index];
@@ -643,6 +655,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
                   ),
           ),
         ],
+      ),
       ),
 
       // ── FAB ──
@@ -792,7 +805,7 @@ class _SubscriptionDetailSheetState extends State<_SubscriptionDetailSheet> {
               bottom:
                   MediaQuery.of(context).viewInsets.bottom +
                   MediaQuery.of(context).padding.bottom +
-                  16,
+                  24,
             ),
             children: [
               // ── Handle ──
@@ -1414,7 +1427,12 @@ class _AssignSubscriptionSheetState extends State<_AssignSubscriptionSheet> {
         builder: (context, scrollController) {
           return ListView(
             controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              MediaQuery.of(context).padding.bottom + 32,
+            ),
             children: [
               const BottomSheetHandle(),
               const Text(

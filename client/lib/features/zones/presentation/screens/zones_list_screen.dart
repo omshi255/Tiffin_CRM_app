@@ -184,7 +184,8 @@ class _ZonesListScreenState extends State<ZonesListScreen> {
   }
 
   // ── Empty state ───────────────────────────────────────────────────────────
-  Widget _buildEmptyState() => Center(
+  Widget _buildEmptyState() => SafeArea(
+    child: Center(
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -240,11 +241,17 @@ class _ZonesListScreenState extends State<ZonesListScreen> {
         ),
       ],
     ),
+    ),
   );
 
   // ── List ──────────────────────────────────────────────────────────────────
   Widget _buildList() => ListView.builder(
-    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+    padding: EdgeInsets.fromLTRB(
+      16,
+      16,
+      16,
+      MediaQuery.of(context).padding.bottom + 100,
+    ),
     itemCount: _zones.length,
     itemBuilder: (context, i) => _buildZoneCard(_zones[i]),
   );

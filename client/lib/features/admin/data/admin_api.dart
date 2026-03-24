@@ -10,6 +10,7 @@ import '../../subscriptions/models/subscription_model.dart';
 import '../../orders/models/order_model.dart';
 import '../../payments/models/payment_model.dart';
 import '../../payments/models/invoice_model.dart';
+import '../models/vendor_stats_model.dart';
 
 /// Admin list endpoints return `{ data: [...], total, page, ... }` inside `data`.
 List<dynamic> _adminListRows(dynamic data) {
@@ -34,6 +35,27 @@ abstract final class AdminApi {
     final data = parseData(response);
     if (data is! Map) throw ApiException('Invalid response');
     return AdminStatsModel.fromJson(Map<String, dynamic>.from(data as Map));
+  }
+
+  static Future<List<VendorStatsModel>> getVendorStats() async {
+    try {
+      final response = await DioClient.instance.get(
+        ApiEndpoints.adminVendorsStats,
+      );
+      final data = parseData(response);
+      List<dynamic> raw = [];
+      if (data is List) {
+        raw = data;
+      } else if (data is Map<String, dynamic>) {
+        raw = (data['data'] as List?) ?? [];
+      }
+      return raw
+          .whereType<Map<String, dynamic>>()
+          .map(VendorStatsModel.fromJson)
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   static Future<List<dynamic>> getVendors({

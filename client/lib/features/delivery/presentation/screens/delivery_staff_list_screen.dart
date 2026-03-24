@@ -265,6 +265,9 @@ class _DeliveryStaffListScreenState extends State<DeliveryStaffListScreen> {
 
   // ── Empty state ───────────────────────────────────────────────────────────
   Widget _buildEmptyState() => ListView(
+    padding: EdgeInsets.only(
+      bottom: MediaQuery.of(context).padding.bottom + 24,
+    ),
     children: [
       const SizedBox(height: 80),
       Center(
@@ -305,7 +308,12 @@ class _DeliveryStaffListScreenState extends State<DeliveryStaffListScreen> {
 
   // ── Staff list ────────────────────────────────────────────────────────────
   Widget _buildList() => ListView.builder(
-    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+    padding: EdgeInsets.fromLTRB(
+      16,
+      16,
+      16,
+      MediaQuery.of(context).padding.bottom + 100,
+    ),
     itemCount: _staff.length,
     itemBuilder: (context, index) => _buildStaffCard(_staff[index]),
   );

@@ -112,4 +112,25 @@ abstract final class InvoiceApi {
   static Future<void> voidInvoice(String id) async {
     await DioClient.instance.post(ApiEndpoints.invoiceVoid(id));
   }
+
+  /// Daily meal receipt for a customer (GET /invoices/daily).
+  static Future<Map<String, dynamic>> getDailyReceipt({
+    required String customerId,
+    required DateTime date,
+  }) async {
+    try {
+      final ds =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      final response = await DioClient.instance.get(
+        ApiEndpoints.invoicesDaily,
+        queryParameters: {'customerId': customerId, 'date': ds},
+      );
+      final data = parseData(response);
+      if (data is Map<String, dynamic>) return data;
+      if (data is Map) return Map<String, dynamic>.from(data);
+      throw ApiException('Invalid response');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

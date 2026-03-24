@@ -95,6 +95,16 @@ abstract final class ApiEndpoints {
   static String invoiceById(String id) => '/invoices/$id';
   static String invoiceShare(String id) => '/invoices/$id/share';
   static String invoiceVoid(String id) => '/invoices/$id/void';
+  static const String invoicesDaily = '/invoices/daily';
+
+  // Expenses
+  static const String expenses = '/expenses';
+  static const String expensesSummary = '/expenses/summary';
+  static String expenseById(String id) => '/expenses/$id';
+
+  // Income
+  static const String incomes = '/incomes';
+  static String incomeById(String id) => '/incomes/$id';
 
   // Reports
   static const String reportsSummary = '/reports/summary';
@@ -105,6 +115,7 @@ abstract final class ApiEndpoints {
 
   // Admin
   static const String adminStats = '/admin/stats';
+  static const String adminVendorsStats = '/admin/vendors/stats';
   static const String adminVendors = '/admin/vendors';
   static const String adminCustomers = '/admin/customers';
   static const String adminDeliveryStaff = '/admin/delivery-staff';

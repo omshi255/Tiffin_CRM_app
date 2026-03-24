@@ -155,7 +155,12 @@ class _ContactPickerBottomSheetState extends State<ContactPickerBottomSheet> {
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      0,
+                      16,
+                      MediaQuery.of(context).padding.bottom + 24,
+                    ),
                     itemCount: _filteredContacts.length,
                     itemBuilder: (context, index) {
                       final contact = _filteredContacts[index];

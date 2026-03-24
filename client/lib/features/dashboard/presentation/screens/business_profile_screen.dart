@@ -183,7 +183,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
               ),
             )
           : SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                20,
+                16,
+                MediaQuery.of(context).padding.bottom + 40,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(

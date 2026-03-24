@@ -480,7 +480,8 @@ import '../../../auth/models/user_model.dart';
 import '../../../customers/presentation/screens/customers_list_screen.dart';
 import 'dashboard_home_screen.dart';
 import 'delivery_screen.dart';
-import 'payments_screen.dart';
+import 'finance_shell.dart';
+import 'invoices_screen.dart';
 
 class DashboardShell extends StatefulWidget {
   const DashboardShell({super.key, this.adminName = 'Vendor'});
@@ -582,6 +583,11 @@ class _DashboardShellState extends State<DashboardShell>
       icon: PhosphorIconsRegular.wallet,
       iconSelected: PhosphorIconsFill.wallet,
       label: 'Finance',
+    ),
+    _NavItem(
+      icon: PhosphorIconsRegular.receipt,
+      iconSelected: PhosphorIconsFill.receipt,
+      label: 'Invoice',
     ),
   ];
 
@@ -732,7 +738,8 @@ class _DashboardShellState extends State<DashboardShell>
           DashboardHomeScreen(adminName: _vendorDisplayName),
           const DeliveryScreen(embeddedInShell: true),
           const CustomersListScreen(),
-          const PaymentsScreen(embeddedInShell: true),
+          const FinanceShell(),
+          const InvoicesScreen(),
         ],
       ),
       bottomNavigationBar: Container(

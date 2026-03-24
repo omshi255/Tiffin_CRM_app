@@ -85,7 +85,12 @@ class _VendorOnboardingScreenState extends State<VendorOnboardingScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.fromLTRB(
+            24,
+            24,
+            24,
+            MediaQuery.of(context).padding.bottom + 24,
+          ),
           children: [
             Text(
               'Vendor onboarding',

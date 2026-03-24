@@ -93,7 +93,10 @@ class _AppDrawerState extends State<AppDrawer> {
             _buildHeader(displayName),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.only(top: 6, bottom: 24),
+                padding: EdgeInsets.only(
+                  top: 6,
+                  bottom: MediaQuery.of(context).padding.bottom + 24,
+                ),
                 children: [
                   // ── Main ──────────────────────────────────────────────────
                   _label('Main'),

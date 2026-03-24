@@ -9,8 +9,14 @@ import '../../../payments/models/payment_model.dart';
 import '../../../../models/customer_model.dart';
 
 class PaymentsScreen extends StatefulWidget {
-  const PaymentsScreen({super.key, this.embeddedInShell = false});
+  const PaymentsScreen({
+    super.key,
+    this.embeddedInShell = false,
+    this.embeddedInFinanceShell = false,
+  });
   final bool embeddedInShell;
+  /// When true with [embeddedInShell], hides the top violet header row (used inside [FinanceShell]).
+  final bool embeddedInFinanceShell;
 
   @override
   State<PaymentsScreen> createState() => _PaymentsScreenState();
@@ -202,7 +208,12 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
             onRefresh: _load,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                4,
+                16,
+                MediaQuery.of(context).padding.bottom + 32,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -228,7 +239,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _shellHeader(),
+            if (!widget.embeddedInFinanceShell) _shellHeader(),
             Expanded(child: body),
           ],
         ),
@@ -698,7 +709,12 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
 
   // ── Skeleton ──────────────────────────────────────────────────────────────
   Widget _skeleton() => SingleChildScrollView(
-    padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+    padding: EdgeInsets.fromLTRB(
+      16,
+      20,
+      16,
+      MediaQuery.of(context).padding.bottom + 32,
+    ),
     child: Column(
       children: List.generate(
         6,

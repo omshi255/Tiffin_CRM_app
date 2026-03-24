@@ -14,6 +14,8 @@ import dailyOrderRoutes from "./dailyOrder.routes.js";
 import deliveryRoutes from "./delivery.routes.js";
 import adminRoutes from "./admin.routes.js";
 import zoneRoutes from "./zone.routes.js";
+import expenseRoutes from "./expense.routes.js";
+import incomeRoutes from "./income.routes.js";
 
 const router = Router();
 
@@ -32,5 +34,7 @@ router.use("/daily-orders", dailyOrderRoutes);
 router.use("/delivery", deliveryRoutes);
 router.use("/admin", adminRoutes);
 router.use("/zones", zoneRoutes);
+router.use("/expenses", expenseRoutes);
+router.use("/incomes", incomeRoutes);
 
 export default router;

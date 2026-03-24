@@ -51,7 +51,12 @@ class SettingsScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          20,
+          16,
+          MediaQuery.of(context).padding.bottom + 32,
+        ),
         children: [
           // ── Account ───────────────────────────────────────────────────────
           _SectionLabel(label: 'Account'),

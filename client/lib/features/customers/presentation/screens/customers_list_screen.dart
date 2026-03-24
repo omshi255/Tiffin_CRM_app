@@ -319,7 +319,10 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
         ],
       ),
 
-      body: Column(
+      body: SafeArea(
+        top: false,
+        bottom: true,
+        child: Column(
         children: [
           // ── Search + filter chips ──
           Container(
@@ -463,7 +466,10 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                           )
                         : ListView.separated(
                             controller: _scrollController,
-                            padding: EdgeInsets.zero,
+                            padding: EdgeInsets.only(
+                              bottom:
+                                  MediaQuery.of(context).padding.bottom + 24,
+                            ),
                             itemCount:
                                 filtered.length + (_isLoadingMore ? 1 : 0),
                             separatorBuilder: (_, _) => const Divider(
@@ -515,7 +521,8 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   ), // RefreshIndicator / Center
           ), // Expanded
         ],
-      ), // Column (body)
+      ),
+      ),
 
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AppRoutes.addCustomer),

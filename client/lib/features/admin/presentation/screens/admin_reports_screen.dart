@@ -87,7 +87,12 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  12,
+                  20,
+                  MediaQuery.of(context).padding.bottom + 32,
+                ),
                 children: [
                   Text(
                     'Generate operational reports for the whole system. Choose a period for revenue and delivery metrics.',

@@ -534,6 +534,9 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
       onRefresh: _load,
       child: filtered.isEmpty
           ? ListView(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom + 24,
+              ),
               children: [
                 const SizedBox(height: 80),
                 Center(
@@ -577,7 +580,12 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
               ],
             )
           : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                MediaQuery.of(context).padding.bottom + 100,
+              ),
               itemCount: filtered.length,
               itemBuilder: (context, index) => _buildOrderCard(filtered[index]),
             ),
@@ -975,7 +983,9 @@ class _OrderActionSheet extends StatelessWidget {
         20,
         12,
         20,
-        MediaQuery.of(context).viewInsets.bottom + 24,
+        MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            24,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

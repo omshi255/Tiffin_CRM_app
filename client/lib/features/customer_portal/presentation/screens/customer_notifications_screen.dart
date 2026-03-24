@@ -247,7 +247,12 @@ class _CustomerNotificationsScreenState
 
   // ── Empty state ────────────────────────────────────────────────────────────
   Widget _buildEmpty() => ListView(
-    padding: const EdgeInsets.all(24),
+    padding: EdgeInsets.fromLTRB(
+      24,
+      24,
+      24,
+      MediaQuery.of(context).padding.bottom + 24,
+    ),
     children: [
       const SizedBox(height: 80),
       Center(child: Container(
@@ -272,7 +277,10 @@ class _CustomerNotificationsScreenState
   Widget _buildList() {
     final groups = _buildGroups();
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 12, bottom: 24),
+      padding: EdgeInsets.only(
+        top: 12,
+        bottom: MediaQuery.of(context).padding.bottom + 24,
+      ),
       itemCount: groups.length,
       itemBuilder: (context, gi) {
         final group = groups[gi];

@@ -496,6 +496,9 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
       onRefresh: _load,
       child: filtered.isEmpty
           ? ListView(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom + 24,
+              ),
               children: [
                 const SizedBox(height: 60),
                 Center(
@@ -558,7 +561,12 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
               ],
             )
           : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 100),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                14,
+                16,
+                MediaQuery.of(context).padding.bottom + 100,
+              ),
               itemCount: filtered.length,
               itemBuilder: (context, index) {
                 final order = filtered[index];
@@ -1011,13 +1019,17 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
     // ── Standalone screen ──
     return Scaffold(
       backgroundColor: _P.bg,
-      body: Column(
+      body: SafeArea(
+        top: false,
+        bottom: true,
+        child: Column(
         children: [
           _buildHeader(context),
           _buildSummaryRow(),
           _filterChips(),
           Expanded(child: _bodyContent(filtered)),
         ],
+        ),
       ),
       floatingActionButton: _fab(),
     );
@@ -1056,7 +1068,12 @@ class _OrderDetailSheet extends StatelessWidget {
         children: [
           const BottomSheetHandle(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              MediaQuery.of(context).padding.bottom + 28,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1281,7 +1298,12 @@ class _AssignStaffSheet extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        padding: const EdgeInsets.all(28),
+        padding: EdgeInsets.fromLTRB(
+          28,
+          28,
+          28,
+          MediaQuery.of(context).padding.bottom + 28,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1328,7 +1350,12 @@ class _AssignStaffSheet extends StatelessWidget {
         children: [
           const BottomSheetHandle(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              MediaQuery.of(context).padding.bottom + 8,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

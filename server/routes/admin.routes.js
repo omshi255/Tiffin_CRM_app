@@ -11,6 +11,7 @@ import {
   listAllInvoices,
   listAllNotifications,
   getSystemStats,
+  getVendorStats,
 } from "../controllers/admin.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/rbac.middleware.js";
@@ -23,7 +24,8 @@ router.use(requireRole(["admin"]));
 // System-wide stats
 router.get("/stats", getSystemStats);
 
-// Vendors
+// Vendors (specific routes before generic /vendors list)
+router.get("/vendors/stats", getVendorStats);
 router.get("/vendors", listVendors);
 
 // Customers (all vendors)

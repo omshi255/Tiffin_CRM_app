@@ -485,7 +485,12 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
         // List
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              12,
+              16,
+              MediaQuery.of(context).padding.bottom + 32,
+            ),
             itemCount: list.length,
             itemBuilder: (context, i) => _buildWebStopCard(list[i], i),
           ),

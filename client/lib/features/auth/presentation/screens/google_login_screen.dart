@@ -21,7 +21,12 @@ class GoogleLoginScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.fromLTRB(
+            24,
+            0,
+            24,
+            MediaQuery.of(context).padding.bottom + 24,
+          ),
           child: Column(
             children: [
               const SizedBox(height: 24),

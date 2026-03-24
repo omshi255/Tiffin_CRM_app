@@ -191,7 +191,12 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          20,
+          16,
+          MediaQuery.of(context).padding.bottom + 40,
+        ),
         child: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.disabled,

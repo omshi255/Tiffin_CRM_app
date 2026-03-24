@@ -132,6 +132,10 @@ class _AdminListScreenState extends State<AdminListScreen> {
               child: _items.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(
+                        bottom:
+                            MediaQuery.of(context).padding.bottom + 24,
+                      ),
                       children: [
                         SizedBox(
                           height: MediaQuery.sizeOf(context).height * 0.35,
@@ -165,7 +169,12 @@ class _AdminListScreenState extends State<AdminListScreen> {
                       ],
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        16,
+                        16,
+                        MediaQuery.of(context).padding.bottom + 16,
+                      ),
                       itemCount: _items.length,
                       itemBuilder: (context, index) {
                         final item = _items[index];

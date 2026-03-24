@@ -9,6 +9,7 @@ import '../../../../core/widgets/section_header.dart';
 import '../../../auth/data/auth_api.dart';
 import '../../data/admin_api.dart';
 import '../../models/admin_stats_model.dart';
+import '../../models/vendor_stats_model.dart';
 import 'admin_list_screen.dart';
 
 String _formatINRAmount(double n) =>
@@ -33,6 +34,8 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   AdminStatsModel? _stats;
   bool _loading = true;
+  List<VendorStatsModel> _vendorStats = [];
+  bool _vendorStatsLoading = false;
 
   @override
   void initState() {
@@ -49,6 +52,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+
+    if (!mounted) return;
+    setState(() => _vendorStatsLoading = true);
+    try {
+      final vs = await AdminApi.getVendorStats();
+      if (mounted) setState(() => _vendorStats = vs);
+    } catch (_) {
+      // Optional endpoint — keep dashboard usable if not deployed yet.
+    } finally {
+      if (mounted) setState(() => _vendorStatsLoading = false);
     }
   }
 
@@ -96,7 +110,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  20,
+                  20,
+                  MediaQuery.of(context).padding.bottom + 20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -161,6 +180,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                         ],
                       ),
+                    const SizedBox(height: 24),
+                    const SectionHeader(title: 'VENDOR OVERVIEW'),
+                    const SizedBox(height: 8),
+                    if (_vendorStatsLoading)
+                      ...List.generate(
+                        3,
+                        (i) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: AnimatedContainer(
+                            duration: Duration(milliseconds: 400 + i * 80),
+                            height: 88,
+                            decoration: BoxDecoration(
+                              color: AppColors.shimmerBase.withValues(
+                                alpha: 0.45 + (i * 0.05),
+                              ),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: AppColors.border.withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      ..._vendorStats.map(_VendorOverviewCard.new),
                     const SizedBox(height: 24),
                     const SectionHeader(title: 'Lists'),
                     const SizedBox(height: 8),
@@ -270,6 +314,124 @@ class _StatCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VendorOverviewCard extends StatelessWidget {
+  const _VendorOverviewCard(this.v);
+  final VendorStatsModel v;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = v.totalCustomers <= 0 ? 1 : v.totalCustomers;
+    final ratio = (v.activeCustomers / total).clamp(0.0, 1.0);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: AppColors.primaryContainer,
+                child: Text(
+                  v.vendorName.isNotEmpty ? v.vendorName[0].toUpperCase() : '?',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      v.vendorName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        _countBadge(
+                          'Active',
+                          v.activeCustomers,
+                          AppColors.successChipBg,
+                          AppColors.successChipText,
+                        ),
+                        _countBadge(
+                          'Paused',
+                          v.pausedCustomers,
+                          AppColors.pendingChipBg,
+                          AppColors.pendingChipText,
+                        ),
+                        _countBadge(
+                          'Expired',
+                          v.expiredCustomers,
+                          AppColors.errorContainer,
+                          AppColors.error,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '${v.totalCustomers}',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: ratio,
+              minHeight: 3,
+              backgroundColor: AppColors.primaryContainer,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _countBadge(String label, int n, Color bg, Color fg) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '$label $n',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: fg,
         ),
       ),
     );

@@ -11,6 +11,7 @@ import '../../../../models/customer_model.dart';
 import '../../data/customer_api.dart';
 import '../../../subscriptions/data/subscription_api.dart';
 import '../../../subscriptions/models/subscription_model.dart';
+import '../../../payments/presentation/widgets/daily_receipt_sheet.dart';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 class _P {
@@ -223,6 +224,27 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           _load();
         },
         onError: (e) => ErrorHandler.show(ctx, e),
+      ),
+    );
+  }
+
+  Future<void> _openDailyReceipt() async {
+    final c = _customer;
+    if (c == null) return;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked == null || !mounted) return;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => DailyReceiptSheet(
+        customerId: c.id,
+        initialDate: picked,
       ),
     );
   }
@@ -633,6 +655,27 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         ],
                       ),
 
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: _P.v600,
+                            side: const BorderSide(color: _P.v600, width: 1.2),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: _openDailyReceipt,
+                          icon: const Icon(Icons.receipt_outlined, size: 18),
+                          label: const Text(
+                            'Daily Receipt',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+
                       // Low balance alert (conditional)
                       if (isLowBalance) ...[
                         const SizedBox(height: 10),
@@ -817,6 +860,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   ),
 
                 const SizedBox(height: 32),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
               ],
             ),
           ),
@@ -968,7 +1012,12 @@ class _CreditWalletSheetState extends State<_CreditWalletSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          MediaQuery.of(context).padding.bottom + 28,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

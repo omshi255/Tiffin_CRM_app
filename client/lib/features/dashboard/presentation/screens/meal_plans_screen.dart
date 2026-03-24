@@ -197,7 +197,12 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
               color: _violet600,
               onRefresh: _load,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  20,
+                  16,
+                  MediaQuery.of(context).padding.bottom + 100,
+                ),
                 children: [
                   // ── Global Plans ─────────────────────────────────────────
                   _sectionHeader(

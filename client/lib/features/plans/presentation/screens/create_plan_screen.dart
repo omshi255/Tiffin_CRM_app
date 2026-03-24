@@ -245,7 +245,12 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            20,
+            16,
+            MediaQuery.of(context).padding.bottom + 40,
+          ),
           children: [
             // ── Plan details ───────────────────────────────────────────────
             _sectionLabel('Plan Details'),
@@ -1053,7 +1058,12 @@ class _ItemPickerSheet extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 controller: scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  8,
+                  16,
+                  MediaQuery.of(context).padding.bottom + 24,
+                ),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index];

@@ -364,7 +364,12 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
               color: _violet600,
               onRefresh: _load,
               child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  MediaQuery.of(context).padding.bottom + 100,
+                ),
                 itemCount: _items.length,
                 itemBuilder: (ctx, i) => _buildItemCard(_items[i]),
               ),
@@ -839,7 +844,9 @@ class _AddEditItemSheetState extends State<_AddEditItemSheet> {
         20,
         12,
         20,
-        MediaQuery.of(context).viewInsets.bottom + 24,
+        MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            24,
       ),
       child: SingleChildScrollView(
         child: Column(

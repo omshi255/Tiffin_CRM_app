@@ -485,6 +485,9 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).padding.bottom + 24,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
