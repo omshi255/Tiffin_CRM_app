@@ -154,15 +154,12 @@ export const deleteExpense = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Expense not found");
   }
   if (existing.ownerId.toString() !== ownerId.toString()) {
-    throw new ApiError(403, "Access denied");
+    throw new ApiError(403, "Forbidden");
   }
 
   await Expense.deleteOne({ _id: id, ownerId });
 
-  const response = new ApiResponse(200, "Expense deleted", {
-    id,
-    vendorId: existing.ownerId,
-  });
+  const response = new ApiResponse(200, "Expense deleted successfully", null);
   res.status(response.statusCode).json({
     success: response.success,
     message: response.message,

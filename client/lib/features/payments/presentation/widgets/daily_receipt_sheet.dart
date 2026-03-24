@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/app_snackbar.dart';
+import '../../../../core/utils/error_handler.dart';
+import '../../../invoices/utils/receipt_pdf_generator.dart';
 import '../../data/invoice_api.dart';
 
 /// Per-day meal receipt preview (GET /invoices/daily).
@@ -22,8 +24,9 @@ class DailyReceiptSheet extends StatefulWidget {
 
 class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
   late DateTime _date;
-  Map<String, dynamic>? _data;
+  Map<String, dynamic>? _receiptData;
   bool _loading = true;
+  bool _pdfLoading = false;
   bool _failed = false;
 
   static final _df = DateFormat('dd/MM/yyyy');
@@ -47,9 +50,43 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
         customerId: widget.customerId,
         date: _date,
       );
-      if (mounted) setState(() => _data = m);
+      if (mounted) setState(() => _receiptData = m);
     } catch (_) {
       if (mounted) setState(() => _failed = true);
+  Future<void> _downloadPdf() async {
+    if (_receiptData == null) return;
+    setState(() => _pdfLoading = true);
+    try {
+      final pdfBytes = await ReceiptPdfGenerator.generate(_receiptData!);
+      final dateStr = _date.toIso8601String().split('T').first;
+      await Printing.layoutPdf(
+        onLayout: (_) async => pdfBytes,
+        name: 'Receipt-$dateStr',
+      );
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    } finally {
+      if (mounted) setState(() => _pdfLoading = false);
+    }
+  }
+
+  Future<void> _shareWhatsApp() async {
+    if (_receiptData == null) return;
+    setState(() => _pdfLoading = true);
+    try {
+      final pdfBytes = await ReceiptPdfGenerator.generate(_receiptData!);
+      final dateStr = _date.toIso8601String().split('T').first;
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'Receipt-$dateStr.pdf',
+      );
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    } finally {
+      if (mounted) setState(() => _pdfLoading = false);
+    }
+  }
+
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -166,20 +203,27 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => AppSnackbar.info(
-                                context,
-                                'Coming soon',
-                              ),
-                              child: const Text('Download PDF'),
+                              onPressed: _pdfLoading ? null : _downloadPdf,
+                              child: _pdfLoading
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.download_rounded, size: 18),
+                                        SizedBox(width: 6),
+                                        Text('Download PDF'),
+                                      ],
+                                    ),
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => AppSnackbar.info(
-                                context,
-                                'Coming soon',
-                              ),
+                              onPressed: _pdfLoading ? null : _shareWhatsApp,
                               child: const Text('Share WhatsApp'),
                             ),
                           ),
@@ -230,10 +274,17 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
   }
 
   Widget _receiptBody() {
-    final d = _data;
+    final d = _receiptData;
     if (d == null) return const SizedBox.shrink();
 
-    final cust = d['customer'];
+    final custRaw = d['customer'];
+    final sumRaw = d['summary'];
+    final vendorRaw = d['vendor'];
+    final receiptRaw = d['receipt'];
+    final cust = custRaw is Map ? Map<String, dynamic>.from(custRaw) : const <String, dynamic>{};
+    final summary = sumRaw is Map ? Map<String, dynamic>.from(sumRaw) : const <String, dynamic>{};
+    final vendor = vendorRaw is Map ? Map<String, dynamic>.from(vendorRaw) : const <String, dynamic>{};
+    final receipt = receiptRaw is Map ? Map<String, dynamic>.from(receiptRaw) : const <String, dynamic>{};
     String name = '—';
     String phone = '—';
     String addr = '—';
@@ -243,7 +294,7 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
       addr = cust['address']?.toString() ?? addr;
     }
 
-    final dateStr = d['date']?.toString() ?? _dfApi.format(_date);
+    final dateStr = receipt['date']?.toString() ?? d['date']?.toString() ?? _dfApi.format(_date);
     final deliveries = (d['deliveries'] is List) ? d['deliveries'] as List : [];
 
     return Container(
@@ -271,10 +322,10 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Company',
+          Text(
+            '${vendor['businessName'] ?? 'Company'}',
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
           ),
           Text(
             dateStr,
@@ -302,13 +353,13 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
             ],
           ],
           const Divider(),
-          _line('Subtotal', _num(d['subtotal'])),
-          _line('Tax', _num(d['tax'])),
-          _line('Grand Total', _num(d['grandTotal']), bold: true),
+          _line('Subtotal', _num(summary['subtotal'] ?? d['subtotal'])),
+          _line('Tax', _num(summary['taxAmount'] ?? d['tax'])),
+          _line('Grand Total', _num(summary['grandTotal'] ?? d['grandTotal']), bold: true),
           const Divider(),
-          _line('Paid', _num(d['paidAmount'])),
-          _line('Balance Due', _num(d['dueAmount'])),
-          _line('Running balance', _num(d['runningBalance'])),
+          _line('Paid', _num(summary['paidAmount'] ?? d['paidAmount'])),
+          _line('Balance Due', _num(summary['dueAmount'] ?? d['dueAmount'])),
+          _line('Running balance', _num(summary['runningBalance'] ?? d['runningBalance'])),
         ],
       ),
     );

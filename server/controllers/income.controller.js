@@ -133,15 +133,12 @@ export const deleteIncome = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Income not found");
   }
   if (existing.ownerId.toString() !== ownerId.toString()) {
-    throw new ApiError(403, "Access denied");
+    throw new ApiError(403, "Forbidden");
   }
 
   await Income.deleteOne({ _id: id, ownerId });
 
-  const response = new ApiResponse(200, "Income deleted", {
-    id,
-    vendorId: existing.ownerId,
-  });
+  const response = new ApiResponse(200, "Income deleted successfully", null);
   res.status(response.statusCode).json({
     success: response.success,
     message: response.message,

@@ -57,7 +57,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
       if (reset) {
         final bulk = await IncomeApi.list(
           page: 1,
-          limit: 500,
+          limit: 100,
           dateFrom: from,
           dateTo: to,
         );

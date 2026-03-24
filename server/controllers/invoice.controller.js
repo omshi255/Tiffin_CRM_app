@@ -193,7 +193,13 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
   const dayEnd = new Date(dayStart);
   dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
 
-  const customer = await Customer.findById(customerId).lean();
+  const [vendor, customer] = await Promise.all([
+    User.findById(ownerId).lean(),
+    Customer.findById(customerId).lean(),
+  ]);
+  if (!vendor) {
+    throw new ApiError(404, "Vendor not found");
+  }
   if (!customer) {
     throw new ApiError(404, "Customer not found");
   }
@@ -232,10 +238,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
 
   if (orders.length) {
     for (const order of orders) {
-      const slotKey =
-        order.mealType === "both" || order.mealType === "all"
-          ? order.mealType
-          : order.mealType;
+      const slotKey = order.mealType || "meal";
 
       const lineItems = [];
       if (order.resolvedItems?.length) {
@@ -250,6 +253,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
             quantity: qty,
             unitPrice,
             total: lineTotal,
+            unit: "unit",
           });
         }
       } else if (order.amount != null) {
@@ -259,6 +263,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
           quantity: 1,
           unitPrice: order.amount,
           total: order.amount,
+          unit: "unit",
         });
       }
 
@@ -299,13 +304,18 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
           quantity: qty,
           unitPrice,
           total: lineTotal,
+          unit: it?.unit || "unit",
         });
       }
       if (lineItems.length) addDelivery(slotKey, lineItems);
     }
   }
 
-  const deliveries = [...slotToDelivery.values()];
+  const deliveries = [...slotToDelivery.values()].map((d) => ({
+    slot: d.slot,
+    items: d.items,
+    slotTotal: d.items.reduce((sum, i) => sum + (i.total || 0), 0),
+  }));
 
   const tax = 0;
   const grandTotal = subtotal + tax;
@@ -338,16 +348,76 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
   ]);
   const runningBalance = runningAgg[0]?.total ?? 0;
 
+  const paymentHistoryRows = await Payment.find({
+    ownerId,
+    customerId,
+  })
+    .sort({ paymentDate: -1 })
+    .limit(5)
+    .lean();
+  const paymentHistory = paymentHistoryRows.map((p) => ({
+    date: p.paymentDate,
+    amount: p.amount ?? 0,
+    method: p.paymentMethod ?? "",
+    referenceId: p.transactionRef ?? "",
+    status: p.status ?? "",
+  }));
+
+  const totalDeliveredItems = deliveries.reduce(
+    (sum, slot) =>
+      sum +
+      slot.items.reduce((s, item) => s + (Number(item.quantity) || 0), 0),
+    0
+  );
+
+  const receiptNumber = `RCP-${value.date.replace(/-/g, "")}-${customer._id.toString().slice(-4).toUpperCase()}`;
+
   const payload = {
-    customer: {
-      name: customer.name,
-      phone: customer.phone,
-      address: customer.address,
+    receipt: {
+      receiptNumber,
+      generatedAt: new Date().toISOString(),
+      date: value.date,
     },
-    date: value.date,
+    vendor: {
+      businessName: vendor.businessName || vendor.ownerName || "",
+      phone: vendor.phone || "",
+      email: vendor.email || "",
+      address: vendor.address || "",
+      gstin: vendor.gstin || "",
+    },
+    customer: {
+      name: customer.name || "",
+      phone: customer.phone || "",
+      email: customer.email || "",
+      address: customer.address || "",
+      area: customer.area || "",
+      customerCode:
+        customer.customerCode || customer._id.toString().slice(-6).toUpperCase(),
+    },
+    subscription: {
+      planName: subscription?.planId?.planName || "",
+      planType: subscription?.planId?.planType || "",
+      deliverySlot: subscription?.deliverySlot || "",
+      deliveryDays: subscription?.deliveryDays || [],
+      startDate: subscription?.startDate || null,
+      endDate: subscription?.endDate || null,
+    },
     deliveries,
-    subtotal,
+    summary: {
+      subtotal,
+      taxRate: 0,
+      taxAmount: tax,
+      grandTotal,
+      paidAmount,
+      dueAmount,
+      runningBalance,
+      totalDeliveredItems,
+    },
+    paymentHistory,
+    // Backward compatibility with current sheet data keys
+    date: value.date,
     tax,
+    subtotal,
     grandTotal,
     paidAmount,
     dueAmount,

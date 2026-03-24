@@ -10,7 +10,7 @@ import { requireRole } from "../middleware/rbac.middleware.js";
 const router = Router();
 
 router.use(authMiddleware);
-router.use(requireRole(["vendor", "admin"]));
+router.use(requireRole(["vendor"]));
 
 router.get("/", listIncomes);
 router.post("/", createIncome);
