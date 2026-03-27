@@ -1,9 +1,9 @@
-import admin from "../config/firebase.js";
 import User from "../models/User.model.js";
 import Customer from "../models/Customer.model.js";
+import { sendPushNotification } from "./fcm.service.js";
 
 /**
- * Send push notification to a single FCM token.
+ * Send push notification to a single FCM token (invalid tokens are cleared).
  * @param {string} token
  * @param {string} title
  * @param {string} body
@@ -12,32 +12,10 @@ import Customer from "../models/Customer.model.js";
 export const sendToToken = async (token, title, body, data = {}) => {
   if (!token) return;
 
-  const stringData = Object.fromEntries(
-    Object.entries(data || {}).map(([k, v]) => [k, String(v)])
-  );
-
-  const message = {
-    notification: {
-      title,
-      body,
-    },
-    data: stringData,
-    android: {
-      priority: "high",
-      notification: {
-        sound: "default",
-        priority: "high",
-        channelId: "default",
-      },
-    },
-    token,
-  };
-
   try {
-    const response = await admin.messaging().send(message);
+    const response = await sendPushNotification(token, title, body, data);
     return response;
   } catch (error) {
-    // If token invalid → remove it
     if (
       error.code === "messaging/registration-token-not-registered" ||
       error.code === "messaging/invalid-registration-token"

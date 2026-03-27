@@ -975,12 +975,42 @@ class _CreditWalletSheetState extends State<_CreditWalletSheet> {
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   String _paymentMethod = 'cash';
+  /// Prevents duplicate POSTs when the user double/triple-taps "Add Money".
+  bool _submitting = false;
 
   @override
   void dispose() {
     _amountController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submitWallet() async {
+    if (_submitting) return;
+    final amount = double.tryParse(_amountController.text.trim());
+    if (amount == null || amount <= 0) {
+      AppSnackbar.error(context, 'Enter valid amount');
+      return;
+    }
+    // Lock synchronously before any await so rapid taps cannot enqueue 3 requests.
+    _submitting = true;
+    setState(() {});
+    try {
+      await CustomerApi.creditWallet(
+        widget.customerId,
+        amount: amount,
+        paymentMethod: _paymentMethod,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+      );
+      if (mounted) widget.onSuccess();
+    } catch (e) {
+      if (mounted) widget.onError(e);
+    } finally {
+      _submitting = false;
+      if (mounted) setState(() {});
+    }
   }
 
   InputDecoration _inputDeco(String label, {String? hint}) => InputDecoration(
@@ -1106,50 +1136,34 @@ class _CreditWalletSheetState extends State<_CreditWalletSheet> {
             const SizedBox(height: 24),
 
             // Submit
-            GestureDetector(
-              onTap: () async {
-                final amount = double.tryParse(_amountController.text.trim());
-                if (amount == null || amount <= 0) {
-                  AppSnackbar.error(context, 'Enter valid amount');
-                  return;
-                }
-                try {
-                  await CustomerApi.creditWallet(
-                    widget.customerId,
-                    amount: amount,
-                    paymentMethod: _paymentMethod,
-                    notes: _notesController.text.trim().isEmpty
-                        ? null
-                        : _notesController.text.trim(),
-                  );
-                  if (mounted) widget.onSuccess();
-                } catch (e) {
-                  if (mounted) widget.onError(e);
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: _P.g1,
+            FilledButton(
+              onPressed: _submitting ? null : _submitWallet,
+              style: FilledButton.styleFrom(
+                backgroundColor: _P.g1,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: _P.g1.withValues(alpha: 0.35),
+                disabledForegroundColor: Colors.white70,
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _P.g1.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'Add Money',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
                 ),
               ),
+              child: _submitting
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Add Money',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
             ),
           ],
         ),

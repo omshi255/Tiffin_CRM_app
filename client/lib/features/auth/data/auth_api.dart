@@ -126,6 +126,14 @@ abstract final class AuthApi {
     return UserModel.fromJson(data);
   }
 
+  /// Persists FCM token for vendor/admin/delivery_staff (customers use the same route; server updates [Customer] when role is customer).
+  static Future<void> saveFcmToken(String token) async {
+    await DioClient.instance.put(
+      ApiEndpoints.usersFcmToken,
+      data: <String, dynamic>{'fcmToken': token},
+    );
+  }
+
   static Future<UserModel> updateProfile(Map<String, dynamic> body) async {
     final response = await DioClient.instance.put(
       ApiEndpoints.authMe,

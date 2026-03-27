@@ -345,7 +345,6 @@
 //     );
 //   }
 // }
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -355,10 +354,10 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
-import '../../../customer_portal/data/customer_portal_api.dart';
 import '../../data/auth_api.dart';
 import '../../models/user_model.dart';
 import '../../services/truecaller_service.dart';
+import '../../../../services/notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.selectedRole = 'vendor'});
@@ -484,7 +483,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await SecureStorage.saveUserRole(user.role);
       await SecureStorage.saveUserId(user.id);
       await NotificationBadgeService.refreshNow();
-      await _updateFcmToken(user.role);
+      await _updateFcmToken();
       if (!mounted) return;
       await _navigateAfterLogin(context, user);
     } catch (e) {
@@ -494,16 +493,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _updateFcmToken(String role) async {
+  Future<void> _updateFcmToken() async {
     try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token != null && token.isNotEmpty) {
-        if (role == 'customer') {
-          await CustomerPortalApi.updateMyProfile({'fcmToken': token});
-        } else {
-          await AuthApi.updateProfile({'fcmToken': token});
-        }
-      }
+      await NotificationService().registerTokenAfterLogin();
     } catch (_) {}
   }
 

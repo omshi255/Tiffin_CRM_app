@@ -115,8 +115,8 @@ export const processToday = asyncHandler(async (req, res) => {
           customerId: cid,
           ownerId,
           type: NOTIFICATION_TYPES.ORDER_PROCESSING,
-          title: "Tiffin Update 🍱",
-          message: "Your tiffin is being prepared!",
+          title: "Tiffin Ready 🍱",
+          message: "Your tiffin is ready!",
           data: { screen: "orderDetail", status: "processing" },
         })
       )
@@ -254,8 +254,8 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
         customerId: order.customerId,
         ownerId,
         type: NOTIFICATION_TYPES.DELIVERED,
-        title: "Tiffin delivered! ✅",
-        message: `Your meal has been delivered.${balanceMsg}`,
+        title: "Order Delivered 🛵",
+        message: `Your tiffin has been delivered!${balanceMsg}`,
         data: { orderId: id, status: "delivered", newBalance },
       }),
       sendNotification({
@@ -410,8 +410,8 @@ export const markDelivered = asyncHandler(async (req, res) => {
         customerId: order.customerId,
         ownerId,
         type: NOTIFICATION_TYPES.DELIVERED,
-        title: "Tiffin delivered! ✅",
-        message: "Your meal has been delivered",
+        title: "Order Delivered 🛵",
+        message: "Your tiffin has been delivered!",
         data: { orderId: order._id.toString(), status: "delivered" },
       })
     )

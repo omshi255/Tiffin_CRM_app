@@ -515,7 +515,6 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
     }
   }
 
-  // ── Share via WhatsApp / Share sheet ─────────────────────────────────────
   Future<void> _shareWhatsApp() async {
     if (_receiptData == null) return;
     setState(() => _pdfLoading = true);

@@ -6,6 +6,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/auth_api.dart';
+import '../../../../services/notification_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -39,6 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
       await SecureStorage.saveUserRole(user.role);
       await SecureStorage.saveUserId(user.id);
       await NotificationBadgeService.refreshNow();
+      await NotificationService().registerTokenAfterLogin();
       if (user.role == 'vendor' && !user.isVendorProfileComplete) {
         router.go(AppRoutes.vendorOnboarding, extra: user.phone);
         return;
@@ -54,6 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
           await SecureStorage.saveUserRole(user.role);
           await SecureStorage.saveUserId(user.id);
           await NotificationBadgeService.refreshNow();
+          await NotificationService().registerTokenAfterLogin();
           if (user.role == 'vendor' && !user.isVendorProfileComplete) {
             router.go(AppRoutes.vendorOnboarding, extra: user.phone);
             return;

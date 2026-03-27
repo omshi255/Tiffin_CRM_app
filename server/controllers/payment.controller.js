@@ -192,11 +192,16 @@ export const createPayment = asyncHandler(async (req, res) => {
       .populate("invoiceId", "invoiceNumber netAmount balanceDue paymentStatus")
       .lean();
 
+    const walletMsg =
+      paymentDoc.type === "wallet_credit"
+        ? `₹${paymentDoc.amount} added to wallet`
+        : `Payment of ₹${paymentDoc.amount} received`;
+
     await sendNotification({
       customerId: paymentDoc.customerId,
       ownerId: ownerId,
-      title: "Payment received",
-      message: `Payment of ₹${paymentDoc.amount} received`,
+      title: "Payment Received 💰",
+      message: walletMsg,
       data: { paymentId: paymentDoc._id.toString() },
     }).catch(() => {}); // non-critical; never block payment response
 

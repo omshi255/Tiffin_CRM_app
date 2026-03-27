@@ -217,7 +217,6 @@
 //   }
 // }
 import 'dart:async';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -228,7 +227,7 @@ import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/auth_api.dart';
 import '../../models/user_model.dart';
-import '../../../customer_portal/data/customer_portal_api.dart';
+import '../../../../services/notification_service.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({
@@ -356,17 +355,9 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // ── ORIGINAL FCM update — unchanged ─────────────────────────
-  Future<void> _updateFcmToken(String role) async {
+  Future<void> _updateFcmToken() async {
     try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token != null && token.isNotEmpty) {
-        if (role == 'customer') {
-          await CustomerPortalApi.updateMyProfile({'fcmToken': token});
-        } else {
-          await AuthApi.updateProfile({'fcmToken': token});
-        }
-      }
+      await NotificationService().registerTokenAfterLogin();
     } catch (_) {}
   }
 
@@ -387,7 +378,7 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
       await SecureStorage.saveUserRole(role);
       await SecureStorage.saveUserId(user.id);
       await NotificationBadgeService.refreshNow();
-      await _updateFcmToken(role);
+      await _updateFcmToken();
       if (!mounted) return;
       setState(() => _isVerifying = false);
       await _navigateAfterLogin(context, user);
