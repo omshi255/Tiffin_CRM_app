@@ -12,15 +12,25 @@ import Customer from "../models/Customer.model.js";
 export const sendToToken = async (token, title, body, data = {}) => {
   if (!token) return;
 
+  const stringData = Object.fromEntries(
+    Object.entries(data || {}).map(([k, v]) => [k, String(v)])
+  );
+
   const message = {
-    token,
     notification: {
       title,
       body,
     },
-    data: Object.fromEntries(
-      Object.entries(data).map(([k, v]) => [k, String(v)])
-    ),
+    data: stringData,
+    android: {
+      priority: "high",
+      notification: {
+        sound: "default",
+        priority: "high",
+        channelId: "default",
+      },
+    },
+    token,
   };
 
   try {

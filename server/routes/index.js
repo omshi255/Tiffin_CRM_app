@@ -16,6 +16,7 @@ import adminRoutes from "./admin.routes.js";
 import zoneRoutes from "./zone.routes.js";
 import expenseRoutes from "./expense.routes.js";
 import incomeRoutes from "./income.routes.js";
+import sendNotificationRoutes from "./sendNotification.routes.js";
 
 const router = Router();
 
@@ -36,5 +37,6 @@ router.use("/admin", adminRoutes);
 router.use("/zones", zoneRoutes);
 router.use("/expenses", expenseRoutes);
 router.use("/incomes", incomeRoutes);
+router.use("/send-notification", sendNotificationRoutes);
 
 export default router;
