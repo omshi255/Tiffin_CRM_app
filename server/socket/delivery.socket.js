@@ -58,7 +58,13 @@ export const initDeliverySocket = (io) => {
         return;
       }
 
-      const payload = { lat, lng, orderId, staffId: staffId || userId };
+      const payload = {
+        lat,
+        lng,
+        orderId: orderId ?? null,
+        staffId: staffId || userId,
+        ...(customerIdForOrder && { customerIdForOrder }),
+      };
 
       // Emit to vendor's admin room so they can track on map.
       delivery.to(`admin:${ownerId || userId}`).emit("location_update", payload);

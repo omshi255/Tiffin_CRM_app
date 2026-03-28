@@ -61,8 +61,8 @@
 	</array>
 	<key>NSContactsUsageDescription</key>
 	<string>TiffinCRM needs access to contacts to quickly add customers</string>
-	<key>GMSApiKey</key>
-	<string>$(GOOGLE_MAPS_API_KEY)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TiffinCRM uses your location for delivery routes and sharing with your vendor</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

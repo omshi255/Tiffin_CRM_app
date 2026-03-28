@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
@@ -22,10 +23,18 @@ void main() async {
   AppRouter.onboardingSeen = prefs.getBool('onboarding_seen') ?? false;
 
   try {
-    await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await NotificationService().initLocalNotifications();
-    await NotificationService().initFCM();
+    if (kIsWeb) {
+      debugPrint(
+        'Firebase/FCM skipped on web (needs FirebaseOptions). '
+        'Run `dart pub global activate flutterfire_cli` then `flutterfire configure` '
+        'and use DefaultFirebaseOptions in main.dart to enable.',
+      );
+    } else {
+      await Firebase.initializeApp();
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      await NotificationService().initLocalNotifications();
+      await NotificationService().initFCM();
+    }
   } catch (e, st) {
     debugPrint('Firebase/FCM init: $e\n$st');
   }

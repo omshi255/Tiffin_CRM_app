@@ -8,7 +8,7 @@ Flutter app for the Tiffin CRM platform. Supports **four roles**: Vendor, Custom
 
 ### Core (Foundation)
 - **API client**: `lib/core/network/dio_client.dart` – singleton Dio with auth header from `SecureStorage`, 401 → refresh token then retry (or clear storage and redirect to login).
-- **Config**: `lib/core/config/app_config.dart` – `baseUrl`, `googleMapsApiKey`, `fcmSenderId`, `razorpayKeyId`, `truecallerAppKey` (from env or defaults).
+- **Config**: `lib/core/config/app_config.dart` – `baseUrl`, `fcmSenderId`, `razorpayKeyId`, `truecallerAppKey` (from env or defaults).
 - **Endpoints**: `lib/core/network/api_endpoints.dart` – all API paths as constants.
 - **Storage**: `lib/core/storage/secure_storage.dart` – access/refresh token, `userRole`, `userId`, `clearAll()`.
 - **Helpers**: `lib/core/utils/error_handler.dart`, `lib/core/utils/whatsapp_helper.dart`, `lib/core/utils/location_helper.dart`, `lib/core/utils/color_utils.dart`.
@@ -79,20 +79,14 @@ Flutter app for the Tiffin CRM platform. Supports **four roles**: Vendor, Custom
 
 ## Environment / Config
 - **Base API URL**: `AppConfig.baseUrl` in `lib/core/config/app_config.dart` (local vs production).
-- **`.env`** in `client/` (gitignored): put `GOOGLE_MAPS_API_KEY=...` and other secrets there.
+- **`.env`** in `client/` (gitignored): FCM, Razorpay, Truecaller, etc. (no map API keys — maps use OpenStreetMap via `flutter_map`).
 
-### Google Maps (`GOOGLE_MAPS_API_KEY` in `.env`)
-1. **Android** — Gradle reads `client/.env` on build and injects the key into `AndroidManifest`. Rebuild the app after changing `.env`.
-2. **Web** — Run once (or after key change):  
-   `dart run tool/sync_maps_key.dart`  
-   This writes `web/gmaps_config.js` (gitignored). Then **full restart** `flutter run -d chrome`. Enable **Maps JavaScript API** and add HTTP referrer restrictions for your dev URL (e.g. `localhost:*`).
-3. **iOS** — Same script writes `ios/Flutter/MapsKey.xcconfig` (gitignored). Then `cd ios && pod install`, rebuild. Enable **Maps SDK for iOS** for that key.
-
-Optional: `--dart-define=GOOGLE_MAPS_API_KEY=...` still works for Dart `AppConfig` if you use it elsewhere.
+### Maps (OpenStreetMap)
+In-app maps use **`flutter_map`** with OSM tiles (`lib/core/maps/osm_map_constants.dart`). External “open in maps” links use OpenStreetMap in the browser (`LocationHelper.openInMaps`).
 
 Other optional defines: `FCM_SENDER_ID`, `RAZORPAY_KEY_ID`, `TRUECALLER_APP_KEY`.
 
-**Truecaller (Android)** — set `TRUECALLER_CLIENT_ID` in `client/.env` (same file as Maps). Gradle injects it into `AndroidManifest` at build time; rebuild after changing `.env`. Optional: `TRUECALLER_APP_KEY` for server-side use.
+**Truecaller (Android)** — set `TRUECALLER_CLIENT_ID` in `client/.env`. Gradle injects it into `AndroidManifest` at build time; rebuild after changing `.env`. Optional: `TRUECALLER_APP_KEY` for server-side use.
 
 ---
 
@@ -104,6 +98,7 @@ lib/
 ├── app.dart                  # MaterialApp.router, DioClient navigator key
 ├── core/
 │   ├── config/               # AppConfig (baseUrl, keys)
+│   ├── maps/                 # OSM tile constants (flutter_map)
 │   ├── network/              # dio_client, api_endpoints, api_exception
 │   ├── router/               # app_router, app_routes
 │   ├── storage/              # secure_storage
@@ -131,7 +126,7 @@ lib/
 ## How to Run
 1. From repo root: `cd client`.
 2. `flutter pub get`.
-3. Copy `.env.example` to `.env`, set `GOOGLE_MAPS_API_KEY`, then run `dart run tool/sync_maps_key.dart` for web/iOS maps.
+3. Copy `.env.example` to `.env` and set any keys you use (FCM, Razorpay, Truecaller, etc.).
 4. `flutter run` (choose device; for mobile FCM works; web may have plugin compatibility issues with Firebase Messaging).
 
 ---

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/storage/secure_storage.dart';
+import '../../../../core/auth/auth_session.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../auth/data/auth_api.dart';
@@ -95,7 +95,7 @@ class _DeliveryProfileScreenState extends State<DeliveryProfileScreen> {
 
   Future<void> _logout() async {
     await AuthApi.logout();
-    await SecureStorage.clearAll();
+    await AuthSession.clearLocalSession();
     if (!mounted) return;
     GoRouter.of(context).go(AppRoutes.login);
   }

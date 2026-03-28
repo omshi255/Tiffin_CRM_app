@@ -217,6 +217,7 @@ class NotificationService {
 
   /// After OTP / Truecaller login — token is saved with fresh auth headers.
   Future<void> registerTokenAfterLogin() async {
+    if (kIsWeb) return;
     await _syncTokenBestEffort();
   }
 }

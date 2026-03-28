@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/notifications/notification_badge_service.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/auth/auth_session.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/auth_api.dart';
@@ -66,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
           return;
         }
       } catch (_) {}
-      await SecureStorage.clearAll();
+      await AuthSession.clearLocalSession();
       if (!mounted) return;
       router.go(AppRoutes.roleSelection);
     }

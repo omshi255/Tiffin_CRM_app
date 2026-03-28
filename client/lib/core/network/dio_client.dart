@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../auth/auth_session.dart';
 import '../config/app_config.dart';
 import '../router/app_routes.dart';
+import '../socket/delivery_tracking_socket.dart';
 import '../storage/secure_storage.dart';
 import 'api_endpoints.dart';
 import 'api_exception.dart';
@@ -61,7 +65,7 @@ final class DioClient {
               }
               throw Exception('Refresh failed');
             } catch (_) {
-              await SecureStorage.clearAll();
+              await AuthSession.clearLocalSession();
               _goToRoleSelection();
             } finally {
               _isRefreshing = false;
@@ -107,6 +111,7 @@ final class DioClient {
           final refresh = data['refreshToken'] as String?;
           if (access != null) await SecureStorage.saveAccessToken(access);
           if (refresh != null) await SecureStorage.saveRefreshToken(refresh);
+          unawaited(DeliveryTrackingSocket.instance.reconnectWithFreshToken());
           return true;
         }
         return false;
@@ -116,6 +121,7 @@ final class DioClient {
       final refresh = payload['refreshToken'] as String?;
       if (access != null) await SecureStorage.saveAccessToken(access);
       if (refresh != null) await SecureStorage.saveRefreshToken(refresh);
+      unawaited(DeliveryTrackingSocket.instance.reconnectWithFreshToken());
       return true;
     } catch (_) {
       return false;

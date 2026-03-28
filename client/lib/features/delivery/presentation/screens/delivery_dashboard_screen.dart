@@ -4,11 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/storage/secure_storage.dart';
+import '../../../../core/auth/auth_session.dart';
+import '../../../../core/delivery/staff_location_sync.dart';
+import '../../../../core/socket/delivery_tracking_socket.dart';
 import '../../../../core/utils/color_utils.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/location_helper.dart';
+import '../../../../core/routing/nominatim_geocode_service.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
 import '../../../../core/widgets/notification_bell_icon.dart';
 import '../../data/delivery_api.dart';
@@ -16,6 +19,7 @@ import '../../../auth/data/auth_api.dart';
 import '../../../orders/data/order_api.dart';
 import '../../../orders/models/order_model.dart';
 import 'delivery_map_screen.dart';
+import '../models/delivery_map_session.dart';
 import 'delivery_profile_screen.dart';
 
 class DeliveryDashboardScreen extends StatefulWidget {
@@ -67,6 +71,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   bool _updatingLocation = false;
   int _selectedTab = 0;
   Timer? _locationTimer;
+  DeliveryMapSession? _mapSession;
 
   static const List<String?> _filterValues = [
     null,
@@ -87,6 +92,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   void initState() {
     super.initState();
     _load();
+    DeliveryTrackingSocket.instance.ensureConnected();
     _locationTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (!mounted) return;
       _updateLocationSilent();
@@ -103,13 +109,41 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     try {
       final position = await LocationHelper.getCurrentPosition();
       if (position == null || !mounted) return;
-      await DeliveryApi.updateMe({
-        'location': {
-          'type': 'Point',
-          'coordinates': [position.longitude, position.latitude],
-        },
-      });
+      await StaffLocationSync.pushFromPosition(position, _orders);
     } catch (_) {}
+  }
+
+  Future<void> _openCustomerRouteOnMap(
+    BuildContext sheetContext,
+    OrderModel order,
+  ) async {
+    final address = order.customerAddress?.trim();
+    if (address == null || address.isEmpty) {
+      if (sheetContext.mounted) {
+        AppSnackbar.error(sheetContext, 'Could not find customer location');
+      }
+      return;
+    }
+    try {
+      final pt = await NominatimGeocodeService.searchFirst(address);
+      if (!sheetContext.mounted) return;
+      if (pt == null) {
+        AppSnackbar.error(sheetContext, 'Could not find customer location');
+        return;
+      }
+      Navigator.pop(sheetContext);
+      setState(() {
+        _mapSession = DeliveryMapSession.singleRoute(
+          customerPoint: pt,
+          customerName: order.customerName ?? order.customerId,
+        );
+        _selectedTab = 1;
+      });
+    } catch (_) {
+      if (sheetContext.mounted) {
+        AppSnackbar.error(sheetContext, 'Could not find customer location');
+      }
+    }
   }
 
   Future<void> _load() async {
@@ -134,12 +168,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     try {
       final position = await LocationHelper.getCurrentPosition();
       if (position == null || !mounted) return;
-      await DeliveryApi.updateMe({
-        'location': {
-          'type': 'Point',
-          'coordinates': [position.longitude, position.latitude],
-        },
-      });
+      await StaffLocationSync.pushFromPosition(position, _orders);
       if (mounted) AppSnackbar.success(context, 'Location shared');
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
@@ -151,7 +180,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   Future<void> _logout() async {
     final router = GoRouter.of(context);
     await AuthApi.logout();
-    await SecureStorage.clearAll();
+    await AuthSession.clearLocalSession();
     if (!mounted) return;
     router.go(AppRoutes.roleSelection);
   }
@@ -247,13 +276,11 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
         },
         onCall: () {
           final phone = order.customerPhone;
-          if (phone != null && phone.isNotEmpty)
+          if (phone != null && phone.isNotEmpty) {
             WhatsAppHelper.callPhone(phone);
+          }
         },
-        onOpenMaps: () {
-          final loc = order.customerLocation;
-          if (loc != null) LocationHelper.openInMaps(loc.lat, loc.lng);
-        },
+        onOpenMaps: () => _openCustomerRouteOnMap(ctx, order),
       ),
     );
   }
@@ -421,7 +448,11 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
         index: _selectedTab,
         children: [
           _buildTasksBody(filtered),
-          const DeliveryMapScreen(showAppBar: false),
+          DeliveryMapScreen(
+            showAppBar: false,
+            orders: _orders,
+            session: _mapSession,
+          ),
           const DeliveryProfileScreen(),
         ],
       ),
@@ -457,7 +488,10 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                       .length,
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    setState(() => _selectedTab = 0);
+                    setState(() {
+                      _selectedTab = 0;
+                      _mapSession = null;
+                    });
                   },
                 ),
                 _NavTab(
@@ -490,7 +524,10 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           ? FloatingActionButton.extended(
               onPressed: () {
                 HapticFeedback.lightImpact();
-                setState(() => _selectedTab = 1);
+                setState(() {
+                  _mapSession = const DeliveryMapSession.multiOnWay();
+                  _selectedTab = 1;
+                });
               },
               backgroundColor: _violet600,
               foregroundColor: Colors.white,

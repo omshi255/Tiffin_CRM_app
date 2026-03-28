@@ -8,10 +8,14 @@ abstract final class AppConfig {
 
   static String get baseUrl => useLocalApi ? apiUrlLocal : apiUrlProduction;
 
-  static const String googleMapsApiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_API_KEY',
-    defaultValue: 'YOUR_GOOGLE_MAPS_API_KEY',
-  );
+  /// Origin for Socket.IO (no `/api/v1` path). Used by `DeliveryTrackingSocket`.
+  static String get socketOrigin {
+    final u = Uri.parse(baseUrl);
+    if (u.hasPort) {
+      return '${u.scheme}://${u.host}:${u.port}';
+    }
+    return '${u.scheme}://${u.host}';
+  }
 
   static const String fcmSenderId = String.fromEnvironment(
     'FCM_SENDER_ID',

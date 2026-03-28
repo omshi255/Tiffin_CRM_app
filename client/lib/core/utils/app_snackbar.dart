@@ -1,12 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../theme/app_colors.dart';
 
+void _hapticLight() {
+  if (kIsWeb) return;
+  HapticFeedback.lightImpact();
+}
+
 abstract final class AppSnackbar {
   static void success(BuildContext context, String message) {
-    HapticFeedback.lightImpact();
+    _hapticLight();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -35,7 +41,7 @@ abstract final class AppSnackbar {
   }
 
   static void error(BuildContext context, String message) {
-    HapticFeedback.lightImpact();
+    _hapticLight();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -64,7 +70,7 @@ abstract final class AppSnackbar {
   }
 
   static void info(BuildContext context, String message) {
-    HapticFeedback.lightImpact();
+    _hapticLight();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

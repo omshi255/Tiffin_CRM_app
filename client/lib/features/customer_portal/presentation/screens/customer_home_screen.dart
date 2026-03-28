@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:tiffin_crm/features/orders/models/order_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/auth/auth_session.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/socket/delivery_tracking_socket.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
@@ -1121,9 +1123,17 @@ class _CustomerOrdersTabState extends State<_CustomerOrdersTab> {
   void initState() {
     super.initState();
     _load();
+    _initLiveTrackingSocket();
     _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) _load();
     });
+  }
+
+  Future<void> _initLiveTrackingSocket() async {
+    final role = await SecureStorage.getUserRole();
+    if (role == 'customer') {
+      await DeliveryTrackingSocket.instance.ensureConnected();
+    }
   }
 
   @override
@@ -1370,9 +1380,18 @@ class _CustomerOrdersTabState extends State<_CustomerOrdersTab> {
   }
 }
 
-class _OrderStatusSheet extends StatelessWidget {
+class _OrderStatusSheet extends StatefulWidget {
   const _OrderStatusSheet({required this.order});
   final OrderModel order;
+
+  @override
+  State<_OrderStatusSheet> createState() => _OrderStatusSheetState();
+}
+
+class _OrderStatusSheetState extends State<_OrderStatusSheet> {
+  StreamSubscription<DeliveryLocationUpdate>? _sub;
+  DeliveryLocationUpdate? _live;
+  DateTime? _liveAt;
 
   static const List<String> _steps = [
     'Order Placed',
@@ -1388,7 +1407,51 @@ class _OrderStatusSheet extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _listen();
+  }
+
+  Future<void> _listen() async {
+    await DeliveryTrackingSocket.instance.ensureConnected();
+    _sub = DeliveryTrackingSocket.instance.updates.listen((u) {
+      if (!_matches(u) || !mounted) return;
+      setState(() {
+        _live = u;
+        _liveAt = DateTime.now();
+      });
+    });
+  }
+
+  bool _matches(DeliveryLocationUpdate u) {
+    final o = widget.order;
+    if (u.orderId != null && u.orderId!.isNotEmpty) {
+      return u.orderId == o.id;
+    }
+    if (u.customerIdForOrder != null && u.customerIdForOrder!.isNotEmpty) {
+      return u.customerIdForOrder == o.customerId;
+    }
+    return false;
+  }
+
+  String _formatLiveAgo(DateTime t) {
+    final sec = DateTime.now().difference(t).inSeconds;
+    if (sec < 10) return 'just now';
+    if (sec < 60) return '${sec}s ago';
+    final m = sec ~/ 60;
+    if (m < 60) return '${m}m ago';
+    return '${m ~/ 60}h ago';
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final order = widget.order;
     final status = order.status.toLowerCase();
     int currentStep = 1;
     if (status == 'pending' || status == 'assigned') {
@@ -1591,6 +1654,67 @@ class _OrderStatusSheet extends StatelessWidget {
                   ],
                 ),
               ),
+            if (_live != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: _violet50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.radar_rounded, size: 20, color: _violet600),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Text(
+                            'Live rider location',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: _text1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_liveAt != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 30),
+                        child: Text(
+                          'Updated ${_formatLiveAgo(_liveAt!)}',
+                          style: const TextStyle(fontSize: 11, color: _text2),
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: () => LocationHelper.openInMaps(
+                        _live!.lat,
+                        _live!.lng,
+                      ),
+                      icon: const Icon(Icons.map_rounded, size: 18),
+                      label: const Text(
+                        'Open rider on map',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: _violet600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: _violet600,
+                        side: BorderSide(
+                          color: _violet600.withValues(alpha: 0.45),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
           const SizedBox(height: 16),
           TextButton(
@@ -1883,7 +2007,7 @@ class _CustomerProfileTabState extends State<_CustomerProfileTab> {
     try {
       await AuthApi.logout();
     } catch (_) {}
-    await SecureStorage.clearAll();
+    await AuthSession.clearLocalSession();
     if (!mounted) return;
     context.go(AppRoutes.roleSelection);
   }

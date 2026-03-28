@@ -7,28 +7,7 @@ id("dev.flutter.flutter-gradle-plugin")
 id("com.google.gms.google-services")
 }
 
-fun loadGoogleMapsKeyFromEnv(): String {
-    val clientRoot = rootProject.projectDir.parentFile
-    val envFile = clientRoot.resolve(".env")
-    if (envFile.exists()) {
-        envFile.readLines().forEach { line ->
-            val t = line.trim()
-            if (t.startsWith("GOOGLE_MAPS_API_KEY=")) {
-                return t.removePrefix("GOOGLE_MAPS_API_KEY=").trim()
-                    .trim('"')
-            }
-        }
-    }
-    val local = clientRoot.resolve("android/local.properties")
-    if (local.exists()) {
-        val p = Properties()
-        local.inputStream().use { p.load(it) }
-        p.getProperty("GOOGLE_MAPS_API_KEY")?.let { if (it.isNotBlank()) return it.trim() }
-    }
-    return "YOUR_GOOGLE_MAPS_API_KEY"
-}
-
-/** Truecaller OAuth Client ID: same pattern as Maps — read from `client/.env` or `android/local.properties`. */
+/** Truecaller OAuth Client ID: read from `client/.env` or `android/local.properties`. */
 fun loadTruecallerClientIdFromEnv(): String {
     val clientRoot = rootProject.projectDir.parentFile
     val envFile = clientRoot.resolve(".env")
@@ -73,7 +52,6 @@ defaultConfig {
     targetSdk = flutter.targetSdkVersion
     versionCode = flutter.versionCode
     versionName = flutter.versionName
-    manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = loadGoogleMapsKeyFromEnv()
     manifestPlaceholders["TRUECALLER_CLIENT_ID"] = loadTruecallerClientIdFromEnv()
 }
 

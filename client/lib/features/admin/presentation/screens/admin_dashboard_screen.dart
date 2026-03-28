@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/storage/secure_storage.dart';
+import '../../../../core/auth/auth_session.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/widgets/section_header.dart';
@@ -69,7 +69,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Future<void> _logout() async {
     final router = GoRouter.of(context);
     await AuthApi.logout();
-    await SecureStorage.clearAll();
+    await AuthSession.clearLocalSession();
     if (!mounted) return;
     router.go(AppRoutes.roleSelection);
   }

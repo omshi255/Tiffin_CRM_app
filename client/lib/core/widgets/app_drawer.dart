@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../auth/auth_session.dart';
 import '../router/app_routes.dart';
-import '../storage/secure_storage.dart';
 import '../utils/app_snackbar.dart';
 import '../widgets/notification_bell_icon.dart';
 import '../../features/auth/data/auth_api.dart';
@@ -219,7 +219,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     onTap: () async {
                       _close();
                       await AuthApi.logout();
-                      await SecureStorage.clearAll();
+                      await AuthSession.clearLocalSession();
                       if (context.mounted) context.go(AppRoutes.login);
                     },
                   ),
