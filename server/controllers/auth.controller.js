@@ -21,18 +21,44 @@ import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 
 /**
+ * Delivery staff display name is stored on [DeliveryStaff], not [User]
+ * (User is the login shell: phone + role). [getMe] and auth payloads must read it here.
+ */
+const getDeliveryStaffDisplayName = async (userId, staffIdFromToken) => {
+  if (staffIdFromToken) {
+    const byId = await DeliveryStaff.findById(staffIdFromToken)
+      .select("name")
+      .lean();
+    if (byId?.name?.trim()) return byId.name.trim();
+  }
+  const byUser = await DeliveryStaff.findOne({ userId })
+    .select("name")
+    .lean();
+  if (byUser?.name?.trim()) return byUser.name.trim();
+  return "";
+};
+
+/**
  * User object returned on login/refresh — includes vendor business fields from DB
  * so clients don't treat completed onboarding as "empty name" on every login.
+ * Pass [staffDisplayName] in [extra] for delivery_staff (stripped from spread output).
  */
 const buildAuthUserPayload = (user, role, extra = {}) => {
   const u = user && typeof user.toObject === "function" ? user.toObject() : user;
   const id = u._id?.toString?.() ?? String(u._id);
+  const { staffDisplayName, ...restExtra } = extra;
+  const name = (
+    (typeof staffDisplayName === "string" && staffDisplayName.trim()) ||
+    u.name ||
+    u.ownerName ||
+    ""
+  ).trim();
   const payload = {
     id,
     phone: u.phone,
-    name: (u.name || u.ownerName || "").trim(),
+    name,
     role,
-    ...extra,
+    ...restExtra,
   };
   if (role === "vendor") {
     payload.businessName = (u.businessName || "").trim();
@@ -246,6 +272,11 @@ export const resetPasswordController = asyncHandler(async (req, res, next) => {
   const staffId = resolved.staffId || null;
   const customerId = resolved.customerId || null;
 
+  let staffDisplayName = "";
+  if (role === "delivery_staff") {
+    staffDisplayName = await getDeliveryStaffDisplayName(user._id, staffId);
+  }
+
   const payload = {
     userId: user._id.toString(),
     phone: user.phone,
@@ -264,6 +295,7 @@ export const resetPasswordController = asyncHandler(async (req, res, next) => {
     user: buildAuthUserPayload(user, role, {
       ...(staffId && { staffId }),
       ...(customerId && { customerId }),
+      ...(staffDisplayName && { staffDisplayName }),
     }),
   });
 
@@ -368,6 +400,11 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
 
   const customerId = resolved.customerId || null;
 
+  let staffDisplayName = "";
+  if (role === "delivery_staff") {
+    staffDisplayName = await getDeliveryStaffDisplayName(user._id, staffId);
+  }
+
   const payload = {
     userId: user._id.toString(),
     phone: user.phone,
@@ -386,6 +423,7 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
     user: buildAuthUserPayload(user, role, {
       ...(staffId && { staffId }),
       ...(customerId && { customerId }),
+      ...(staffDisplayName && { staffDisplayName }),
     }),
   });
 
@@ -543,12 +581,18 @@ export const truecallerController = asyncHandler(async (req, res, next) => {
   const access = generateAccessToken(payload);
   const refresh = generateRefreshToken(payload);
 
+  let staffDisplayName = "";
+  if (role === "delivery_staff") {
+    staffDisplayName = await getDeliveryStaffDisplayName(user._id, tcStaffId);
+  }
+
   const response = new ApiResponse(200, "Login successful", {
     accessToken: access,
     refreshToken: refresh,
     user: buildAuthUserPayload(user, role, {
       ...(tcStaffId && { staffId: tcStaffId }),
       ...(tcCustomerId && { customerId: tcCustomerId }),
+      ...(staffDisplayName && { staffDisplayName }),
     }),
   });
 
@@ -606,6 +650,11 @@ export const refreshTokenController = asyncHandler(async (req, res, next) => {
   const staffId = resolved.staffId || null;
   const customerId = resolved.customerId || null;
 
+  let staffDisplayName = "";
+  if (role === "delivery_staff") {
+    staffDisplayName = await getDeliveryStaffDisplayName(user._id, staffId);
+  }
+
   const payload = {
     userId: user._id.toString(),
     phone: user.phone,
@@ -624,6 +673,7 @@ export const refreshTokenController = asyncHandler(async (req, res, next) => {
     user: buildAuthUserPayload(user, role, {
       ...(staffId && { staffId }),
       ...(customerId && { customerId }),
+      ...(staffDisplayName && { staffDisplayName }),
     }),
   });
 
@@ -654,10 +704,19 @@ export const getMeController = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.userId).lean();
   if (!user) throw new ApiError(404, "User not found");
 
+  let name = (user.name || user.ownerName || "").trim();
+  if (user.role === "delivery_staff") {
+    const staffName = await getDeliveryStaffDisplayName(
+      user._id,
+      req.user.staffId || null
+    );
+    if (staffName) name = staffName;
+  }
+
   const response = new ApiResponse(200, "User profile", {
     id: user._id.toString(),
     phone: user.phone,
-    name: user.name || user.ownerName || "",
+    name,
     role: user.role,
     email: user.email,
     businessName: user.businessName || "",
@@ -757,11 +816,23 @@ export const updateMe = asyncHandler(async (req, res) => {
     { new: true }
   ).lean();
 
+  let responseName = (user.name || user.ownerName || "").trim();
+  if (user.role === "delivery_staff") {
+    if (value.name?.trim() && req.user.staffId) {
+      await DeliveryStaff.findByIdAndUpdate(req.user.staffId, {
+        $set: { name: value.name.trim() },
+      });
+    }
+    responseName =
+      (await getDeliveryStaffDisplayName(user._id, req.user.staffId || null)) ||
+      responseName;
+  }
+
   const response = new ApiResponse(200, "Profile updated", {
     user: {
       id: user._id.toString(),
       phone: user.phone,
-      name: user.name || user.ownerName || "",
+      name: responseName,
       businessName: user.businessName || "",
       ownerName: user.ownerName || "",
       address: user.address || "",
