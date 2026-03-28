@@ -21,6 +21,10 @@ final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
 
 /// Top-level background handler calls this after [Firebase.initializeApp].
 Future<void> showLocalNotificationFromRemoteMessage(RemoteMessage message) async {
+  debugPrint(
+    '[FCM DEBUG] showLocalNotificationFromRemoteMessage '
+    'messageId=${message.messageId} dataKeys=${message.data.keys.toList()}',
+  );
   await _ensureLocalNotificationsReady();
   await showLocalNotification(message);
 }
@@ -58,6 +62,9 @@ Future<void> showLocalNotification(RemoteMessage message) async {
       '';
   final route =
       message.data['route'] as String? ?? AppRoutes.notifications;
+  debugPrint(
+    '[FCM DEBUG] showLocalNotification title="$title" bodyLen=${body.length} route=$route',
+  );
 
   const androidDetails = AndroidNotificationDetails(
     kTiffinCrmNotificationChannelId,
@@ -77,13 +84,19 @@ Future<void> showLocalNotification(RemoteMessage message) async {
     iOS: iosDetails,
   );
   final id = message.messageId?.hashCode ?? (message.hashCode & 0x7FFFFFFF);
-  await _flutterLocalNotificationsPlugin.show(
-    id: id,
-    title: title,
-    body: body,
-    notificationDetails: details,
-    payload: route,
-  );
+  try {
+    await _flutterLocalNotificationsPlugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: route,
+    );
+    debugPrint('[FCM DEBUG] flutter_local_notifications.show completed id=$id');
+  } catch (e, st) {
+    debugPrint('[FCM DEBUG] flutter_local_notifications.show FAILED: $e\n$st');
+    rethrow;
+  }
 }
 
 /// Foreground + cold start: wire tap handling and channels.
@@ -144,6 +157,7 @@ class NotificationService {
 
   /// Registers FCM token, syncs to backend, and attaches listeners (once).
   Future<void> initFCM() async {
+    debugPrint('[FCM DEBUG] initFCM() start');
     await _requestAndroidPostNotifications();
 
     try {
@@ -154,24 +168,36 @@ class NotificationService {
       );
     } catch (_) {}
 
+    try {
+      await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (_) {}
+
     await _syncTokenBestEffort();
-    FirebaseMessaging.instance.onTokenRefresh.listen((t) async {
-      try {
-        debugPrint('[FCM] token refreshed: $t');
-        final access = await SecureStorage.getAccessToken();
-        if (access != null && access.isNotEmpty) {
-          await AuthApi.saveFcmToken(t);
-        }
-      } catch (_) {}
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      debugPrint('[FCM] token refreshed: $newToken');
+      _saveTokenToBackend(newToken);
     });
 
     if (!_fcmListenersAttached) {
       _fcmListenersAttached = true;
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-        await showLocalNotification(message);
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint(
+          '[FCM DEBUG] onMessage (foreground) '
+          'messageId=${message.messageId} '
+          'notification=${message.notification?.title}',
+        );
+        showLocalNotificationFromRemoteMessage(message);
       });
 
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        debugPrint(
+          '[FCM DEBUG] onMessageOpenedApp '
+          'messageId=${message.messageId} data=${message.data}',
+        );
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final ctx = AppRouter.navigatorKey.currentContext;
           if (ctx == null) return;
@@ -186,6 +212,10 @@ class NotificationService {
 
       final initial = await FirebaseMessaging.instance.getInitialMessage();
       if (initial != null) {
+        debugPrint(
+          '[FCM DEBUG] getInitialMessage (cold start) '
+          'messageId=${initial.messageId}',
+        );
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final ctx = AppRouter.navigatorKey.currentContext;
           if (ctx == null) return;
@@ -193,6 +223,30 @@ class NotificationService {
           GoRouter.of(ctx).go(route ?? AppRoutes.notifications);
         });
       }
+    }
+    debugPrint('[FCM DEBUG] initFCM() finished (listeners attached=$_fcmListenersAttached)');
+  }
+
+  Future<void> _saveTokenToBackend(String token) async {
+    if (token.isEmpty) {
+      debugPrint('[FCM DEBUG] _saveTokenToBackend skipped: empty token');
+      return;
+    }
+    try {
+      final access = await SecureStorage.getAccessToken();
+      if (access != null && access.isNotEmpty) {
+        await AuthApi.saveFcmToken(token);
+        debugPrint(
+          '[FCM DEBUG] _saveTokenToBackend OK '
+          'tokenPrefix=${token.length > 24 ? token.substring(0, 24) : token}...',
+        );
+      } else {
+        debugPrint(
+          '[FCM DEBUG] _saveTokenToBackend skipped: no access token (login first)',
+        );
+      }
+    } catch (e) {
+      debugPrint('[FCM DEBUG] _saveTokenToBackend error: $e');
     }
   }
 
@@ -202,10 +256,7 @@ class NotificationService {
         final token = await FirebaseMessaging.instance.getToken();
         if (token != null && token.isNotEmpty) {
           debugPrint('[FCM] device token: $token');
-          final access = await SecureStorage.getAccessToken();
-          if (access != null && access.isNotEmpty) {
-            await AuthApi.saveFcmToken(token);
-          }
+          await _saveTokenToBackend(token);
           return;
         }
       } catch (e) {

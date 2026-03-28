@@ -168,6 +168,16 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   const order = await DailyOrder.findOne(orderFilter);
   if (!order) throw new ApiError(404, "Order not found");
 
+  console.log("[FCM DEBUG] updateOrderStatus", {
+    orderId: id,
+    requestedStatus: status,
+    role,
+    ownerId: String(ownerId),
+    jwtUserId: String(req.user.userId),
+    customerId: order.customerId?.toString?.(),
+    orderStatus: order.status,
+  });
+
   if (role === "delivery_staff") {
     const staffId = req.user.staffId;
     if (
@@ -192,6 +202,19 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     );
   }
 
+  // Vendor alerts resolve FCM from User.fcmToken. Staff tokens are on the staff User row,
+  // not the vendor's — include the acting user when delivery_staff updates status.
+  const vendorAlertUserIds = [
+    ...new Set([
+      String(ownerId),
+      ...(role === "delivery_staff" &&
+      req.user.userId &&
+      String(req.user.userId) !== String(ownerId)
+        ? [String(req.user.userId)]
+        : []),
+    ]),
+  ];
+
   // ── out_for_delivery ──────────────────────────────────────────────
   if (status === "out_for_delivery") {
     order.status = "out_for_delivery";
@@ -207,17 +230,20 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
         message: "Your tiffin is on the way",
         data: { orderId: id, status: "out_for_delivery" },
       }),
-      sendNotification({
-        userId: ownerId,
-        type: NOTIFICATION_TYPES.OUT_FOR_DELIVERY,
-        title: "Order out for delivery",
-        message: "An order is out for delivery",
-        data: {
-          orderId: id,
-          customerId: order.customerId.toString(),
-          status: "out_for_delivery",
-        },
-      }),
+      ...vendorAlertUserIds.map((userId) =>
+        sendNotification({
+          userId,
+          ownerId,
+          type: NOTIFICATION_TYPES.OUT_FOR_DELIVERY,
+          title: "Order out for delivery",
+          message: "An order is out for delivery",
+          data: {
+            orderId: id,
+            customerId: order.customerId.toString(),
+            status: "out_for_delivery",
+          },
+        })
+      ),
     ]);
 
     return res.status(200).json(
@@ -258,17 +284,20 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
         message: `Your tiffin has been delivered!${balanceMsg}`,
         data: { orderId: id, status: "delivered", newBalance },
       }),
-      sendNotification({
-        userId: ownerId,
-        type: NOTIFICATION_TYPES.DELIVERED,
-        title: "Order delivered",
-        message: "An order has been successfully delivered",
-        data: {
-          orderId: id,
-          customerId: order.customerId.toString(),
-          status: "delivered",
-        },
-      }),
+      ...vendorAlertUserIds.map((userId) =>
+        sendNotification({
+          userId,
+          ownerId,
+          type: NOTIFICATION_TYPES.DELIVERED,
+          title: "Order delivered",
+          message: "An order has been successfully delivered",
+          data: {
+            orderId: id,
+            customerId: order.customerId.toString(),
+            status: "delivered",
+          },
+        })
+      ),
     ]);
 
     // Low balance alert
@@ -287,16 +316,19 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
             message: `₹${newBalance.toFixed(2)} remaining. Please recharge.`,
             data: { balance: newBalance, screen: "wallet" },
           }),
-          sendNotification({
-            userId: ownerId,
-            type: NOTIFICATION_TYPES.LOW_BALANCE,
-            title: "Customer low balance",
-            message: `${customerDoc?.name || "A customer"} has low balance (₹${newBalance.toFixed(2)})`,
-            data: {
-              customerId: order.customerId.toString(),
-              balance: newBalance,
-            },
-          }),
+          ...vendorAlertUserIds.map((userId) =>
+            sendNotification({
+              userId,
+              ownerId,
+              type: NOTIFICATION_TYPES.LOW_BALANCE,
+              title: "Customer low balance",
+              message: `${customerDoc?.name || "A customer"} has low balance (₹${newBalance.toFixed(2)})`,
+              data: {
+                customerId: order.customerId.toString(),
+                balance: newBalance,
+              },
+            })
+          ),
         ]);
       }
     }

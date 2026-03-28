@@ -25,20 +25,47 @@ export const sendNotification = async ({
   message,
   data = {},
 }) => {
-  let user = null;
-  let customer = null;
+  console.log("[FCM DEBUG] sendNotification called", {
+    customerId,
+    userId,
+    type,
+    title,
+  });
 
-  if (userId) user = await User.findById(userId).select("fcmToken").lean();
-  if (customerId) customer = await Customer.findById(customerId).select("fcmToken").lean();
+  let token = null;
 
-  const token = user?.fcmToken || customer?.fcmToken;
+  if (userId) {
+    const user = await User.findById(userId).select("fcmToken").lean();
+    console.log("[FCM DEBUG] User lookup:", {
+      userId,
+      fcmToken: user?.fcmToken,
+    });
+    token = user?.fcmToken?.trim() || null;
+  } else if (customerId) {
+    const customer = await Customer.findById(customerId)
+      .select("fcmToken")
+      .lean();
+    console.log("[FCM DEBUG] Customer lookup:", {
+      customerId,
+      fcmToken: customer?.fcmToken,
+    });
+    token = customer?.fcmToken?.trim() || null;
+  }
+
+  console.log(
+    "[FCM DEBUG] Final token:",
+    token ? `${token.substring(0, 20)}...` : "NULL - skipping FCM"
+  );
+
   let fcmResult = null;
 
   if (token) {
     try {
       await sendToToken(token, title, message, data);
+      console.log("[FCM DEBUG] sendToToken SUCCESS");
       fcmResult = { success: true };
     } catch (err) {
+      console.error("[FCM DEBUG] sendToToken FAILED:", err.code, err.message);
       fcmResult = { success: false, error: err.message };
     }
   }
@@ -54,6 +81,11 @@ export const sendNotification = async ({
     message,
     data,
     channel: "in_app",
+  });
+  console.log("[FCM DEBUG] in-app Notification.create done", {
+    type,
+    notifOwnerId: notifOwnerId?.toString?.() ?? notifOwnerId,
+    customerId: customerId?.toString?.() ?? customerId,
   });
 
   return fcmResult;

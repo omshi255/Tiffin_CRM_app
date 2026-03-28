@@ -10,12 +10,23 @@ import { sendPushNotification } from "./fcm.service.js";
  * @param {Object} data
  */
 export const sendToToken = async (token, title, body, data = {}) => {
-  if (!token) return;
-
+  if (!token) {
+    console.warn("[FCM DEBUG] sendToToken called with empty token — skipping");
+    return;
+  }
+  console.log(
+    "[FCM DEBUG] sendToToken called with token:",
+    `${token.substring(0, 20)}...`
+  );
   try {
     const response = await sendPushNotification(token, title, body, data);
     return response;
   } catch (error) {
+    console.error(
+      "[FCM DEBUG] sendToToken error:",
+      error.code,
+      error.message
+    );
     if (
       error.code === "messaging/registration-token-not-registered" ||
       error.code === "messaging/invalid-registration-token"

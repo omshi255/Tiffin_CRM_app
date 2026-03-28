@@ -13,6 +13,10 @@ import 'services/notification_service.dart';
 /// Must be a top-level function for background delivery when the app is terminated.
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint(
+    '[FCM DEBUG] background handler messageId=${message.messageId} '
+    'dataKeys=${message.data.keys.toList()}',
+  );
   await Firebase.initializeApp();
   await showLocalNotificationFromRemoteMessage(message);
 }
