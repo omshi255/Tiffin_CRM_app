@@ -265,6 +265,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'income_fab_add',
         onPressed: _openAdd,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,

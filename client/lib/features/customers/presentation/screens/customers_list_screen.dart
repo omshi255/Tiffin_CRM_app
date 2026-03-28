@@ -525,6 +525,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
       ),
 
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'customers_fab_add',
         onPressed: () => context.push(AppRoutes.addCustomer),
         backgroundColor: _P.g1,
         foregroundColor: Colors.white,

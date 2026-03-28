@@ -945,6 +945,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   Widget _fab() {
     if (_bulkMode && _selectedIds.isNotEmpty) {
       return FloatingActionButton.extended(
+        heroTag: 'delivery_fab_assign',
         onPressed: () => _openAssignSheet(context, _selectedIds.toList()),
         backgroundColor: _P.g1,
         foregroundColor: Colors.white,
@@ -958,6 +959,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
       );
     }
     return FloatingActionButton.extended(
+      heroTag: 'delivery_fab_map',
       onPressed: () => context.push(AppRoutes.maps),
       backgroundColor: _P.g1,
       foregroundColor: Colors.white,

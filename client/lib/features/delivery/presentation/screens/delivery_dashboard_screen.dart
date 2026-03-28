@@ -522,6 +522,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
 
       floatingActionButton: _selectedTab == 0
           ? FloatingActionButton.extended(
+              heroTag: 'delivery_staff_fab_view_map',
               onPressed: () {
                 HapticFeedback.lightImpact();
                 setState(() {

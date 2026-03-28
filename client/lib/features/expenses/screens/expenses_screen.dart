@@ -364,6 +364,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'expenses_fab_add',
         onPressed: _openAdd,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
