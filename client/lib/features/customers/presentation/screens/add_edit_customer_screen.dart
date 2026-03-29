@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../models/customer_model.dart';
@@ -25,19 +24,9 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
-  late final TextEditingController _emailController;
   late final TextEditingController _addressController;
   late final TextEditingController _areaController;
-  late final TextEditingController _landmarkController;
-  late final TextEditingController _whatsappController;
-  late final TextEditingController _notesController;
-  late final TextEditingController _tagsController;
   bool _isSaving = false;
-
-  // Track which fields have errors to show red border
-  final Map<String, String?> _fieldErrors = {};
-
-  // ─── ALL FUNCTIONALITY UNCHANGED ───────────────────────────────────────────
 
   @override
   void initState() {
@@ -45,26 +34,16 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
     final c = widget.customer;
     _nameController = TextEditingController(text: c?.name ?? '');
     _phoneController = TextEditingController(text: c?.phone ?? '');
-    _emailController = TextEditingController(text: c?.email ?? '');
     _addressController = TextEditingController(text: c?.address ?? '');
     _areaController = TextEditingController(text: c?.area ?? '');
-    _landmarkController = TextEditingController(text: c?.landmark ?? '');
-    _whatsappController = TextEditingController(text: c?.whatsapp ?? '');
-    _notesController = TextEditingController(text: c?.notes ?? '');
-    _tagsController = TextEditingController(text: c?.tags?.join(', ') ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _emailController.dispose();
     _addressController.dispose();
     _areaController.dispose();
-    _landmarkController.dispose();
-    _whatsappController.dispose();
-    _notesController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 
@@ -97,9 +76,6 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
   }
 
   Future<void> _save() async {
-    // Clear previous field errors
-    setState(() => _fieldErrors.clear());
-
     if (!_formKey.currentState!.validate()) return;
 
     final phone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
@@ -107,39 +83,17 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
       AppSnackbar.error(context, 'Enter 10 digit phone number');
       return;
     }
+
     setState(() => _isSaving = true);
     try {
       final body = <String, dynamic>{
         'name': _nameController.text.trim(),
         'phone': phone,
-        'address': _addressController.text.trim().isEmpty
-            ? null
-            : _addressController.text.trim(),
-        'area': _areaController.text.trim().isEmpty
-            ? null
-            : _areaController.text.trim(),
-        'landmark': _landmarkController.text.trim().isEmpty
-            ? null
-            : _landmarkController.text.trim(),
-        'whatsapp': _whatsappController.text.trim().isEmpty
-            ? null
-            : _whatsappController.text.trim().replaceAll(RegExp(r'\D'), ''),
-        'notes': _notesController.text.trim().isEmpty
-            ? null
-            : _notesController.text.trim(),
+        'address': _addressController.text.trim(),
+        'whatsapp': phone,
+        'area': _areaController.text.trim(),
         if (!widget._isEditMode) 'status': 'active',
       };
-      if (_emailController.text.trim().isNotEmpty) {
-        body['email'] = _emailController.text.trim();
-      }
-      final tagsStr = _tagsController.text.trim();
-      if (tagsStr.isNotEmpty) {
-        body['tags'] = tagsStr
-            .split(',')
-            .map((e) => e.trim())
-            .where((s) => s.isNotEmpty)
-            .toList();
-      }
       if (widget._isEditMode) {
         await CustomerApi.update(widget.customer!.id, body);
       } else {
@@ -159,12 +113,9 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
     }
   }
 
-  // ─── BUILD ──────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✅ Exact same bg as app — light lavender matching dashboard
       backgroundColor: const Color(0xFFEDE9F8),
       appBar: AppBar(
         backgroundColor: const Color(0xFF6B21D4),
@@ -203,16 +154,13 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Import Button (Add mode only) ────────────────────────────
               if (!widget._isEditMode) ...[
                 _ImportContactButton(onTap: _importFromContacts),
                 const SizedBox(height: 20),
                 _OrDivider(),
                 const SizedBox(height: 20),
               ],
-
-              // ── Basic Information ────────────────────────────────────────
-              _SectionLabel(text: 'Basic Information'),
+              const _SectionLabel(text: 'Customer details'),
               const SizedBox(height: 10),
               _FormCard(
                 children: [
@@ -237,7 +185,7 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
                     keyboardType: TextInputType.phone,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(13),
+                      LengthLimitingTextInputFormatter(10),
                     ],
                     validator: (v) {
                       final d = (v ?? '').replaceAll(RegExp(r'\D'), '');
@@ -249,100 +197,41 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
                     },
                   ),
                   _Field(
-                    controller: _emailController,
-                    label: 'Email Address',
+                    controller: _areaController,
+                    label: 'Area',
                     hint: 'Optional',
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    isLast: true,
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return null;
-                      final ok = RegExp(
-                        r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$',
-                      ).hasMatch(v.trim());
-                      if (!ok) return 'Enter a valid email address';
-                      return null;
-                    },
+                    icon: Icons.location_city_outlined,
+                    textCapitalization: TextCapitalization.words,
+                    validator: (_) => null,
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // ── Address Details ──────────────────────────────────────────
-              _SectionLabel(text: 'Address Details'),
-              const SizedBox(height: 10),
-              _FormCard(
-                children: [
                   _Field(
                     controller: _addressController,
                     label: 'Address',
-                    hint: 'Optional',
                     icon: Icons.home_outlined,
+                    required: true,
                     maxLines: 2,
-                  ),
-                  _Field(
-                    controller: _areaController,
-                    label: 'Area / Locality',
-                    hint: 'Optional',
-                    icon: Icons.location_city_outlined,
-                  ),
-                  _Field(
-                    controller: _landmarkController,
-                    label: 'Landmark',
-                    hint: 'Optional',
-                    icon: Icons.place_outlined,
                     isLast: true,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // ── Other Details ────────────────────────────────────────────
-              _SectionLabel(text: 'Other Details'),
-              const SizedBox(height: 10),
-              _FormCard(
-                children: [
-                  _Field(
-                    controller: _whatsappController,
-                    label: 'WhatsApp Number',
-                    hint: 'Optional',
-                    icon: Icons.chat_bubble_outline_rounded,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(13),
-                    ],
+                    textCapitalization: TextCapitalization.sentences,
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return null;
-                      final d = v.replaceAll(RegExp(r'\D'), '');
-                      if (d.isNotEmpty && d.length != 10) {
-                        return 'Must be exactly 10 digits';
+                      if (v == null || v.trim().isEmpty) {
+                        return 'Address is required';
                       }
                       return null;
                     },
                   ),
-                  _Field(
-                    controller: _notesController,
-                    label: 'Notes',
-                    hint: 'Optional',
-                    icon: Icons.notes_outlined,
-                    maxLines: 2,
-                  ),
-                  _Field(
-                    controller: _tagsController,
-                    label: 'Tags',
-                    hint: 'Comma separated, e.g. vip, regular',
-                    icon: Icons.label_outline_rounded,
-                    isLast: true,
-                  ),
                 ],
               ),
-
-              const SizedBox(height: 32),
-
-              // ── Save Button ──────────────────────────────────────────────
+              const SizedBox(height: 12),
+              Text(
+                'WhatsApp uses the same number as phone.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 24),
               SizedBox(
                 height: 54,
                 child: FilledButton(
@@ -352,7 +241,7 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: const Color(
                       0xFF6B21D4,
-                    ).withOpacity(0.45),
+                    ).withValues(alpha: 0.45),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -386,8 +275,6 @@ class _AddEditCustomerScreenState extends State<AddEditCustomerScreen> {
     );
   }
 }
-
-// ─── REUSABLE WIDGETS ──────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
   final String text;
@@ -426,7 +313,7 @@ class _ImportContactButton extends StatelessWidget {
             color: const Color(0xFFEEEDFE),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: const Color(0xFF6B21D4).withOpacity(0.35),
+              color: const Color(0xFF6B21D4).withValues(alpha: 0.35),
               width: 1.2,
             ),
           ),
@@ -482,7 +369,6 @@ class _OrDivider extends StatelessWidget {
   }
 }
 
-/// White card grouping multiple fields
 class _FormCard extends StatelessWidget {
   final List<Widget> children;
   const _FormCard({required this.children});
@@ -495,7 +381,7 @@ class _FormCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6B21D4).withOpacity(0.06),
+            color: const Color(0xFF6B21D4).withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 3),
           ),
@@ -509,7 +395,6 @@ class _FormCard extends StatelessWidget {
   }
 }
 
-/// Individual form field with proper red error UI
 class _Field extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -575,12 +460,7 @@ class _Field extends StatelessWidget {
               horizontal: 16,
               vertical: 14,
             ),
-            // ✅ Proper red error styling
-            errorStyle: const TextStyle(
-              fontSize:
-                  0, // hide default error text — we render it ourselves below
-              height: 0,
-            ),
+            errorStyle: const TextStyle(fontSize: 0, height: 0),
             border: InputBorder.none,
             enabledBorder: !isLast
                 ? const UnderlineInputBorder(
@@ -604,7 +484,6 @@ class _Field extends StatelessWidget {
             ),
           ),
         ),
-        // ✅ Custom red error banner — shows below the field
         if (validator != null)
           _ErrorBanner(controller: controller, validator: validator!),
       ],
@@ -612,7 +491,6 @@ class _Field extends StatelessWidget {
   }
 }
 
-/// Red error banner that appears below field on validation failure
 class _ErrorBanner extends StatefulWidget {
   final TextEditingController controller;
   final String? Function(String?) validator;
@@ -652,7 +530,7 @@ class _ErrorBannerState extends State<_ErrorBanner> {
       decoration: BoxDecoration(
         color: const Color(0xFFFCEBEB),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE53935).withOpacity(0.3)),
+        border: Border.all(color: const Color(0xFFE53935).withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
