@@ -1,23 +1,37 @@
 import 'package:url_launcher/url_launcher.dart';
 
 abstract final class WhatsAppHelper {
-  static Future<void> openChat(String phone) async {
+  /// Digits only, with country code (default India `91` for 10-digit local numbers).
+  static String normalizeWhatsAppPhone(String phone) {
     final clean = phone.replaceAll(RegExp(r'[^0-9]'), '');
-    final number = clean.length == 10 ? '91$clean' : clean;
+    if (clean.isEmpty) return '';
+    if (clean.length == 10) return '91$clean';
+    return clean;
+  }
+
+  static Future<void> openChat(String phone) async {
+    final number = normalizeWhatsAppPhone(phone);
+    if (number.isEmpty) return;
     final url = Uri.parse('https://wa.me/$number');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
   }
 
-  static Future<void> openWithMessage(String phone, String message) async {
-    final clean = phone.replaceAll(RegExp(r'[^0-9]'), '');
-    final number = clean.length == 10 ? '91$clean' : clean;
+  /// Opens WhatsApp (or wa.me in browser) with [message] pre-filled for [phone].
+  /// Returns `false` if the URL could not be launched (e.g. no handler).
+  static Future<bool> openWithMessage(String phone, String message) async {
+    final number = normalizeWhatsAppPhone(phone);
+    if (number.isEmpty) return false;
     final enc = Uri.encodeComponent(message);
     final url = Uri.parse('https://wa.me/$number?text=$enc');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    }
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+        return true;
+      }
+    } catch (_) {}
+    return false;
   }
 
   static Future<void> callPhone(String phone) async {
