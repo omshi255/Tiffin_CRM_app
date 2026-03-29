@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
@@ -10,6 +11,17 @@ import '../core/router/app_routes.dart';
 import '../core/storage/secure_storage.dart';
 
 /// Push delivery via OneSignal. Backend targets [external_id] = MongoDB User or Customer _id.
+final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+/// Android 8+ channel for notification importance (align with OneSignal / local display).
+const AndroidNotificationChannel _kAndroidPushChannel = AndroidNotificationChannel(
+  'tiffin_crm_channel',
+  'Tiffin CRM Notifications',
+  description: 'Push notifications for Tiffin CRM app',
+  importance: Importance.max,
+);
+
 class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._();
@@ -22,15 +34,31 @@ class NotificationService {
       debugPrint('[OneSignal] skipped on web');
       return;
     }
-    if (kOneSignalAppId.isEmpty) {
+    if (kOneSignalAppId.isEmpty ||
+        kOneSignalAppId == 'YOUR_ACTUAL_ONESIGNAL_APP_ID_HERE') {
       debugPrint(
-        '[OneSignal] kOneSignalAppId empty — set --dart-define=ONESIGNAL_APP_ID=...',
+        '[OneSignal] kOneSignalAppId empty — set your real App ID in '
+        'lib/core/config/onesignal_config.dart',
       );
       return;
     }
     if (_initialized) return;
 
     OneSignal.initialize(kOneSignalAppId);
+
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      await _flutterLocalNotificationsPlugin.initialize(
+        const InitializationSettings(
+          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        ),
+      );
+      await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(_kAndroidPushChannel);
+      debugPrint('[OneSignal] Android notification channel created');
+    }
+
     await OneSignal.Notifications.requestPermission(true);
 
     OneSignal.Notifications.addForegroundWillDisplayListener((event) {
@@ -81,13 +109,15 @@ class NotificationService {
   /// Match backend: customer pushes use Customer [_id]; vendor/staff/admin use User [_id] (JWT userId).
   Future<void> syncExternalIdAfterLogin() async {
     if (kIsWeb || !_initialized || kOneSignalAppId.isEmpty) return;
+    if (kOneSignalAppId == 'YOUR_ACTUAL_ONESIGNAL_APP_ID_HERE') return;
     try {
       final token = await SecureStorage.getAccessToken();
       final role = await SecureStorage.getUserRole();
       String? externalId;
+      Map<String, dynamic> claims = {};
 
       if (token != null && token.isNotEmpty) {
-        final claims = readJwtPayload(token);
+        claims = readJwtPayload(token);
         if (role == 'customer') {
           final cid = claims['customerId']?.toString();
           if (cid != null && cid.isNotEmpty) externalId = cid;
@@ -96,9 +126,17 @@ class NotificationService {
       }
       externalId ??= await SecureStorage.getUserId();
 
+      debugPrint('[OneSignal] Role: $role');
+      debugPrint('[OneSignal] JWT Claims: $claims');
+      debugPrint('[OneSignal] ExternalId being set: $externalId');
+
       if (externalId != null && externalId.isNotEmpty) {
         await OneSignal.login(externalId);
-        debugPrint('[OneSignal] login externalId=$externalId role=$role');
+        debugPrint('[OneSignal] login() called with: $externalId');
+      } else {
+        debugPrint(
+          '[OneSignal] ERROR — externalId is null/empty, login skipped!',
+        );
       }
     } catch (e) {
       debugPrint('[OneSignal] login error: $e');
@@ -112,6 +150,7 @@ class NotificationService {
 
   static Future<void> logoutPushUser() async {
     if (kIsWeb || kOneSignalAppId.isEmpty) return;
+    if (kOneSignalAppId == 'YOUR_ACTUAL_ONESIGNAL_APP_ID_HERE') return;
     try {
       await OneSignal.logout();
       debugPrint('[OneSignal] logout');

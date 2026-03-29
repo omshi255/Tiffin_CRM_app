@@ -1,6 +1,3 @@
 /// OneSignal Dashboard → Settings → Keys & IDs → OneSignal App ID.
-/// Prefer: `flutter run --dart-define=ONESIGNAL_APP_ID=your-id`
-const String kOneSignalAppId = String.fromEnvironment(
-  'ONESIGNAL_APP_ID',
-  defaultValue: '',
-);
+/// Must match server `ONESIGNAL_APP_ID`.
+const String kOneSignalAppId = '9be9371a-ee4d-4fb6-b365-c3bff41d9742';
