@@ -58,7 +58,9 @@ abstract final class ReceiptPdfGenerator {
 
   static Future<Uint8List> generate(Map<String, dynamic> receiptData) async {
     final fontData = await rootBundle.load('assets/fonts/DejaVuSans.ttf');
-    final boldFontData = await rootBundle.load('assets/fonts/DejaVuSans-Bold.ttf');
+    final boldFontData = await rootBundle.load(
+      'assets/fonts/DejaVuSans-Bold.ttf',
+    );
     final font = pw.Font.ttf(fontData);
     final boldFont = pw.Font.ttf(boldFontData);
 
@@ -96,17 +98,20 @@ abstract final class ReceiptPdfGenerator {
     final deliveries = (receiptData['deliveries'] as List?) ?? const [];
     final paymentHistory = (receiptData['paymentHistory'] as List?) ?? const [];
 
-    final businessName =
-        _stripRupeeGlyphs(vendor['businessName']?.toString().trim() ?? 'Business');
+    final businessName = _stripRupeeGlyphs(
+      vendor['businessName']?.toString().trim() ?? 'Business',
+    );
     final phone = _stripRupeeGlyphs(vendor['phone']?.toString().trim() ?? '');
     final city = _stripRupeeGlyphs(vendor['city']?.toString().trim() ?? '');
     final cityLine = [phone, city].where((s) => s.isNotEmpty).join(' | ');
 
     String subscriptionLine() {
-      final planName =
-          _stripRupeeGlyphs(subscription['planName']?.toString().trim() ?? '');
-      final planType =
-          _stripRupeeGlyphs(subscription['planType']?.toString().trim() ?? '');
+      final planName = _stripRupeeGlyphs(
+        subscription['planName']?.toString().trim() ?? '',
+      );
+      final planType = _stripRupeeGlyphs(
+        subscription['planType']?.toString().trim() ?? '',
+      );
       if (planName.isEmpty && planType.isEmpty) return '';
       if (planType.isEmpty) return planName;
       if (planName.isEmpty) return planType;
@@ -130,9 +135,7 @@ abstract final class ReceiptPdfGenerator {
     }
     if (logoBytes == null || logoBytes.isEmpty) {
       final logoUrl = vendor['logoUrl']?.toString();
-      if (logoUrl != null &&
-          logoUrl.startsWith('http') &&
-          logoUrl.isNotEmpty) {
+      if (logoUrl != null && logoUrl.startsWith('http') && logoUrl.isNotEmpty) {
         try {
           final dio = Dio();
           final res = await dio.get<List<int>>(
@@ -151,19 +154,18 @@ abstract final class ReceiptPdfGenerator {
     }
 
     final receiptNo = _stripRupeeGlyphs(
-        receipt['receiptNumber']?.toString() ?? '—');
-    final receiptDate =
-        _fmtParsedDate(receipt['date'] ?? receiptData['date']);
+      receipt['receiptNumber']?.toString() ?? '—',
+    );
+    final receiptDate = _fmtParsedDate(receipt['date'] ?? receiptData['date']);
 
     final subtotal = _num(summary['subtotal'] ?? receiptData['subtotal']);
     final tax = _num(summary['taxAmount'] ?? receiptData['tax']);
-    final grandTotal =
-        _num(summary['grandTotal'] ?? receiptData['grandTotal']);
-    final paidAmount =
-        _num(summary['paidAmount'] ?? receiptData['paidAmount']);
+    final grandTotal = _num(summary['grandTotal'] ?? receiptData['grandTotal']);
+    final paidAmount = _num(summary['paidAmount'] ?? receiptData['paidAmount']);
     final amountDue = _num(summary['dueAmount'] ?? receiptData['dueAmount']);
-    final runningBalance =
-        _num(summary['runningBalance'] ?? receiptData['runningBalance']);
+    final runningBalance = _num(
+      summary['runningBalance'] ?? receiptData['runningBalance'],
+    );
 
     final pw.ThemeData theme = pw.ThemeData.withFont(
       base: font,
@@ -204,10 +206,7 @@ abstract final class ReceiptPdfGenerator {
         decoration: pw.BoxDecoration(
           color: purpleLight,
           borderRadius: pw.BorderRadius.circular(8),
-          border: pw.Border.all(
-            color: purpleMid,
-            width: 1,
-          ),
+          border: pw.Border.all(color: purpleMid, width: 1),
         ),
         child: pw.Center(
           child: pw.Text(
@@ -222,11 +221,8 @@ abstract final class ReceiptPdfGenerator {
       );
     }
 
-    pw.Widget hr() => pw.Container(
-          height: 0.6,
-          color: borderColor,
-          width: double.infinity,
-        );
+    pw.Widget hr() =>
+        pw.Container(height: 0.6, color: borderColor, width: double.infinity);
 
     pw.Widget billToCard() {
       return pw.Container(
@@ -235,10 +231,7 @@ abstract final class ReceiptPdfGenerator {
           borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
           border: pw.Border.all(color: borderColor),
         ),
-        padding: const pw.EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 11,
-        ),
+        padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
@@ -263,37 +256,22 @@ abstract final class ReceiptPdfGenerator {
             pw.SizedBox(height: 4),
             pw.Text(
               _stripRupeeGlyphs(
-                  '${customer['phone'] ?? ''} | ${customer['address'] ?? ''}'),
-              style: pw.TextStyle(
-                font: font,
-                fontSize: 9.5,
-                color: grayText,
+                '${customer['phone'] ?? ''} | ${customer['address'] ?? ''}',
               ),
+              style: pw.TextStyle(font: font, fontSize: 9.5, color: grayText),
             ),
             pw.SizedBox(height: 6),
             pw.Text(
               'Customer Code: ${_stripRupeeGlyphs(customer['customerCode']?.toString() ?? '—')}',
-              style: pw.TextStyle(
-                font: font,
-                fontSize: 9,
-                color: grayText,
-              ),
+              style: pw.TextStyle(font: font, fontSize: 9, color: grayText),
             ),
             pw.Text(
               'Subscription: ${subscriptionDisplay.isEmpty ? '—' : subscriptionDisplay}',
-              style: pw.TextStyle(
-                font: font,
-                fontSize: 9,
-                color: grayText,
-              ),
+              style: pw.TextStyle(font: font, fontSize: 9, color: grayText),
             ),
             pw.Text(
               'Delivery Slot: ${_stripRupeeGlyphs(subscription['deliverySlot']?.toString() ?? '')}',
-              style: pw.TextStyle(
-                font: font,
-                fontSize: 9,
-                color: grayText,
-              ),
+              style: pw.TextStyle(font: font, fontSize: 9, color: grayText),
             ),
           ],
         ),
@@ -301,40 +279,32 @@ abstract final class ReceiptPdfGenerator {
     }
 
     pw.Widget thCell(String t) => pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-          child: pw.Text(
-            t,
-            style: pw.TextStyle(
-              font: boldFont,
-              fontSize: 8.5,
-              color: white,
-            ),
-            textAlign: t == 'Item Name' ? pw.TextAlign.left : pw.TextAlign.right,
-          ),
-        );
+      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      child: pw.Text(
+        t,
+        style: pw.TextStyle(font: boldFont, fontSize: 8.5, color: white),
+        textAlign: t == 'Item Name' ? pw.TextAlign.left : pw.TextAlign.right,
+      ),
+    );
 
     pw.Widget tdCell(
       String t,
       PdfColor color, {
       pw.TextAlign align = pw.TextAlign.left,
-    }) =>
-        pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-          child: pw.Text(
-            t,
-            style: pw.TextStyle(
-              font: font,
-              fontSize: 9.5,
-              color: color,
-            ),
-            textAlign: align,
-          ),
-        );
+    }) => pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      child: pw.Text(
+        t,
+        style: pw.TextStyle(font: font, fontSize: 9.5, color: color),
+        textAlign: align,
+      ),
+    );
 
     pw.Widget itemsSection(Map<String, dynamic> slot) {
       final items = (slot['items'] as List?) ?? const [];
-      final slotTitle =
-          _stripRupeeGlyphs('${slot['slot'] ?? 'MEAL'}'.toUpperCase());
+      final slotTitle = _stripRupeeGlyphs(
+        '${slot['slot'] ?? 'MEAL'}'.toUpperCase(),
+      );
 
       double lineTotal(Map<String, dynamic> it) {
         final t = _num(it['total']);
@@ -422,7 +392,10 @@ abstract final class ReceiptPdfGenerator {
             ),
             pw.Table(
               border: pw.TableBorder(
-                horizontalInside: pw.BorderSide(color: borderColor, width: 0.35),
+                horizontalInside: pw.BorderSide(
+                  color: borderColor,
+                  width: 0.35,
+                ),
                 verticalInside: pw.BorderSide(color: borderColor, width: 0.35),
                 left: pw.BorderSide(color: borderColor, width: 0.35),
                 right: pw.BorderSide(color: borderColor, width: 0.35),
@@ -487,8 +460,8 @@ abstract final class ReceiptPdfGenerator {
       }) {
         return pw.Container(
           color: bg,
-          padding: pad ??
-              const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+          padding:
+              pad ?? const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 4),
           child: pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
@@ -540,8 +513,10 @@ abstract final class ReceiptPdfGenerator {
                 color: purpleLight,
                 borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
               ),
-              padding:
-                  const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+              padding: const pw.EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 8,
+              ),
               child: pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -651,11 +626,7 @@ abstract final class ReceiptPdfGenerator {
             ),
             pw.Text(
               'Date: $receiptDate',
-              style: pw.TextStyle(
-                font: font,
-                fontSize: 8.5,
-                color: grayText,
-              ),
+              style: pw.TextStyle(font: font, fontSize: 8.5, color: grayText),
             ),
           ],
         ),
@@ -665,10 +636,7 @@ abstract final class ReceiptPdfGenerator {
         if (deliveries.isEmpty)
           pw.Text(
             'No deliveries recorded for this date.',
-            style: pw.TextStyle(
-              font: font,
-              color: grayText,
-            ),
+            style: pw.TextStyle(font: font, color: grayText),
           )
         else
           ...deliveries.whereType<Map>().map((slotRaw) {
@@ -686,11 +654,7 @@ abstract final class ReceiptPdfGenerator {
           pw.SizedBox(height: 14),
           pw.Text(
             'RECENT PAYMENTS',
-            style: pw.TextStyle(
-              font: boldFont,
-              fontSize: 8.5,
-              color: purple,
-            ),
+            style: pw.TextStyle(font: boldFont, fontSize: 8.5, color: purple),
           ),
           pw.SizedBox(height: 6),
           pw.Table(
@@ -724,26 +688,24 @@ abstract final class ReceiptPdfGenerator {
               ...paymentHistory.whereType<Map>().map((pRaw) {
                 final p = Map<String, dynamic>.from(pRaw);
                 return pw.TableRow(
-                  children: [
-                    _fmtParsedDate(p['date']),
-                    _money(_num(p['amount'])),
-                    _stripRupeeGlyphs('${p['method'] ?? ''}'),
-                    _stripRupeeGlyphs('${p['referenceId'] ?? ''}'),
-                    _stripRupeeGlyphs('${p['status'] ?? ''}'),
-                  ]
-                      .map(
-                        (t) => pw.Padding(
-                          padding: const pw.EdgeInsets.all(4),
-                          child: pw.Text(
-                            t,
-                            style: pw.TextStyle(
-                              font: font,
-                              fontSize: 8.5,
+                  children:
+                      [
+                            _fmtParsedDate(p['date']),
+                            _money(_num(p['amount'])),
+                            _stripRupeeGlyphs('${p['method'] ?? ''}'),
+                            _stripRupeeGlyphs('${p['referenceId'] ?? ''}'),
+                            _stripRupeeGlyphs('${p['status'] ?? ''}'),
+                          ]
+                          .map(
+                            (t) => pw.Padding(
+                              padding: const pw.EdgeInsets.all(4),
+                              child: pw.Text(
+                                t,
+                                style: pw.TextStyle(font: font, fontSize: 8.5),
+                              ),
                             ),
-                          ),
-                        ),
-                      )
-                      .toList(),
+                          )
+                          .toList(),
                 );
               }),
             ],
@@ -755,11 +717,7 @@ abstract final class ReceiptPdfGenerator {
         pw.Center(
           child: pw.Text(
             'Thank you for your order! | $businessName | $phone',
-            style: pw.TextStyle(
-              font: font,
-              fontSize: 7.5,
-              color: grayText,
-            ),
+            style: pw.TextStyle(font: font, fontSize: 7.5, color: grayText),
             textAlign: pw.TextAlign.center,
           ),
         ),
@@ -767,11 +725,7 @@ abstract final class ReceiptPdfGenerator {
         pw.Center(
           child: pw.Text(
             'This is a computer-generated receipt and does not require a signature.',
-            style: pw.TextStyle(
-              font: font,
-              fontSize: 7.5,
-              color: grayText,
-            ),
+            style: pw.TextStyle(font: font, fontSize: 7.5, color: grayText),
             textAlign: pw.TextAlign.center,
           ),
         ),
