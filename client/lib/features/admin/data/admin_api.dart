@@ -34,7 +34,7 @@ abstract final class AdminApi {
     final response = await DioClient.instance.get(ApiEndpoints.adminStats);
     final data = parseData(response);
     if (data is! Map) throw ApiException('Invalid response');
-    return AdminStatsModel.fromJson(Map<String, dynamic>.from(data as Map));
+    return AdminStatsModel.fromJson(Map<String, dynamic>.from(data));
   }
 
   static Future<List<VendorStatsModel>> getVendorStats() async {

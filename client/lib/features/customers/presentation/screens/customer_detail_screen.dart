@@ -243,6 +243,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => DailyReceiptSheet(
+        key: ValueKey<String>('daily-receipt-${c.id}-${picked.toIso8601String()}'),
         customerId: c.id,
         initialDate: picked,
       ),

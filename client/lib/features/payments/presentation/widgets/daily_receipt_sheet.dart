@@ -1,14 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
-import '../../../../core/utils/whatsapp_helper.dart';
 import '../../../invoices/utils/receipt_pdf_generator.dart';
 import '../../data/invoice_api.dart';
-import '../../utils/receipt_local_save.dart';
+import '../../utils/receipt_user_download.dart';
 
 /// Per-day meal receipt preview (GET /invoices/daily).
 class DailyReceiptSheet extends StatefulWidget {
@@ -30,7 +28,6 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
   Map<String, dynamic>? _receiptData;
   bool _loading = true;
   bool _downloadBusy = false;
-  bool _shareBusy = false;
   bool _failed = false;
 
   static final _df = DateFormat('dd/MM/yyyy');
@@ -38,7 +35,6 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
   static final _money = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
 
   static const double _radius = 14;
-  static const int _kWhatsAppMaxChars = 3800;
 
   @override
   void initState() {
@@ -65,31 +61,25 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
     }
   }
 
-  /// Saves PDF under app documents only (no share / print sheet).
+  /// Saves PDF: browser download on web; [FileSaver] on Android/iOS/desktop.
   Future<void> _downloadPdf() async {
     if (_receiptData == null) return;
-    if (kIsWeb) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Saving receipts to device is not supported on web.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
 
     setState(() => _downloadBusy = true);
     try {
       final pdfBytes = await ReceiptPdfGenerator.generate(_receiptData!);
       final dateStr = _date.toIso8601String().split('T').first;
       final fileName = 'Receipt-$dateStr.pdf';
-      final path = await saveReceiptPdfToDocuments(pdfBytes, fileName);
+      final result = await downloadReceiptPdfForUser(pdfBytes, fileName);
       if (!mounted) return;
-      if (path == null) {
+      if (result == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not save file on this device.'),
+          SnackBar(
+            content: Text(
+              kIsWeb
+                  ? 'Could not start download. Check browser pop-up / download settings.'
+                  : 'Could not save file. Please try again.',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -97,7 +87,9 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Receipt saved:\n$path'),
+          content: Text(
+            kIsWeb ? result : 'Receipt saved:\n$result',
+          ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 5),
         ),
@@ -107,175 +99,6 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
     } finally {
       if (mounted) setState(() => _downloadBusy = false);
     }
-  }
-
-  /// Opens WhatsApp to the customer's number with a text summary, or falls back
-  /// to the system share sheet with the PDF (e.g. missing phone / no handler).
-  Future<void> _shareWhatsApp() async {
-    if (_receiptData == null) return;
-    setState(() => _shareBusy = true);
-    try {
-      final pdfBytes = await ReceiptPdfGenerator.generate(_receiptData!);
-      final dateStr = _date.toIso8601String().split('T').first;
-      final fileName = 'Receipt-$dateStr.pdf';
-
-      final custRaw = _receiptData!['customer'];
-      final cust = custRaw is Map
-          ? Map<String, dynamic>.from(custRaw)
-          : const <String, dynamic>{};
-      final phoneRaw = _customerPhoneForShare(cust);
-      final hasPhone =
-          phoneRaw.isNotEmpty && phoneRaw != '—' && phoneRaw != '-';
-
-      final message = _buildWhatsAppReceiptMessage();
-      final xFile = XFile.fromData(
-        pdfBytes,
-        name: fileName,
-        mimeType: 'application/pdf',
-      );
-
-      if (hasPhone) {
-        final opened = await WhatsAppHelper.openWithMessage(phoneRaw, message);
-        if (opened) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                'WhatsApp opened with a text receipt for this customer. '
-                'Use Download if you need the PDF to attach manually.',
-              ),
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 5),
-            ),
-          );
-          return;
-        }
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Could not open WhatsApp. Opening share sheet with the PDF instead.',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [xFile],
-          fileNameOverrides: [fileName],
-          text: hasPhone
-              ? 'Daily tiffin receipt PDF'
-              : 'Daily tiffin receipt PDF (add customer phone to share via WhatsApp).',
-          subject: 'Tiffin receipt',
-        ),
-      );
-    } catch (e) {
-      if (mounted) ErrorHandler.show(context, e);
-    } finally {
-      if (mounted) setState(() => _shareBusy = false);
-    }
-  }
-
-  /// Prefer WhatsApp field when the API provides it; fall back to [phone].
-  String _customerPhoneForShare(Map<String, dynamic> cust) {
-    final w = cust['whatsapp']?.toString().trim() ?? '';
-    if (w.isNotEmpty && w != '—' && w != '-') return w;
-    return cust['phone']?.toString().trim() ?? '';
-  }
-
-  String _buildWhatsAppReceiptMessage() {
-    final d = _receiptData;
-    if (d == null) return '';
-
-    final custRaw = d['customer'];
-    final sumRaw = d['summary'];
-    final vendorRaw = d['vendor'];
-    final receiptRaw = d['receipt'];
-
-    final cust = custRaw is Map
-        ? Map<String, dynamic>.from(custRaw)
-        : const <String, dynamic>{};
-    final summary = sumRaw is Map
-        ? Map<String, dynamic>.from(sumRaw)
-        : const <String, dynamic>{};
-    final vendor = vendorRaw is Map
-        ? Map<String, dynamic>.from(vendorRaw)
-        : const <String, dynamic>{};
-    final receipt = receiptRaw is Map
-        ? Map<String, dynamic>.from(receiptRaw)
-        : const <String, dynamic>{};
-
-    final name = cust['name']?.toString() ?? 'Customer';
-    final dateStr =
-        receipt['date']?.toString() ??
-        d['date']?.toString() ??
-        _dfApi.format(_date);
-    final receiptNo = receipt['receiptNumber']?.toString() ?? '—';
-    final deliveries = (d['deliveries'] is List) ? d['deliveries'] as List : [];
-
-    final buf = StringBuffer()
-      ..writeln('*Daily tiffin receipt*')
-      ..writeln()
-      ..writeln('${vendor['businessName'] ?? 'Vendor'}')
-      ..writeln('Date: $dateStr')
-      ..writeln('Receipt no: $receiptNo')
-      ..writeln('Customer: $name')
-      ..writeln();
-
-    if (deliveries.isEmpty) {
-      buf.writeln('_No meal lines for this date._');
-    } else {
-      for (final slot in deliveries) {
-        if (slot is! Map) continue;
-        final m = Map<String, dynamic>.from(slot);
-        buf.writeln('*${m['slot'] ?? 'Meal'}*');
-        final items = (m['items'] as List?) ?? const [];
-        for (final e in items) {
-          if (e is! Map) continue;
-          final it = Map<String, dynamic>.from(e);
-          final lineName = it['name']?.toString() ?? '—';
-          final qty = it['quantity']?.toString() ?? '—';
-          final total = _num(it['total']);
-          buf.writeln('• $lineName × $qty — ${_money.format(total)}');
-        }
-        buf.writeln(
-          'Subtotal: ${_money.format(_num(m['slotTotal']))}',
-        );
-        buf.writeln();
-      }
-    }
-
-    buf
-      ..writeln(
-        'Subtotal: ${_money.format(_num(summary['subtotal'] ?? d['subtotal']))}',
-      )
-      ..writeln(
-        'Tax: ${_money.format(_num(summary['taxAmount'] ?? d['tax']))}',
-      )
-      ..writeln(
-        '*Grand total: ${_money.format(_num(summary['grandTotal'] ?? d['grandTotal']))}*',
-      )
-      ..writeln(
-        'Paid: ${_money.format(_num(summary['paidAmount'] ?? d['paidAmount']))}',
-      )
-      ..writeln(
-        'Due: ${_money.format(_num(summary['dueAmount'] ?? d['dueAmount']))}',
-      )
-      ..writeln(
-        'Running balance: ${_money.format(_num(summary['runningBalance'] ?? d['runningBalance']))}',
-      )
-      ..writeln()
-      ..writeln(
-        '_PDF copy: use Download in the app to save the file, then attach here if needed._',
-      );
-
-    var text = buf.toString();
-    if (text.length > _kWhatsAppMaxChars) {
-      text = '${text.substring(0, _kWhatsAppMaxChars)}…';
-    }
-    return text;
   }
 
   void _prevDay() {
@@ -414,88 +237,51 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
                       const SizedBox(height: 16),
                       _receiptBody(theme),
                       const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: (_downloadBusy || _shareBusy)
-                                  ? null
-                                  : _downloadPdf,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.primary,
-                                side: const BorderSide(
-                                  color: AppColors.primary,
-                                  width: 1.5,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                      // PDF: download only (no share — product requirement).
+                      SizedBox(
+                        width: double.infinity,
+                        child: Tooltip(
+                          message: 'Save receipt as PDF',
+                          child: OutlinedButton(
+                            onPressed: _downloadBusy ? null : _downloadPdf,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
                               ),
-                              child: _downloadBusy
-                                  ? SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.primary,
-                                      ),
-                                    )
-                                  : const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.download_rounded, size: 20),
-                                        SizedBox(width: 8),
-                                        Text('Download'),
-                                      ],
-                                    ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: (_downloadBusy || _shareBusy)
-                                  ? null
-                                  : _shareWhatsApp,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: AppColors.onPrimary,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 14,
                               ),
-                              child: _shareBusy
-                                  ? SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.onPrimary,
-                                      ),
-                                    )
-                                  : const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.chat_rounded, size: 20),
-                                        SizedBox(width: 8),
-                                        Text('Share'),
-                                      ],
-                                    ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
+                            child: _downloadBusy
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.download_rounded, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('Download'),
+                                  ],
+                                ),
                           ),
-                        ],
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Share opens WhatsApp to this customer with a full text receipt. '
-                        'Download saves the PDF on your device only.',
+                        kIsWeb
+                            ? 'Download saves the PDF to your browser download folder.'
+                            : 'Download saves the PDF to your device (choose location when prompted).',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondary,

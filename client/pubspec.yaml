@@ -87,6 +87,7 @@ dependencies:
   flutter_map_cancellable_tile_provider: ^2.0.0
   share_plus: ^12.0.1
   path_provider: ^2.1.5
+  file_saver: ^0.3.1
  
 
 dev_dependencies:
@@ -106,3 +107,5 @@ flutter:
     - assets/lottie/
     - assets/images/
     - assets/config/onesignal.env
+    - assets/fonts/DejaVuSans.ttf
+    - assets/fonts/DejaVuSans-Bold.ttf
