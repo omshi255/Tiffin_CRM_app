@@ -1,6 +1,7 @@
 import config from "../config/index.js";
 
-const BASE_URL = "https://onesignal.com/api/v1/notifications";
+// Current OneSignal API (not legacy onesignal.com/api/v1)
+const BASE_URL = "https://api.onesignal.com/notifications";
 
 const appId = () => config.ONESIGNAL_APP_ID || "";
 const restKey = () => config.ONESIGNAL_REST_API_KEY || "";
@@ -32,7 +33,6 @@ export const sendPushToUser = async (externalId, title, body, data = {}) => {
     headings: { en: title },
     contents: { en: body },
     data: stringData,
-    android_channel_id: "tiffin_crm_channel",
     priority: 10,
     android_accent_color: "FF4CAF50",
     small_icon: "ic_launcher",
@@ -49,10 +49,15 @@ export const sendPushToUser = async (externalId, title, body, data = {}) => {
 
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.errors) {
-    console.error("[OneSignal] Error:", json.errors || json);
+    console.error(
+      "[OneSignal] HTTP",
+      res.status,
+      res.statusText,
+      "body:",
+      json.errors || json
+    );
     return json;
   }
-  console.log("[OneSignal] Sent:", json.id, "→", externalId);
   return json;
 };
 

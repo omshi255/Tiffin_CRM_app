@@ -2,8 +2,6 @@ abstract final class ApiEndpoints {
   // Auth
   static const String sendOtp = '/auth/send-otp';
   static const String verifyOtp = '/auth/verify-otp';
-  /// Same as server `POST /api/v1/auth/truecaller` (see `truecallerController`).
-  static const String truecaller = '/auth/truecaller';
   static const String refreshToken = '/auth/refresh-token';
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';

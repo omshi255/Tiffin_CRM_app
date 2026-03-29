@@ -26,9 +26,4 @@ abstract final class AppConfig {
     'RAZORPAY_KEY_ID',
     defaultValue: 'YOUR_RAZORPAY_KEY_ID',
   );
-
-  static const String truecallerAppKey = String.fromEnvironment(
-    'TRUECALLER_APP_KEY',
-    defaultValue: '',
-  );
 }

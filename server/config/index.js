@@ -37,9 +37,6 @@ const optional = {
   TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || "",
   TWILIO_SERVICE_SID: process.env.TWILIO_SERVICE_SID || "",
 
-  // Optional Truecaller API key (set in .env if using Truecaller)
-  TRUECALLER_API_KEY: process.env.TRUECALLER_API_KEY || "",
-
   RATE_LIMIT: {
     windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
     max: Number(process.env.RATE_LIMIT_MAX) || 100,
@@ -100,16 +97,6 @@ export default {
     process.env.TWILIO_SERVICE_SID || optional.TWILIO_SERVICE_SID,
 
   CORS_ORIGIN: process.env.CORS_ORIGIN || "",
-
-  TRUECALLER_API_KEY: process.env.TRUECALLER_API_KEY || "",
-  // override host if default `api4.truecaller.com` cannot be resolved
-  TRUECALLER_BASE_URL: process.env.TRUECALLER_BASE_URL || "",
-  // OAuth Client Id (same as Android manifest) — required for PKCE token exchange
-  TRUECALLER_CLIENT_ID: process.env.TRUECALLER_CLIENT_ID || "",
-  TRUECALLER_OAUTH_TOKEN_URL: process.env.TRUECALLER_OAUTH_TOKEN_URL || "",
-  TRUECALLER_OAUTH_USERINFO_URL: process.env.TRUECALLER_OAUTH_USERINFO_URL || "",
-  // enable mock mode: returns a fake profile in development
-  TRUECALLER_MOCK: process.env.TRUECALLER_MOCK || "false",
 
   // email settings (SendGrid)
   SENDGRID_API_KEY: process.env.SENDGRID_API_KEY || "",

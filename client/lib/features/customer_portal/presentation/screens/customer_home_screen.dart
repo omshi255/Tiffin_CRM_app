@@ -52,12 +52,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   int _selectedIndex = 0;
   int _unreadCount = 0;
 
-  static const _tabs = [
-    _CustomerHomeTab(),
-    _CustomerMyPlanTab(),
-    _CustomerOrdersTab(),
-    _CustomerWalletTab(),
-    _CustomerProfileTab(),
+  static final List<Widget> _tabs = [
+    RepaintBoundary(child: _CustomerHomeTab()),
+    RepaintBoundary(child: _CustomerMyPlanTab()),
+    RepaintBoundary(child: _CustomerOrdersTab()),
+    RepaintBoundary(child: _CustomerWalletTab()),
+    RepaintBoundary(child: _CustomerProfileTab()),
   ];
 
   @override

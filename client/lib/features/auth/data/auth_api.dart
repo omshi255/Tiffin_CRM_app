@@ -56,48 +56,6 @@ abstract final class AuthApi {
     return AuthResponseModel.fromJson(payload);
   }
 
-  /// Placeholder: POST OAuth authorization code to backend as `accessToken` (per API contract).
-  /// The server should exchange it with Truecaller using PKCE [codeVerifier] and validate [oauthState].
-  static Future<AuthResponseModel> verifyTruecallerToken(
-    String accessToken, {
-    String? codeVerifier,
-    String? oauthState,
-  }) async {
-    final dio = Dio(BaseOptions(
-      baseUrl: DioClient.instance.options.baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-    ));
-    final response = await dio.post(
-      ApiEndpoints.truecaller,
-      data: <String, dynamic>{
-        'accessToken': accessToken,
-        if (codeVerifier != null) 'codeVerifier': codeVerifier,
-        if (oauthState != null) 'oauthState': oauthState,
-      },
-      options: Options(
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-      ),
-    );
-    final data = response.data;
-    if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
-    Map<String, dynamic>? payload = data['data'] is Map<String, dynamic>
-        ? data['data'] as Map<String, dynamic>
-        : null;
-    if (payload == null && data['accessToken'] != null) {
-      payload = data;
-    }
-    if (payload == null) {
-      final success = data['success'] as bool? ?? false;
-      if (!success) {
-        final msg = data['message'] as String? ?? 'Truecaller verification failed';
-        throw ApiException(msg, response.statusCode);
-      }
-      throw ApiException('Invalid response');
-    }
-    return AuthResponseModel.fromJson(payload);
-  }
-
   static Future<AuthResponseModel?> refreshToken(String refreshToken) async {
     try {
       final dio = Dio(BaseOptions(baseUrl: DioClient.instance.options.baseUrl));

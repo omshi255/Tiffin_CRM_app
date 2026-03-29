@@ -8,7 +8,6 @@ import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/role_selection_screen.dart';
 import '../../features/auth/presentation/screens/app_intro_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
-import '../../features/auth/presentation/screens/truecaller_screen.dart';
 import '../../features/auth/presentation/screens/vendor_onboarding_screen.dart';
 import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/customers/presentation/screens/add_edit_customer_screen.dart';
@@ -130,11 +129,6 @@ final class AppRouter {
           final role = state.extra as String? ?? 'vendor';
           return WelcomeScreen(role: role);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.truecaller,
-        name: 'truecaller',
-        builder: (context, state) => const TruecallerScreen(),
       ),
       GoRoute(
         path: AppRoutes.googleLogin,

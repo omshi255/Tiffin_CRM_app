@@ -24,7 +24,8 @@ class NotificationService {
     }
     if (kOneSignalAppId.isEmpty) {
       debugPrint(
-        '[OneSignal] kOneSignalAppId empty — set --dart-define=ONESIGNAL_APP_ID=...',
+        '[OneSignal] App ID empty — set assets/config/onesignal.env or '
+        '--dart-define=ONESIGNAL_APP_ID=...',
       );
       return;
     }
@@ -80,7 +81,16 @@ class NotificationService {
 
   /// Match backend: customer pushes use Customer [_id]; vendor/staff/admin use User [_id] (JWT userId).
   Future<void> syncExternalIdAfterLogin() async {
-    if (kIsWeb || !_initialized || kOneSignalAppId.isEmpty) return;
+    if (kIsWeb || kOneSignalAppId.isEmpty) return;
+    if (!_initialized) {
+      try {
+        await initOneSignal();
+      } catch (e, st) {
+        debugPrint('[OneSignal] re-init failed: $e\n$st');
+        return;
+      }
+    }
+    if (!_initialized) return;
     try {
       final token = await SecureStorage.getAccessToken();
       final role = await SecureStorage.getUserRole();

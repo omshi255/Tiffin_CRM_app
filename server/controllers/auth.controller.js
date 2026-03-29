@@ -5,7 +5,6 @@ import config from "../config/index.js";
 import { sendOtp, verifyOtp } from "../services/otp.service.js";
 import * as passwordService from "../services/password.service.js";
 import * as securePassword from "../services/securePassword.service.js";
-import * as truecallerService from "../services/truecaller.service.js";
 import * as emailService from "../services/email.service.js";
 import {
   generateAccessToken,
@@ -107,21 +106,6 @@ const resetPasswordSchema = Joi.object({
   newPassword: Joi.string().pattern(passwordPattern).required().messages({
     "string.pattern.base": passwordMessage,
   }),
-});
-
-const truecallerSchema = Joi.object({
-  accessToken: Joi.string().required(),
-  // Flutter Truecaller SDK (OAuth PKCE) sends authorization code as `accessToken` plus:
-  codeVerifier: Joi.string().optional().allow(null, ""),
-  oauthState: Joi.string().optional().allow(null, ""),
-  // profile may be supplied by client to avoid extra API call;
-  // if present we still verify the token for security, but it
-  // allows UI code to pass along name/phone it already received.
-  profile: Joi.object({
-    phone: Joi.string().optional(),
-    name: Joi.string().optional(),
-    truecallerId: Joi.string().optional(),
-  }).optional(),
 });
 
 /**
@@ -423,175 +407,6 @@ export const verifyOtpController = asyncHandler(async (req, res, next) => {
     user: buildAuthUserPayload(user, role, {
       ...(staffId && { staffId }),
       ...(customerId && { customerId }),
-      ...(staffDisplayName && { staffDisplayName }),
-    }),
-  });
-
-  res.status(response.statusCode).json({
-    success: response.success,
-    message: response.message,
-    data: response.data,
-  });
-});
-
-/**
- * POST /api/v1/auth/truecaller
- * Body: { accessToken }
- * Clients obtain `accessToken` from Truecaller SDK on the device.
- */
-export const truecallerController = asyncHandler(async (req, res, next) => {
-  const { error, value } = truecallerSchema.validate(req.body || {}, {
-    stripUnknown: true,
-    abortEarly: false,
-  });
-
-  if (error || !value || !value.accessToken) {
-    const msg = error
-      ? error.details.map((d) => d.message).join("; ")
-      : "accessToken is required";
-    throw new ApiError(400, msg);
-  }
-
-  const { accessToken, profile: clientProfile, codeVerifier } = value;
-  let profile = clientProfile || null;
-
-  // Flutter SDK sends OAuth authorization code as `accessToken` + PKCE `codeVerifier`.
-  // Legacy clients may send a raw token without code_verifier → old verify endpoint.
-  try {
-    let remoteProfile;
-    if (codeVerifier && String(codeVerifier).trim().length > 0) {
-      remoteProfile = await truecallerService.verifyOAuthPkce({
-        authorizationCode: accessToken,
-        codeVerifier: String(codeVerifier).trim(),
-      });
-    } else {
-      remoteProfile = await truecallerService.verifyToken(accessToken);
-    }
-    profile = { ...remoteProfile, ...profile };
-  } catch (err) {
-    const msg = err.message || "unknown error";
-    // if network problem, propagate as 503 so client may retry later
-    if (msg.includes("network error")) {
-      throw new ApiError(503, `Truecaller service unavailable: ${msg}`);
-    }
-    throw new ApiError(401, `Truecaller verification failed: ${msg}`);
-  }
-
-  // profile object typically contains phoneNumber and name fields
-  const phoneRaw = profile.phoneNumber || profile.phone || "";
-  const phone = String(phoneRaw).replace(/^\+91/, "").trim();
-  if (!phone || phone.replace(/\D/g, "").length < 10) {
-    throw new ApiError(
-      422,
-      "Could not determine a valid phone number from Truecaller. Ensure userinfo includes phone scope."
-    );
-  }
-  const tcId = profile.truecallerId || profile.id || "";
-
-  const resolved = await resolveRoleForPhone(phone);
-
-  // prefer matching by Truecaller ID if available
-  let user = null;
-  if (tcId) {
-    user = await User.findOne({ truecallerId: tcId }).lean();
-  }
-  if (!user) {
-    user = await User.findOne({ phone }).lean();
-  }
-
-  if (!user) {
-    user = await User.create({
-      phone,
-      role: resolved.role,
-      name:
-        (profile.firstName || profile.name || "") +
-        (profile.lastName ? " " + profile.lastName : ""),
-      truecallerId: tcId,
-    });
-    user = user.toObject();
-  } else {
-    // Admin is never overridden
-    if (user.role === "admin") {
-      // keep role as admin; resolved is ignored for role/ownerId below
-    } else if (user.role === "vendor" && resolved.role !== "vendor") {
-      const hasBusiness = await hasVendorBusinessData(user._id);
-      if (!hasBusiness) {
-        await User.updateOne(
-          { _id: user._id },
-          { $set: { role: resolved.role } }
-        );
-        user.role = resolved.role;
-      } else {
-        resolved.role = "vendor";
-        resolved.ownerId = null;
-      }
-    } else if (user.role === "vendor" && resolved.role === "vendor") {
-      resolved.ownerId = null;
-    } else if (user.role !== resolved.role) {
-      await User.updateOne(
-        { _id: user._id },
-        { $set: { role: resolved.role } }
-      );
-      user.role = resolved.role;
-    }
-    // sync any missing fields
-    const update = {};
-    if (tcId && !user.truecallerId) update.truecallerId = tcId;
-    if (phone && user.phone !== phone) update.phone = phone;
-    if (Object.keys(update).length) {
-      user = await User.findByIdAndUpdate(
-        user._id,
-        { $set: update },
-        { new: true }
-      ).lean();
-    }
-  }
-
-  // Admin is never overridden
-  const role =
-    user.role === "admin"
-      ? "admin"
-      : user.role === "vendor"
-        ? "vendor"
-        : resolved.role;
-  const ownerId =
-    role === "admin"
-      ? null
-      : role === "vendor"
-        ? user._id.toString()
-        : resolved.ownerId || null;
-  const tcCustomerId = resolved.customerId || null;
-  const tcStaffId = resolved.staffId || null;
-
-  // Link the User account back to the DeliveryStaff record on first Truecaller login.
-  if (role === "delivery_staff" && tcStaffId) {
-    await DeliveryStaff.findByIdAndUpdate(tcStaffId, {
-      $set: { userId: user._id },
-    });
-  }
-
-  const payload = {
-    userId: user._id.toString(),
-    phone: user.phone,
-    role,
-    ...(ownerId && { ownerId }),
-    ...(tcStaffId && { staffId: tcStaffId }),
-    ...(tcCustomerId && { customerId: tcCustomerId }),
-  };
-  const access = generateAccessToken(payload);
-  const refresh = generateRefreshToken(payload);
-
-  let staffDisplayName = "";
-  if (role === "delivery_staff") {
-    staffDisplayName = await getDeliveryStaffDisplayName(user._id, tcStaffId);
-  }
-
-  const response = new ApiResponse(200, "Login successful", {
-    accessToken: access,
-    refreshToken: refresh,
-    user: buildAuthUserPayload(user, role, {
-      ...(tcStaffId && { staffId: tcStaffId }),
-      ...(tcCustomerId && { customerId: tcCustomerId }),
       ...(staffDisplayName && { staffDisplayName }),
     }),
   });

@@ -8,7 +8,6 @@ import '../../../core/utils/error_handler.dart';
 import '../data/expense_api.dart';
 import '../models/expense_model.dart';
 
-/// Maps category id → Material icon for list/chips UI.
 IconData expenseCategoryIcon(String category) {
   switch (category) {
     case 'food':
@@ -55,6 +54,29 @@ Color expenseCategoryColor(String category) {
   }
 }
 
+Color expenseCategoryBg(String category) {
+  switch (category) {
+    case 'food':
+      return const Color(0xFFFAEEDA);
+    case 'transport':
+      return const Color(0xFFE6F1FB);
+    case 'salary':
+      return const Color(0xFFEAF3DE);
+    case 'rent':
+      return const Color(0xFFEAF3DE);
+    case 'utilities':
+      return const Color(0xFFEEEDFE);
+    case 'marketing':
+      return const Color(0xFFFBEAF0);
+    case 'equipment':
+      return const Color(0xFFFAECE7);
+    case 'maintenance':
+      return const Color(0xFFF1EFE8);
+    default:
+      return const Color(0xFFE6F1FB);
+  }
+}
+
 class ExpensesScreen extends StatefulWidget {
   const ExpensesScreen({super.key, this.embeddedInFinanceShell = false});
 
@@ -65,7 +87,8 @@ class ExpensesScreen extends StatefulWidget {
 }
 
 class _ExpensesScreenState extends State<ExpensesScreen> {
-  static final _fmtMoney = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
+  static final _fmtMoney =
+      NumberFormat.currency(locale: 'en_IN', symbol: '₹');
 
   final _searchCtrl = TextEditingController();
   List<ExpenseModel> _items = [];
@@ -76,7 +99,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   int _total = 0;
 
   Map<String, dynamic>? _summary;
-  String _period = 'all'; // all | week | month | custom
+  String _period = 'all';
   DateTimeRange? _customRange;
   String? _categoryFilter;
 
@@ -138,7 +161,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         category: _categoryFilter,
         dateFrom: df,
         dateTo: dt,
-        search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
+        search: _searchCtrl.text.trim().isEmpty
+            ? null
+            : _searchCtrl.text.trim(),
       );
       Map<String, dynamic>? sum;
       try {
@@ -179,7 +204,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         category: _categoryFilter,
         dateFrom: df,
         dateTo: dt,
-        search: _searchCtrl.text.trim().isEmpty ? null : _searchCtrl.text.trim(),
+        search: _searchCtrl.text.trim().isEmpty
+            ? null
+            : _searchCtrl.text.trim(),
       );
       if (!mounted) return;
       setState(() {
@@ -269,7 +296,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               child: ListView(
                 padding: EdgeInsets.fromLTRB(
                   16,
-                  8,
+                  12,
                   16,
                   mq.padding.bottom + 80,
                 ),
@@ -278,66 +305,23 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   const SizedBox(height: 12),
                   _periodChips(),
                   const SizedBox(height: 10),
-                  TextField(
-                    controller: _searchCtrl,
-                    onSubmitted: (_) => _load(reset: true),
-                    decoration: InputDecoration(
-                      hintText: 'Search by title',
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                    ),
-                  ),
+                  _searchField(),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _catChip('All', null),
-                        ...ExpenseModel.categories.map(
-                          (c) => _catChip(c, c),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  _categoryChips(),
+                  const SizedBox(height: 14),
                   if (_categoryBreakdown().isNotEmpty) ...[
-                    Text(
-                      'Category breakdown',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                    ),
+                    _sectionLabel('Category breakdown'),
                     const SizedBox(height: 8),
                     ..._categoryBreakdown().map(_breakdownTile),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 6),
                   ],
                   if (_items.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 48),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.receipt_long_outlined,
-                            size: 56,
-                            color: AppColors.textHint,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'No expenses found',
-                            style: TextStyle(color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
+                    _emptyState()
+                  else ...[
+                    _sectionLabel('Recent expenses'),
+                    const SizedBox(height: 8),
                     ..._items.map(_expenseTile),
+                  ],
                   if (_loadingMore)
                     const Padding(
                       padding: EdgeInsets.all(16),
@@ -371,76 +355,76 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         icon: const Icon(Icons.add_rounded),
         label: const Text('Add Expense'),
       ),
-      body: SafeArea(
-        bottom: true,
-        child: scrollBody,
-      ),
+      body: SafeArea(bottom: true, child: scrollBody),
     );
   }
+
+  // ── Summary ──────────────────────────────────────────────────────
 
   Widget _summaryRow() {
     final exp = _sumFromSummary('totalExpenseThisMonth');
     final inc = _sumFromSummary('totalIncomeThisMonth');
     final net = _sumFromSummary('netBalance');
-    return SizedBox(
-      height: 112,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          _sumCard('Expense', exp, AppColors.errorContainer, AppColors.error),
-          const SizedBox(width: 10),
-          _sumCard(
-            'Income',
-            inc,
-            AppColors.successChipBg,
-            AppColors.success,
-          ),
-          const SizedBox(width: 10),
-          _sumCard(
+    return Row(
+      children: [
+        Expanded(
+          child: _sumCard('Expense', exp, AppColors.errorContainer,
+              AppColors.error),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _sumCard(
+              'Income', inc, AppColors.successChipBg, AppColors.success),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _sumCard(
             'Balance',
             net,
             AppColors.primaryContainer,
             net >= 0 ? AppColors.success : AppColors.error,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _sumCard(String label, double value, Color bg, Color fg) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            _fmtMoney.format(value),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: fg,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ],
       ),
     );
   }
 
-  Widget _sumCard(String label, double value, Color bg, Color fg) {
-    return Container(
-      width: 160,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            _fmtMoney.format(value),
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: fg,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // ── Period chips ─────────────────────────────────────────────────
 
   Widget _periodChips() {
     return Wrap(
@@ -464,8 +448,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         if (value == 'custom') {
           final range = await showDateRangePicker(
             context: context,
-            firstDate: DateTime(nowYear() - 1),
-            lastDate: DateTime(nowYear() + 1),
+            firstDate: DateTime(DateTime.now().year - 1),
+            lastDate: DateTime(DateTime.now().year + 1),
             initialDateRange: _customRange ??
                 DateTimeRange(
                   start: DateTime.now().subtract(const Duration(days: 7)),
@@ -487,7 +471,45 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  int nowYear() => DateTime.now().year;
+  // ── Search ───────────────────────────────────────────────────────
+
+  Widget _searchField() {
+    return TextField(
+      controller: _searchCtrl,
+      onSubmitted: (_) => _load(reset: true),
+      decoration: InputDecoration(
+        hintText: 'Search by title',
+        prefixIcon: const Icon(Icons.search_rounded, size: 20),
+        filled: true,
+        fillColor: AppColors.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+      ),
+    );
+  }
+
+  // ── Category filter chips ─────────────────────────────────────────
+
+  Widget _categoryChips() {
+    return SizedBox(
+      height: 36,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _catChip('All', null),
+          ...ExpenseModel.categories.map((c) => _catChip(c, c)),
+        ],
+      ),
+    );
+  }
 
   Widget _catChip(String label, String? value) {
     final sel = _categoryFilter == value;
@@ -504,6 +526,22 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
+  // ── Section label ─────────────────────────────────────────────────
+
+  Widget _sectionLabel(String text) {
+    return Text(
+      text.toUpperCase(),
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
+        color: AppColors.textSecondary,
+      ),
+    );
+  }
+
+  // ── Category breakdown ────────────────────────────────────────────
+
   Widget _breakdownTile(Map<String, dynamic> row) {
     final cat = row['category']?.toString() ?? 'misc';
     final total = (row['total'] is num)
@@ -514,6 +552,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         : double.tryParse('${row['percentage']}') ?? 0;
     final icon = expenseCategoryIcon(cat);
     final col = expenseCategoryColor(cat);
+    final bg = expenseCategoryBg(cat);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -521,25 +561,42 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: col),
-              const SizedBox(width: 8),
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 16, color: col),
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   cat,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
               ),
-              Text(_fmtMoney.format(total)),
+              Text(
+                _fmtMoney.format(total),
+                style: const TextStyle(fontSize: 13),
+              ),
             ],
           ),
-          const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (pct / 100).clamp(0.0, 1.0),
-              minHeight: 6,
-              backgroundColor: AppColors.primaryContainer,
-              color: col,
+          const SizedBox(height: 5),
+          Padding(
+            padding: const EdgeInsets.only(left: 42),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: (pct / 100).clamp(0.0, 1.0),
+                minHeight: 5,
+                backgroundColor: AppColors.primaryContainer,
+                color: col,
+              ),
             ),
           ),
         ],
@@ -547,11 +604,40 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
+  // ── Empty state ───────────────────────────────────────────────────
+
+  Widget _emptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48),
+      child: Column(
+        children: [
+          Icon(
+            Icons.receipt_long_outlined,
+            size: 52,
+            color: AppColors.textHint,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No expenses found',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Expense tile ──────────────────────────────────────────────────
+
   Widget _expenseTile(ExpenseModel e) {
     final col = expenseCategoryColor(e.category);
+    final bg = expenseCategoryBg(e.category);
     final icon = expenseCategoryIcon(e.category);
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Slidable(
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
@@ -561,10 +647,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               onPressed: (_) => _confirmDelete(e),
               backgroundColor: AppColors.error,
               foregroundColor: AppColors.onError,
+              borderRadius: BorderRadius.circular(12),
               child: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.delete_outline_rounded),
+                  Icon(Icons.delete_outline_rounded, size: 22),
                   SizedBox(height: 4),
                   Text('Delete', style: TextStyle(fontSize: 11)),
                 ],
@@ -585,10 +672,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: col.withValues(alpha: 0.12),
+                  color: bg,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: col),
+                child: Icon(icon, color: col, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -602,10 +689,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                         fontSize: 14,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       DateFormat.yMMMd().format(e.date),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -617,24 +705,23 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 children: [
                   Text(
                     _fmtMoney.format(e.amount),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                       color: AppColors.error,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
+                        horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.secondaryContainer,
-                      borderRadius: BorderRadius.circular(8),
+                      color: bg,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       e.category,
-                      style: const TextStyle(fontSize: 10),
+                      style: TextStyle(fontSize: 10, color: col),
                     ),
                   ),
                 ],
@@ -646,6 +733,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 }
+
+// ── Add Expense Sheet ─────────────────────────────────────────────
 
 class AddExpenseSheet extends StatefulWidget {
   const AddExpenseSheet({super.key, required this.onAdded});
@@ -691,7 +780,8 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
         'category': _category,
         'date': _date.toIso8601String().split('T').first,
         'paymentMethod': _payment,
-        if (_notesCtrl.text.trim().isNotEmpty) 'notes': _notesCtrl.text.trim(),
+        if (_notesCtrl.text.trim().isNotEmpty)
+          'notes': _notesCtrl.text.trim(),
         if (tags.isNotEmpty) 'tags': tags,
       });
       if (mounted) {
@@ -808,23 +898,22 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                     border: OutlineInputBorder(),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'cash', child: Text('cash')),
-                    DropdownMenuItem(value: 'upi', child: Text('upi')),
+                    DropdownMenuItem(value: 'cash', child: Text('Cash')),
+                    DropdownMenuItem(value: 'upi', child: Text('UPI')),
                     DropdownMenuItem(
-                      value: 'bank_transfer',
-                      child: Text('bank_transfer'),
-                    ),
-                    DropdownMenuItem(value: 'card', child: Text('card')),
+                        value: 'bank_transfer',
+                        child: Text('Bank transfer')),
+                    DropdownMenuItem(value: 'card', child: Text('Card')),
                   ],
-                  onChanged: (v) =>
-                      setState(() => _payment = v ?? 'cash'),
+                  onChanged: (v) => setState(() => _payment = v ?? 'cash'),
                 ),
                 const SizedBox(height: 12),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Date'),
                   subtitle: Text(DateFormat.yMMMd().format(_date)),
-                  trailing: const Icon(Icons.calendar_today_rounded),
+                  trailing:
+                      const Icon(Icons.calendar_today_rounded, size: 20),
                   onTap: () async {
                     final d = await showDatePicker(
                       context: context,

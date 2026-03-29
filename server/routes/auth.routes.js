@@ -8,7 +8,6 @@ import {
   updateMe,
   forgotPasswordController,
   resetPasswordController,
-  truecallerController,
   getMeController,
   changePasswordController,
   vendorOnboardingController,
@@ -79,8 +78,6 @@ router.post(
 );
 router.post("/forgot-password", forgotPasswordController);
 router.post("/reset-password", resetPasswordController);
-router.post("/truecaller", truecallerController);
-router.post("/truecaller/verify", truecallerController);
 router.post("/refresh-token", refreshTokenLimiter, refreshTokenController);
 router.post("/logout", authMiddleware, logoutController);
 router.put("/me", authMiddleware, updateMe);

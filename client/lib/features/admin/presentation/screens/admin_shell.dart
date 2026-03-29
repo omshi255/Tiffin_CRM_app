@@ -38,14 +38,24 @@ class _AdminShellState extends State<AdminShell> {
       body: IndexedStack(
         index: _selectedTab,
         children: [
-          AdminDashboardScreen(
-            onListTap: _onListTap,
-            onReportsTap: () => setState(() => _selectedTab = 4),
+          RepaintBoundary(
+            child: AdminDashboardScreen(
+              onListTap: _onListTap,
+              onReportsTap: () => setState(() => _selectedTab = 4),
+            ),
           ),
-          const AdminListScreen(type: AdminListType.vendors),
-          const AdminListScreen(type: AdminListType.customers),
-          const AdminListScreen(type: AdminListType.orders),
-          const AdminReportsScreen(),
+          const RepaintBoundary(
+            child: AdminListScreen(type: AdminListType.vendors),
+          ),
+          const RepaintBoundary(
+            child: AdminListScreen(type: AdminListType.customers),
+          ),
+          const RepaintBoundary(
+            child: AdminListScreen(type: AdminListType.orders),
+          ),
+          const RepaintBoundary(
+            child: AdminReportsScreen(),
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

@@ -349,14 +349,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/notifications/notification_badge_service.dart';
-import '../../../../core/platform/android_device.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../data/auth_api.dart';
 import '../../models/user_model.dart';
-import '../../services/truecaller_service.dart';
 import '../../../../services/notification_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -374,55 +372,18 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _isValid = false;
 
-  /// Android only: after Truecaller SDK init, whether OAuth consent can be shown.
-  bool _truecallerUsable = false;
-
-  /// True while checking [TruecallerSdk.isUsable] on Android (avoid flicker).
-  bool _checkingTruecaller = false;
-
-  bool _truecallerSigningIn = false;
-
-  /// Truecaller SDK is Android-only (`Platform.isAndroid` via conditional `dart:io` — web-safe).
-  bool get _isAndroidDevice => isAndroidDevice;
-
   static final RegExp _phoneRegex = RegExp(r'^[6-9]\d{9}$');
 
   @override
   void initState() {
     super.initState();
     _phoneController.addListener(_onPhoneChanged);
-    _prepareTruecallerOption();
-    Future.delayed(const Duration(seconds: 5), () {
-      if (!mounted) return;
-      if (_checkingTruecaller) {
-        setState(() {
-          _checkingTruecaller = false;
-          _truecallerUsable = false;
-        });
-      }
-    });
-  }
-
-  /// iOS / web: skip SDK entirely. Android: init plugin + check OAuth usability (max ~5s).
-  Future<void> _prepareTruecallerOption() async {
-    if (!_isAndroidDevice) return;
-    if (!mounted) return;
-    setState(() => _checkingTruecaller = true);
-    try {
-      final usable = await TruecallerService.instance.checkTruecallerUsable();
-      if (mounted) setState(() => _truecallerUsable = usable);
-    } catch (_) {
-      if (mounted) setState(() => _truecallerUsable = false);
-    } finally {
-      if (mounted) setState(() => _checkingTruecaller = false);
-    }
   }
 
   @override
   void dispose() {
     _phoneController.removeListener(_onPhoneChanged);
     _phoneController.dispose();
-    TruecallerService.instance.disposeCallbackSubscription();
     super.dispose();
   }
 
@@ -460,36 +421,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
       if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  /// Truecaller OAuth → backend [AuthApi.verifyTruecallerToken] → same session handling as OTP.
-  Future<void> _onTruecallerLogin() async {
-    setState(() => _truecallerSigningIn = true);
-    try {
-      final outcome = await TruecallerService.instance.signInWithTruecaller();
-      if (!outcome.ok) {
-        // Graceful fallback: user can continue with phone + OTP (no intrusive toast for dismiss).
-        return;
-      }
-      final response = await AuthApi.verifyTruecallerToken(
-        outcome.authorizationCode!,
-        codeVerifier: outcome.codeVerifier,
-        oauthState: outcome.oauthState,
-      );
-      await SecureStorage.saveAccessToken(response.accessToken);
-      await SecureStorage.saveRefreshToken(response.refreshToken);
-      final user = response.user;
-      await SecureStorage.saveUserRole(user.role);
-      await SecureStorage.saveUserId(user.id);
-      await NotificationBadgeService.refreshNow();
-      await _updateFcmToken();
-      if (!mounted) return;
-      await _navigateAfterLogin(context, user);
-    } catch (e) {
-      if (mounted) ErrorHandler.show(context, e);
-    } finally {
-      if (mounted) setState(() => _truecallerSigningIn = false);
     }
   }
 
@@ -757,165 +688,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // ── Truecaller (Android only): always show a block — loading / button / hint ──
-                      if (_isAndroidDevice) ...[
-                        const Text(
-                          'QUICK SIGN-IN',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF8B7BAE),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        if (_checkingTruecaller)
-                          Container(
-                            height: 52,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFE0DAF0),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: _roleColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  'Checking Truecaller…',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: const Color(0xFF8B7BAE),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else if (_truecallerUsable)
-                          SizedBox(
-                            height: 52,
-                            child: OutlinedButton(
-                              onPressed: _isLoading || _truecallerSigningIn
-                                  ? null
-                                  : _onTruecallerLogin,
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                side: const BorderSide(
-                                  color: Color(0xFFE0DAF0),
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: _truecallerSigningIn
-                                  ? SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.4,
-                                        color: _roleColor,
-                                      ),
-                                    )
-                                  : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Image.asset(
-                                          'assets/images/truecaller.webp',
-                                          height: 28,
-                                          width: 28,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        const Text(
-                                          'Continue with Truecaller',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xFF1A0A2E),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                            ),
-                          )
-                        else
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8F6FC),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFE8E0F5),
-                              ),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.info_outline_rounded,
-                                  size: 20,
-                                  color: _roleColor.withValues(alpha: 0.9),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'Truecaller one-tap login is not available on this device. '
-                                    'Install Truecaller and sign in there, or use your phone number with OTP below.',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: const Color(0xFF8B7BAE),
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: 1,
-                                color: const Color(0xFFF0EBF9),
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                'or use phone',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFFC4BAD9),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                height: 1,
-                                color: const Color(0xFFF0EBF9),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                      ],
 
                       // Label
                       const Text(

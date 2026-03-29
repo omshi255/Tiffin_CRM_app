@@ -7,7 +7,6 @@ abstract final class AppRoutes {
   static const String roleSelection = '/role-selection';
   static const String welcome = '/welcome';
   static const String vendorOnboarding = '/vendor-onboarding';
-  static const String truecaller = '/truecaller';
   static const String googleLogin = '/google-login';
   static const String facebookLogin = '/facebook-login';
   static const String dashboard = '/dashboard';

@@ -24,12 +24,6 @@ export const sendNotification = async ({
 }) => {
   const targetId = userId || customerId || null;
 
-  console.log("[OneSignal] sendNotification", {
-    targetId,
-    type,
-    title,
-  });
-
   let pushResult = null;
   if (targetId) {
     try {
@@ -53,11 +47,6 @@ export const sendNotification = async ({
     message,
     data,
     channel: "in_app",
-  });
-  console.log("[OneSignal] in-app Notification.create done", {
-    type,
-    notifOwnerId: notifOwnerId?.toString?.() ?? notifOwnerId,
-    customerId: customerId?.toString?.() ?? customerId,
   });
 
   return pushResult;

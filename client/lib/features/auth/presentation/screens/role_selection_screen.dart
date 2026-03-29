@@ -213,7 +213,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       bgColor: Color(0xFFF0EBF9),
       tagBg: Color(0xFFF0EBF9),
       tagText: Color(0xFF5B2D8E),
-      isAdmin: false,
       isPopular: true,
     ),
     _RoleDef(
@@ -226,7 +225,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       bgColor: Color(0xFFE8F8F2),
       tagBg: Color(0xFFE8F8F2),
       tagText: Color(0xFF0F6E56),
-      isAdmin: false,
       isPopular: false,
     ),
     _RoleDef(
@@ -239,20 +237,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       bgColor: Color(0xFFFEF5E7),
       tagBg: Color(0xFFFEF5E7),
       tagText: Color(0xFF854F0B),
-      isAdmin: false,
-      isPopular: false,
-    ),
-    _RoleDef(
-      key: 'admin',
-      title: 'Admin',
-      subtitle: 'Full system control\n& config',
-      tag1: 'Users',
-      tag2: 'Settings',
-      color: Color(0xFFA32D2D),
-      bgColor: Color(0xFFFDEAEA),
-      tagBg: Color(0xFFFDEAEA),
-      tagText: Color(0xFF791F1F),
-      isAdmin: true,
       isPopular: false,
     ),
   ];
@@ -265,8 +249,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
         return [const Color(0xFF1DB87A), const Color(0xFF0A5C3A)];
       case 'delivery_staff':
         return [const Color(0xFFE8A020), const Color(0xFF8B4A00)];
-      case 'admin':
-        return [const Color(0xFFD64444), const Color(0xFF7A1212)];
       default:
         return [const Color(0xFF9B59D0), const Color(0xFF3B1472)];
     }
@@ -408,70 +390,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               ),
 
               const SizedBox(height: 16),
-
-              // ── Admin Warning ────────────────────────────────────
-              AnimatedSize(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOut,
-                child: _selectedRole == 'admin'
-                    ? Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF8F8),
-                          border: Border.all(color: const Color(0xFFF7C1C1)),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.warning_amber_rounded,
-                              color: Color(0xFFA32D2D),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Restricted Access',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: const Color(0xFFA32D2D),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Only one admin account exists per system. You cannot log in as Admin unless an admin account has already been created for you. Contact your system administrator.',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: const Color(0xFF791F1F),
-                                      height: 1.6,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  GestureDetector(
-                                    onTap: () => setState(
-                                      () => _selectedRole = 'vendor',
-                                    ),
-                                    child: Text(
-                                      'Not an admin? Continue as Vendor →',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: AppColors.primary,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
 
               // ── Continue Button ──────────────────────────────────
               AnimatedContainer(
@@ -706,8 +624,6 @@ class _RoleIcon extends StatelessWidget {
         return Icon(Icons.person_outline_rounded, color: color, size: 26);
       case 'delivery_staff':
         return Icon(Icons.delivery_dining_rounded, color: color, size: 26);
-      case 'admin':
-        return Icon(Icons.shield_outlined, color: color, size: 26);
       default:
         return Icon(Icons.circle_outlined, color: color, size: 26);
     }
@@ -727,7 +643,6 @@ class _RoleDef {
     required this.bgColor,
     required this.tagBg,
     required this.tagText,
-    required this.isAdmin,
     required this.isPopular,
   });
 
@@ -740,6 +655,5 @@ class _RoleDef {
   final Color bgColor;
   final Color tagBg;
   final Color tagText;
-  final bool isAdmin;
   final bool isPopular;
 }

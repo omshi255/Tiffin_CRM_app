@@ -28,12 +28,18 @@ class _FinanceShellState extends State<FinanceShell> {
               child: IndexedStack(
                 index: _index,
                 children: const [
-                  PaymentsScreen(
-                    embeddedInShell: true,
-                    embeddedInFinanceShell: true,
+                  RepaintBoundary(
+                    child: PaymentsScreen(
+                      embeddedInShell: true,
+                      embeddedInFinanceShell: true,
+                    ),
                   ),
-                  ExpensesScreen(embeddedInFinanceShell: true),
-                  IncomeScreen(embeddedInFinanceShell: true),
+                  RepaintBoundary(
+                    child: ExpensesScreen(embeddedInFinanceShell: true),
+                  ),
+                  RepaintBoundary(
+                    child: IncomeScreen(embeddedInFinanceShell: true),
+                  ),
                 ],
               ),
             ),

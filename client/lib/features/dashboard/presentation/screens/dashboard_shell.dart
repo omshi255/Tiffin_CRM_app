@@ -36,18 +36,12 @@ class _DashboardShellState extends State<DashboardShell>
     WidgetsBinding.instance.addObserver(this);
     _loadVendorProfile();
     NotificationBadgeService.init();
-    NotificationBadgeService.unreadCount.addListener(_onBadgeChanged);
   }
 
   @override
   void dispose() {
-    NotificationBadgeService.unreadCount.removeListener(_onBadgeChanged);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-
-  void _onBadgeChanged() {
-    if (mounted) setState(() {});
   }
 
   @override
@@ -113,9 +107,6 @@ class _DashboardShellState extends State<DashboardShell>
 
   @override
   Widget build(BuildContext context) {
-    final hasUnread = NotificationBadgeService.unreadCount.value > 0;
-    final unreadCount = NotificationBadgeService.unreadCount.value;
-
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: Stack(
@@ -170,71 +161,8 @@ class _DashboardShellState extends State<DashboardShell>
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.onPrimary,
         elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Stack(
-              alignment: Alignment.center,
-              clipBehavior: Clip.none,
-              children: [
-                IconButton(
-                  icon: const PhosphorIcon(
-                    PhosphorIconsRegular.bell,
-                    size: 22,
-                    color: AppColors.onPrimary,
-                  ),
-                  onPressed: () async {
-                    HapticFeedback.lightImpact();
-                    NotificationBadgeService.adjustBy(
-                      -NotificationBadgeService.unreadCount.value,
-                    );
-                    await context.push(AppRoutes.notifications);
-                    NotificationBadgeService.refreshNow();
-                  },
-                ),
-                if (hasUnread)
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: Container(
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppColors.primary,
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.45),
-                            blurRadius: 4,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        unreadCount > 9 ? '9+' : '$unreadCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          height: 1.2,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+        actions: const [
+          _DashboardNotificationAction(),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -248,10 +176,18 @@ class _DashboardShellState extends State<DashboardShell>
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          DashboardHomeScreen(adminName: _vendorDisplayName),
-          const DeliveryScreen(embeddedInShell: true),
-          const CustomersListScreen(),
-          const FinanceShell(),
+          RepaintBoundary(
+            child: DashboardHomeScreen(adminName: _vendorDisplayName),
+          ),
+          const RepaintBoundary(
+            child: DeliveryScreen(embeddedInShell: true),
+          ),
+          const RepaintBoundary(
+            child: CustomersListScreen(),
+          ),
+          const RepaintBoundary(
+            child: FinanceShell(),
+          ),
         ],
       ),
       bottomNavigationBar: Container(
@@ -306,6 +242,84 @@ class _DashboardShellState extends State<DashboardShell>
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Badge + bell only rebuild when [NotificationBadgeService.unreadCount] changes,
+/// not on every vendor profile or tab update.
+class _DashboardNotificationAction extends StatelessWidget {
+  const _DashboardNotificationAction();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: NotificationBadgeService.unreadCount,
+      builder: (context, unreadCount, _) {
+        final hasUnread = unreadCount > 0;
+        return Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: const PhosphorIcon(
+                  PhosphorIconsRegular.bell,
+                  size: 22,
+                  color: AppColors.onPrimary,
+                ),
+                onPressed: () async {
+                  HapticFeedback.lightImpact();
+                  NotificationBadgeService.adjustBy(-unreadCount);
+                  await context.push(AppRoutes.notifications);
+                  NotificationBadgeService.refreshNow();
+                },
+              ),
+              if (hasUnread)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withValues(alpha: 0.45),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      unreadCount > 9 ? '9+' : '$unreadCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

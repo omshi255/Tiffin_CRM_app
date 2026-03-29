@@ -447,13 +447,17 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
       body: IndexedStack(
         index: _selectedTab,
         children: [
-          _buildTasksBody(filtered),
-          DeliveryMapScreen(
-            showAppBar: false,
-            orders: _orders,
-            session: _mapSession,
+          RepaintBoundary(child: _buildTasksBody(filtered)),
+          RepaintBoundary(
+            child: DeliveryMapScreen(
+              showAppBar: false,
+              orders: _orders,
+              session: _mapSession,
+            ),
           ),
-          const DeliveryProfileScreen(),
+          const RepaintBoundary(
+            child: DeliveryProfileScreen(),
+          ),
         ],
       ),
 
