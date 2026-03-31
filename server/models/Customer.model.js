@@ -85,6 +85,16 @@ const customerSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    /** Wallet balance for customer-details APIs; falls back to balance if unset in app logic. */
+    walletBalance: {
+      type: Number,
+      default: 0,
+    },
+    /** Extra charges billed separately (not deducted from subscription yet). */
+    pendingDue: {
+      type: Number,
+      default: 0,
+    },
     creditLimit: {
       type: Number,
       default: 0,

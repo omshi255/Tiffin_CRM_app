@@ -9,6 +9,7 @@ import config from "./config/index.js";
 import requestId from "./middleware/requestId.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
+import customerDetailsRoutes from "./routes/customerDetails.js";
 import webhookRoutes from "./routes/webhook.routes.js";
 import publicRoutes from "./routes/public.routes.js";
 
@@ -59,6 +60,7 @@ app.use(morgan("combined"));
 app.use("/public", express.static("public"));
 
 app.use("/api/v1/public", publicRoutes);
+app.use("/api/v1/customer-details", customerDetailsRoutes);
 app.use("/api/v1", routes);
 
 app.use(errorHandler);

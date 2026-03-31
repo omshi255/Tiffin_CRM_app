@@ -49,6 +49,11 @@ const subscriptionSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    /** Remaining prepaid value on this subscription (defaults to totalAmount on create). */
+    remainingBalance: {
+      type: Number,
+      default: null,
+    },
     pausedFrom: {
       type: Date,
     },
@@ -67,6 +72,12 @@ const subscriptionSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+subscriptionSchema.pre("save", function () {
+  if (this.remainingBalance == null && this.totalAmount != null) {
+    this.remainingBalance = this.totalAmount;
+  }
+});
 
 subscriptionSchema.index({ ownerId: 1, customerId: 1, status: 1 });
 subscriptionSchema.index({ ownerId: 1, endDate: 1 });

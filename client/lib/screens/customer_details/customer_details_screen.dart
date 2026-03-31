@@ -1,0 +1,118 @@
+import 'package:flutter/material.dart';
+
+import 'tabs/balance_tab.dart';
+import 'tabs/customer_info_tab.dart';
+import 'tabs/deliveries_tab.dart';
+import 'tabs/meal_plan_tab.dart';
+import 'tabs/transactions_tab.dart';
+
+/// Matches Customers list / detail purple palette (no theme changes).
+class _P {
+  static const g1 = Color(0xFF7B3FE4);
+  static const bg = Color(0xFFF0EBFF);
+  static const s900 = Color(0xFF0F172A);
+  static const s600 = Color(0xFF475569);
+}
+
+/// Tabbed customer workspace: info, meal plan, transactions, balance, deliveries.
+class CustomerDetailsScreen extends StatefulWidget {
+  const CustomerDetailsScreen({
+    super.key,
+    required this.customerId,
+    required this.customerName,
+  });
+
+  final String customerId;
+  final String customerName;
+
+  @override
+  State<CustomerDetailsScreen> createState() => _CustomerDetailsScreenState();
+}
+
+class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 5, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _P.bg,
+      appBar: AppBar(
+        backgroundColor: _P.g1,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          widget.customerName,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            letterSpacing: -0.2,
+          ),
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+          tabs: const [
+            Tab(
+              icon: Icon(Icons.person_outline, size: 20),
+              text: 'Info',
+            ),
+            Tab(
+              icon: Icon(Icons.restaurant_menu, size: 20),
+              text: 'Meal Plan',
+            ),
+            Tab(
+              icon: Icon(Icons.receipt_long, size: 20),
+              text: 'Transactions',
+            ),
+            Tab(
+              icon: Icon(Icons.account_balance_wallet, size: 20),
+              text: 'Balance',
+            ),
+            Tab(
+              icon: Icon(Icons.delivery_dining, size: 20),
+              text: 'Deliveries',
+            ),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          CustomerInfoTab(customerId: widget.customerId),
+          MealPlanTab(customerId: widget.customerId),
+          TransactionsTab(customerId: widget.customerId),
+          BalanceTab(customerId: widget.customerId),
+          DeliveriesTab(customerId: widget.customerId),
+        ],
+      ),
+    );
+  }
+}

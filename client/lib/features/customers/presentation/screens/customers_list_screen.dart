@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../screens/customer_details/customer_details_screen.dart';
 import '../../../../core/utils/color_utils.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
@@ -495,9 +496,14 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                                 child: _CustomerRow(
                                   customer: customer,
                                   onTap: () async {
-                                    await context.push(
-                                      AppRoutes.customerDetail,
-                                      extra: customer,
+                                    await Navigator.push<void>(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => CustomerDetailsScreen(
+                                          customerId: customer.id,
+                                          customerName: customer.name,
+                                        ),
+                                      ),
                                     );
                                     _loadCustomers(
                                       reset: true,
