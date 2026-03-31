@@ -210,7 +210,11 @@ export const generateDailyOrdersForDate = async (ownerId, date) => {
 
 export const getTodayDailyOrders = async (ownerId) => {
   const today = parseUTC(new Date());
-  return DailyOrder.find({ ownerId, orderDate: today })
+  return DailyOrder.find({
+    ownerId,
+    orderDate: today,
+    status: { $ne: "cancelled" },
+  })
     .populate("customerId", "name phone address area")
     .populate("planId", "planName price")
     .populate("deliveryStaffId", "name phone")

@@ -45,9 +45,13 @@ final class DeliveryTrackingSocket {
 
   sio.Socket? _socket;
   final _updates = StreamController<DeliveryLocationUpdate>.broadcast();
+  final _dailyOrdersRefresh = StreamController<void>.broadcast();
   Future<void>? _connecting;
 
   Stream<DeliveryLocationUpdate> get updates => _updates.stream;
+
+  /// Fired when vendor-facing daily order lists should refetch (e.g. customer cancelled a delivery).
+  Stream<void> get dailyOrdersRefresh => _dailyOrdersRefresh.stream;
 
   bool get isConnected => _socket?.connected == true;
 
@@ -100,6 +104,10 @@ final class DeliveryTrackingSocket {
       if (kDebugMode) {
         debugPrint('[DeliverySocket] location_error: $data');
       }
+    });
+
+    socket.on('daily_orders_changed', (_) {
+      if (!_dailyOrdersRefresh.isClosed) _dailyOrdersRefresh.add(null);
     });
 
     socket.onConnect((_) {

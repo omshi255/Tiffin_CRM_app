@@ -45,13 +45,15 @@ async function assertCustomer(ownerId, customerId) {
   return customer;
 }
 
-/** Effective wallet: prefers walletBalance when set, else legacy balance. */
+/**
+ * Effective wallet total. Uses the higher of legacy `balance` and `walletBalance`
+ * so a new `walletBalance` field that was only partially incremented (e.g. 0→50)
+ * while `balance` still holds the full ledger (e.g. 6320→6370) never shows as only the top-up.
+ */
 function effectiveWallet(c) {
-  const w = c.walletBalance;
-  const b = c.balance;
-  if (w != null && w !== undefined) return Number(w);
-  if (b != null && b !== undefined) return Number(b);
-  return 0;
+  const b = Number(c.balance ?? 0);
+  const w = Number(c.walletBalance ?? 0);
+  return Math.max(b, w);
 }
 
 /** Remaining subscription balance with sane defaults. */
@@ -443,7 +445,7 @@ router.post(
       const updated = await Customer.findByIdAndUpdate(
         customerId,
         {
-          $inc: { balance: inc, walletBalance: inc },
+          $inc: { walletBalance: inc, balance: inc },
         },
         { new: true, session }
       ).lean();
@@ -468,8 +470,19 @@ router.post(
       await session.commitTransaction();
       session.endSession();
 
+      const subAfter = await Subscription.findOne({
+        ownerId,
+        customerId,
+        status: "active",
+        endDate: { $gte: new Date() },
+      })
+        .sort({ endDate: -1 })
+        .lean();
+
       const response = new ApiResponse(200, "Balance added", {
-        walletBalance: effectiveWallet(updated),
+        success: true,
+        updatedWalletBalance: effectiveWallet(updated),
+        updatedSubscriptionBalance: effectiveRemaining(subAfter),
       });
       return res.status(response.statusCode).json({
         success: response.success,
@@ -557,10 +570,9 @@ router.post(
         if (cur < amt) {
           throw new ApiError(400, "Insufficient subscription balance");
         }
-        const newRem = cur - amt;
         await Subscription.findByIdAndUpdate(
           sub._id,
-          { $set: { remainingBalance: newRem } },
+          { $inc: { remainingBalance: -amt } },
           { session }
         );
         await Transaction.create(
@@ -755,6 +767,17 @@ router.patch(
         },
       }
     );
+
+    const io = req.app.get("io");
+    if (io) {
+      const vendorRoomId = resolveOwnerId(req);
+      io.of("/delivery")
+        .to(`admin:${vendorRoomId}`)
+        .emit("daily_orders_changed", {
+          date: ymd,
+          customerId: String(customerId),
+        });
+    }
 
     const response = new ApiResponse(200, "Delivery cancelled", {
       success: true,

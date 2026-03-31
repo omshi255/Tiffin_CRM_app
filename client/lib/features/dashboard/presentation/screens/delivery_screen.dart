@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../core/socket/delivery_tracking_socket.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
@@ -131,6 +134,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   String? _statusFilter;
   final Set<String> _selectedIds = {};
   bool _bulkMode = false;
+  StreamSubscription<void>? _dailyOrdersSocketSub;
 
   static const List<String> _filterLabels = [
     'All',
@@ -151,13 +155,32 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   void initState() {
     super.initState();
     _load();
+    _attachDailyOrdersSocket();
+  }
+
+  /// Refetch when server notifies that today’s daily orders changed (e.g. cancellation).
+  Future<void> _attachDailyOrdersSocket() async {
+    await DeliveryTrackingSocket.instance.ensureConnected();
+    _dailyOrdersSocketSub =
+        DeliveryTrackingSocket.instance.dailyOrdersRefresh.listen((_) {
+      if (mounted) _load();
+    });
+  }
+
+  @override
+  void dispose() {
+    _dailyOrdersSocketSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
       final list = await DeliveryApi.getAllDeliveries();
-      if (mounted) setState(() => _orders = list);
+      final visible = list
+          .where((o) => o.status.toLowerCase() != 'cancelled')
+          .toList();
+      if (mounted) setState(() => _orders = visible);
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
