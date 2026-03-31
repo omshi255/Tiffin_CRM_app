@@ -245,6 +245,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       builder: (ctx) => DailyReceiptSheet(
         key: ValueKey<String>('daily-receipt-${c.id}-${picked.toIso8601String()}'),
         customerId: c.id,
+        customerName: c.name,
         initialDate: picked,
       ),
     );
@@ -661,8 +662,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: _P.v600,
-                            side: const BorderSide(color: _P.v600, width: 1.2),
+                            foregroundColor: const Color(0xFF7C3AED),
+                            side: const BorderSide(
+                              color: Color(0xFF7C3AED),
+                              width: 1.2,
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -677,9 +681,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         ),
                       ),
 
+                      const SizedBox(height: 10),
                       // Low balance alert (conditional)
                       if (isLowBalance) ...[
-                        const SizedBox(height: 10),
                         _actionBtn(
                           icon: Icons.chat_rounded,
                           label: 'Send Low Balance Reminder',
@@ -689,10 +693,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                           onTap: _openWhatsAppLowBalance,
                           fullWidth: true,
                         ),
+                        const SizedBox(height: 10),
                       ],
 
                       // Delete
-                      const SizedBox(height: 10),
                       _actionBtn(
                         icon: Icons.delete_outline_rounded,
                         label: 'Delete Customer',

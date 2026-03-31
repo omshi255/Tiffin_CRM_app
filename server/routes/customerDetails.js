@@ -1,4 +1,5 @@
 import { Router } from "express";
+import crypto from "crypto";
 import mongoose from "mongoose";
 import Joi from "joi";
 import Customer from "../models/Customer.model.js";
@@ -15,6 +16,67 @@ import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 
 const router = Router();
+
+/**
+ * Public token verification for customer portal magic-link login.
+ * GET /api/v1/customer-details/verify-token?token=...&id=...
+ */
+router.get(
+  "/verify-token",
+  asyncHandler(async (req, res) => {
+    try {
+      const token = String(req.query.token || "").trim();
+      const id = String(req.query.id || "").trim();
+      if (!token || !id || !mongoose.Types.ObjectId.isValid(id)) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Invalid or expired link" });
+      }
+
+      const customer = await Customer.findOne({
+        _id: id,
+        loginToken: token,
+        loginTokenExpiry: { $gt: new Date() },
+        isDeleted: { $ne: true },
+      });
+
+      if (!customer) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Invalid or expired link" });
+      }
+
+      const activeSub = await Subscription.findOne({
+        customerId: customer._id,
+        status: "active",
+        endDate: { $gte: new Date() },
+      })
+        .sort({ endDate: -1 })
+        .populate("planId", "planName")
+        .lean();
+
+      const planName = activeSub?.planId?.planName || "";
+
+      customer.loginToken = null;
+      customer.loginTokenExpiry = null;
+      await customer.save();
+
+      return res.status(200).json({
+        success: true,
+        customer: {
+          id: String(customer._id),
+          name: customer.name || "",
+          phone: customer.phone || "",
+          planName,
+        },
+      });
+    } catch (_) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to verify login link" });
+    }
+  })
+);
 
 router.use(authMiddleware);
 router.use(requireRole(["vendor", "admin"]));
@@ -515,6 +577,57 @@ const extraChargeSchema = Joi.object({
   note: Joi.string().trim().required(),
   chargeType: Joi.string().valid("separate", "subscription").required(),
 });
+
+/**
+ * POST /api/v1/customer-details/:customerId/send-login-link
+ * Generates one-time login token (24h) and returns WhatsApp-ready message.
+ */
+router.post(
+  "/:customerId/send-login-link",
+  asyncHandler(async (req, res) => {
+    try {
+      const ownerId = resolveOwnerId(req);
+      const { customerId } = req.params;
+      const customer = await Customer.findOne({
+        _id: customerId,
+        ownerId,
+        isDeleted: { $ne: true },
+      });
+      if (!customer) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Customer not found" });
+      }
+
+      const token = crypto.randomBytes(32).toString("hex");
+      const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      customer.loginToken = token;
+      customer.loginTokenExpiry = expiry;
+      await customer.save();
+
+      const basePortal = process.env.CUSTOMER_PORTAL_URL || "";
+      const loginUrl = `${basePortal}/login?token=${token}&id=${customer._id}`;
+
+      const message =
+        `Hello ${customer.name}!\n\n` +
+        "Here is your login link for the customer portal:\n\n" +
+        `${loginUrl}\n\n` +
+        "This link is valid for 24 hours.\n\n" +
+        "Thank you!";
+
+      return res.status(200).json({
+        success: true,
+        loginUrl,
+        phone: customer.phone || "",
+        message,
+      });
+    } catch (_) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Could not create login link" });
+    }
+  })
+);
 
 /**
  * POST /api/v1/customer-details/:customerId/extra-charge

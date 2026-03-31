@@ -251,4 +251,30 @@ abstract final class CustomerDetailService {
       );
     }
   }
+
+  /// Requests a one-time customer portal login link for WhatsApp sharing.
+  static Future<Map<String, dynamic>> sendLoginLink(String customerId) async {
+    await _ensureNetwork();
+    try {
+      final res = await DioClient.instance.post(
+        '$_prefix/$customerId/send-login-link',
+      );
+      final raw = res.data;
+      if (raw is Map<String, dynamic>) {
+        final success = raw['success'] as bool? ?? false;
+        if (!success) {
+          final msg =
+              raw['message'] as String? ?? raw['error'] as String? ?? 'Failed';
+          throw ApiException(msg, res.statusCode);
+        }
+        return raw;
+      }
+      throw ApiException('Invalid response', res.statusCode);
+    } on DioException catch (e) {
+      throw ApiException(
+        e.message ?? 'Network error',
+        e.response?.statusCode,
+      );
+    }
+  }
 }

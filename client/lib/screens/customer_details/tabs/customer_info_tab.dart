@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/utils/app_snackbar.dart';
+import '../../../core/utils/error_handler.dart';
+import '../../../core/utils/whatsapp_helper.dart';
 import '../../../models/customer_detail_model.dart';
 import '../../../services/customer_detail_service.dart';
 
@@ -30,6 +33,7 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
   CustomerDetailInfo? _info;
   bool _loading = true;
   String? _error;
+  bool _sendingLink = false;
 
   @override
   void initState() {
@@ -66,6 +70,28 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
     final d = DateTime.tryParse(iso);
     if (d == null) return iso;
     return DateFormat.yMMMd().format(d.toLocal());
+  }
+
+  /// Creates a login link and opens WhatsApp with the generated message.
+  Future<void> _sendLoginLink() async {
+    setState(() => _sendingLink = true);
+    try {
+      final result = await CustomerDetailService.sendLoginLink(widget.customerId);
+      if (!mounted) return;
+      final phone = result['phone']?.toString() ?? '';
+      final message = result['message']?.toString() ?? '';
+      final ok = await WhatsAppHelper.openWithMessage(phone, message);
+      if (!mounted) return;
+      if (ok) {
+        AppSnackbar.success(context, 'Login link sent to $phone');
+      } else {
+        AppSnackbar.error(context, 'Could not open WhatsApp');
+      }
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    } finally {
+      if (mounted) setState(() => _sendingLink = false);
+    }
   }
 
   @override
@@ -137,6 +163,100 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
                       fontWeight: FontWeight.w600,
                       color: _P.s900,
                     ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'CUSTOMER PORTAL',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF5B21B6),
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F3FF),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFDDD6FE),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(
+                            Icons.link_rounded,
+                            color: Color(0xFF7B3FE4),
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Send Login Link',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Customer will receive a WhatsApp message with a secure login link valid for 24 hours.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _sendingLink ? null : _sendLoginLink,
+                          icon: _sendingLink
+                              ? const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.whatsapp_rounded, size: 16),
+                          label: Text(
+                            _sendingLink ? 'Sending...' : 'Send via WhatsApp',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF25D366),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

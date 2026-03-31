@@ -117,6 +117,14 @@ const customerSchema = new mongoose.Schema(
     reportTokenExpiresAt: {
       type: Date,
     },
+    loginToken: {
+      type: String,
+      default: null,
+    },
+    loginTokenExpiry: {
+      type: Date,
+      default: null,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

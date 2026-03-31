@@ -1,22 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 
+import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/error_handler.dart';
-import '../../../invoices/utils/receipt_pdf_generator.dart';
+import '../../utils/receipt_pdf_generator.dart';
 import '../../data/invoice_api.dart';
-import '../../utils/receipt_user_download.dart';
 
 /// Per-day meal receipt preview (GET /invoices/daily).
 class DailyReceiptSheet extends StatefulWidget {
   const DailyReceiptSheet({
     super.key,
     required this.customerId,
+    required this.customerName,
     required this.initialDate,
   });
 
   final String customerId;
+  final String customerName;
   final DateTime initialDate;
 
   @override
@@ -27,7 +30,7 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
   late DateTime _date;
   Map<String, dynamic>? _receiptData;
   bool _loading = true;
-  bool _downloadBusy = false;
+  bool _downloading = false;
   bool _failed = false;
 
   static final _df = DateFormat('dd/MM/yyyy');
@@ -61,44 +64,117 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
     }
   }
 
-  /// Saves PDF: browser download on web; [FileSaver] on Android/iOS/desktop.
+  /// Opens native print/share/save dialog to export the receipt PDF.
   Future<void> _downloadPdf() async {
-    if (_receiptData == null) return;
-
-    setState(() => _downloadBusy = true);
+    setState(() => _downloading = true);
     try {
-      final pdfBytes = await ReceiptPdfGenerator.generate(_receiptData!);
+      final pdfBytes = await ReceiptPdfGenerator.generateReceiptPdf(
+        customerName: widget.customerName,
+        customerId: widget.customerId,
+        date: _date,
+        items: _pdfItems(),
+        totalAmount: _totalAmount(),
+        paymentStatus: _paymentStatus(),
+        businessName: _businessName(),
+      );
       final dateStr = _date.toIso8601String().split('T').first;
-      final fileName = 'Receipt-$dateStr.pdf';
-      final result = await downloadReceiptPdfForUser(pdfBytes, fileName);
-      if (!mounted) return;
-      if (result == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              kIsWeb
-                  ? 'Could not start download. Check browser pop-up / download settings.'
-                  : 'Could not save file. Please try again.',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            kIsWeb ? result : 'Receipt saved:\n$result',
-          ),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 5),
-        ),
+      await Printing.layoutPdf(
+        onLayout: (_) async => pdfBytes,
+        name: 'Receipt-${widget.customerId}-$dateStr',
+      );
+    } catch (_) {
+      if (mounted) AppSnackbar.error(context, 'Could not generate PDF');
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
+
+  /// Shares the generated PDF with available apps.
+  Future<void> _shareReceipt() async {
+    try {
+      final pdfBytes = await ReceiptPdfGenerator.generateReceiptPdf(
+        customerName: widget.customerName,
+        customerId: widget.customerId,
+        date: _date,
+        items: _pdfItems(),
+        totalAmount: _totalAmount(),
+        paymentStatus: _paymentStatus(),
+        businessName: _businessName(),
+      );
+      final dateStr = _date.toIso8601String().split('T').first;
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: 'Receipt-${widget.customerId}-$dateStr.pdf',
       );
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
-    } finally {
-      if (mounted) setState(() => _downloadBusy = false);
     }
+  }
+
+  List<Map<String, dynamic>> _pdfItems() {
+    final d = _receiptData;
+    if (d == null) return const [];
+    final rows = <Map<String, dynamic>>[];
+    final deliveries = d['deliveries'];
+    if (deliveries is List) {
+      for (final slot in deliveries) {
+        if (slot is! Map) continue;
+        final slotMap = Map<String, dynamic>.from(slot);
+        final items = slotMap['items'];
+        if (items is List && items.isNotEmpty) {
+          for (final it in items) {
+            if (it is! Map) continue;
+            final m = Map<String, dynamic>.from(it);
+            rows.add(<String, dynamic>{
+              'name': m['name'] ?? m['itemName'] ?? slotMap['slot'] ?? 'Item',
+              'quantity': m['quantity'] ?? 1,
+              'price': m['total'] ?? m['unitPrice'] ?? 0,
+            });
+          }
+        } else {
+          rows.add(<String, dynamic>{
+            'name': slotMap['slot'] ?? 'Meal',
+            'quantity': 1,
+            'price': 0,
+          });
+        }
+      }
+    }
+    return rows;
+  }
+
+  double _totalAmount() {
+    final d = _receiptData;
+    if (d == null) return 0;
+    final summary = d['summary'];
+    if (summary is Map) {
+      final g = summary['grandTotal'];
+      if (g is num) return g.toDouble();
+      return double.tryParse('$g') ?? 0;
+    }
+    final g = d['grandTotal'];
+    if (g is num) return g.toDouble();
+    return double.tryParse('$g') ?? 0;
+  }
+
+  String _paymentStatus() {
+    final d = _receiptData;
+    if (d == null) return '';
+    final summary = d['summary'];
+    if (summary is Map) {
+      return summary['paymentStatus']?.toString() ?? '';
+    }
+    return d['paymentStatus']?.toString() ?? '';
+  }
+
+  String _businessName() {
+    final d = _receiptData;
+    if (d == null) return 'Tiffin Service';
+    final vendor = d['vendor'];
+    if (vendor is Map) {
+      return vendor['businessName']?.toString() ?? 'Tiffin Service';
+    }
+    return 'Tiffin Service';
   }
 
   void _prevDay() {
@@ -237,45 +313,50 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
                       const SizedBox(height: 16),
                       _receiptBody(theme),
                       const SizedBox(height: 24),
-                      // PDF: download only (no share — product requirement).
-                      SizedBox(
-                        width: double.infinity,
-                        child: Tooltip(
-                          message: 'Save receipt as PDF',
-                          child: OutlinedButton(
-                            onPressed: _downloadBusy ? null : _downloadPdf,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              side: const BorderSide(
-                                color: AppColors.primary,
-                                width: 1.5,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _shareReceipt,
+                              icon: const Icon(Icons.share_outlined, size: 16),
+                              label: const Text('Share'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF7C3AED),
+                                side: const BorderSide(
+                                  color: Color(0xFF7C3AED),
+                                  width: 1,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                             ),
-                            child: _downloadBusy
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primary,
-                                  ),
-                                )
-                              : const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.download_rounded, size: 20),
-                                    SizedBox(width: 8),
-                                    Text('Download'),
-                                  ],
-                                ),
                           ),
-                        ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _downloading ? null : _downloadPdf,
+                              icon: _downloading
+                                  ? const SizedBox(
+                                      width: 14,
+                                      height: 14,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.download_outlined, size: 16),
+                              label: Text(_downloading ? 'Saving...' : 'Download PDF'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF7B3FE4),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Text(
