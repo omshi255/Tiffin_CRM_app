@@ -72,6 +72,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
+            tabAlignment: TabAlignment.start,   // ← fixes left space
+  padding: EdgeInsets.zero, 
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
