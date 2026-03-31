@@ -208,29 +208,20 @@ abstract final class CustomerDetailService {
     }
   }
 
-  /// Month list for tab 5.
-  static Future<List<CustomerDetailDeliveryRow>> fetchDeliveries(
-    String customerId, {
-    required int month,
-    required int year,
-  }) async {
+  /// Full subscription window (start→end) for tab 5.
+  static Future<CustomerDetailDeliveriesBundle> fetchDeliveries(
+    String customerId,
+  ) async {
     await _ensureNetwork();
     try {
       final res = await DioClient.instance.get(
         '$_prefix/$customerId/deliveries',
-        queryParameters: <String, dynamic>{
-          'month': month.toString().padLeft(2, '0'),
-          'year': year.toString(),
-        },
       );
       final data = _parse(res);
-      if (data is! List) {
+      if (data is! Map<String, dynamic>) {
         throw ApiException('Invalid response', res.statusCode);
       }
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map(CustomerDetailDeliveryRow.fromJson)
-          .toList();
+      return CustomerDetailDeliveriesBundle.fromJson(data);
     } on DioException catch (e) {
       throw ApiException(
         e.message ?? 'Network error',

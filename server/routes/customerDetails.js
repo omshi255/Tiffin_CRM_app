@@ -94,6 +94,19 @@ function istTodayYmd() {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 }
 
+/** YYYY-MM-DD in Asia/Kolkata for a stored Date. */
+function ymdIST(d) {
+  if (!d) return "";
+  return new Date(d).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+}
+
+/** Short label when there are no daily orders yet (plan summary). */
+function defaultItemsFromPlan(plan) {
+  if (!plan) return "—";
+  if (plan.planName) return String(plan.planName);
+  return "—";
+}
+
 /**
  * GET /api/v1/customer-details/:customerId/info
  * Returns core profile + active plan summary for the Info tab.
@@ -632,7 +645,8 @@ router.post(
 );
 
 /**
- * GET /api/v1/customer-details/:customerId/deliveries?month=03&year=2026
+ * GET /api/v1/customer-details/:customerId/deliveries
+ * Full subscription window: one row per calendar day from startDate → endDate (IST).
  */
 router.get(
   "/:customerId/deliveries",
@@ -641,53 +655,114 @@ router.get(
     const { customerId } = req.params;
     await assertCustomer(ownerId, customerId);
 
-    const month = parseInt(String(req.query.month || ""), 10);
-    const year = parseInt(String(req.query.year || ""), 10);
-    if (!month || month < 1 || month > 12 || !year || year < 2000) {
-      throw new ApiError(400, "Invalid month or year");
+    const subscription = await Subscription.findOne({
+      ownerId,
+      customerId,
+      status: "active",
+      endDate: { $gte: new Date() },
+    })
+      .sort({ endDate: -1 })
+      .populate("planId")
+      .lean();
+
+    if (!subscription) {
+      const empty = new ApiResponse(200, "Deliveries", {
+        subscription: null,
+        deliveries: [],
+      });
+      return res.status(empty.statusCode).json({
+        success: empty.success,
+        message: empty.message,
+        data: empty.data,
+      });
     }
 
-    const daysInMonth = new Date(year, month, 0).getDate();
+    const plan = subscription.planId;
+    const planName = plan?.planName ? String(plan.planName) : "";
+
+    const startYmd = ymdIST(subscription.startDate);
+    const endYmd = ymdIST(subscription.endDate);
+    const startMs = new Date(`${startYmd}T00:00:00+05:30`).getTime();
+    const endMs = new Date(`${endYmd}T00:00:00+05:30`).getTime();
+    const dayMs = 86400000;
+    const totalDays =
+      startMs > endMs
+        ? 0
+        : Math.floor((endMs - startMs) / dayMs) + 1;
+
+    const todayYmd = istTodayYmd();
+    const todayMs = new Date(`${todayYmd}T00:00:00+05:30`).getTime();
+    const remStartMs = Math.max(startMs, todayMs);
+    let remainingDays = 0;
+    if (remStartMs <= endMs) {
+      for (let t = remStartMs; t <= endMs; t += dayMs) {
+        remainingDays += 1;
+      }
+    }
+
+    const rangeStart = new Date(`${startYmd}T00:00:00+05:30`);
+    const rangeEnd = new Date(`${endYmd}T23:59:59.999+05:30`);
+
+    const [scheduleDocs, orderDocs] = await Promise.all([
+      DeliverySchedule.find({
+        ownerId,
+        customerId,
+        date: { $gte: rangeStart, $lte: rangeEnd },
+      }).lean(),
+      DailyOrder.find({
+        ownerId,
+        customerId,
+        orderDate: { $gte: rangeStart, $lte: rangeEnd },
+      }).lean(),
+    ]);
+
+    const scheduleByYmd = new Map();
+    for (const s of scheduleDocs) {
+      scheduleByYmd.set(ymdIST(s.date), s);
+    }
+
+    const ordersByYmd = new Map();
+    for (const o of orderDocs) {
+      const k = ymdIST(o.orderDate);
+      if (!ordersByYmd.has(k)) ordersByYmd.set(k, []);
+      ordersByYmd.get(k).push(o);
+    }
+
+    const startDateObj = subscription.startDate
+      ? new Date(subscription.startDate)
+      : null;
+    const endDateObj = subscription.endDate
+      ? new Date(subscription.endDate)
+      : null;
+
     const rows = [];
+    for (let t = startMs; t <= endMs; t += dayMs) {
+      const ymd = new Date(t).toLocaleDateString("en-CA", {
+        timeZone: "Asia/Kolkata",
+      });
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      const ymd = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      const start = new Date(`${ymd}T00:00:00+05:30`);
-      const end = new Date(`${ymd}T23:59:59.999+05:30`);
+      const schedule = scheduleByYmd.get(ymd);
+      const orders = ordersByYmd.get(ymd) || [];
 
-      const [orders, schedule] = await Promise.all([
-        DailyOrder.find({
-          ownerId,
-          customerId,
-          orderDate: { $gte: start, $lte: end },
-        }).lean(),
-        DeliverySchedule.findOne({
-          ownerId,
-          customerId,
-          date: { $gte: start, $lte: end },
-        }).lean(),
-      ]);
+      let items = "";
+      let status = "pending";
 
       if (schedule?.status === "cancelled") {
-        rows.push({
-          date: ymd,
-          items: schedule.items || formatOrderItems(orders.flatMap((o) => o.resolvedItems || [])),
-          status: "cancelled",
-        });
-        continue;
+        items =
+          schedule.items ||
+          formatOrderItems(orders.flatMap((o) => o.resolvedItems || []));
+        status = "cancelled";
+      } else if (orders.length) {
+        items = formatOrderItems(orders.flatMap((o) => o.resolvedItems || []));
+        const hasDelivered = orders.some((o) => o.status === "delivered");
+        const hasCancelled = orders.some((o) => o.status === "cancelled");
+        if (hasCancelled && !hasDelivered) status = "cancelled";
+        else if (hasDelivered) status = "delivered";
+        else status = "pending";
+      } else {
+        items = defaultItemsFromPlan(plan);
+        status = "pending";
       }
-
-      if (!orders.length) {
-        continue;
-      }
-
-      const items = formatOrderItems(orders.flatMap((o) => o.resolvedItems || []));
-      let status = "pending";
-      const hasDelivered = orders.some((o) => o.status === "delivered");
-      const hasCancelled = orders.some((o) => o.status === "cancelled");
-      if (hasCancelled && !hasDelivered) status = "cancelled";
-      else if (hasDelivered) status = "delivered";
-      else status = "pending";
 
       rows.push({
         date: ymd,
@@ -696,7 +771,18 @@ router.get(
       });
     }
 
-    const response = new ApiResponse(200, "Deliveries", rows);
+    const subPayload = {
+      planName,
+      startDate: startDateObj ? startDateObj.toISOString() : "",
+      endDate: endDateObj ? endDateObj.toISOString() : "",
+      totalDays,
+      remainingDays,
+    };
+
+    const response = new ApiResponse(200, "Deliveries", {
+      subscription: subPayload,
+      deliveries: rows,
+    });
     return res.status(response.statusCode).json({
       success: response.success,
       message: response.message,
