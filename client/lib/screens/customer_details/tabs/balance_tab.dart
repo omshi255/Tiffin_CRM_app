@@ -446,6 +446,10 @@ import '../../../services/customer_detail_service.dart';
 
 import 'customer_info_tab.dart';
 
+/// Backend `extra-charge` chargeType: [separate] = pending due; [wallet] = deduct from wallet.
+const _kChargeSeparate = 'separate';
+const _kChargeWallet = 'wallet';
+
 class _P {
   static const g1 = Color(0xFF7B3FE4);
   static const s900 = Color(0xFF0F172A);
@@ -546,14 +550,19 @@ class _BalanceTabState extends State<BalanceTab> {
   final _addNote = TextEditingController();
   String _payMode = 'cash';
 
+  final _deductAmount = TextEditingController();
+  final _deductNote = TextEditingController();
+
   final _extraAmount = TextEditingController();
   final _extraReason = TextEditingController();
 
   final _addForm = GlobalKey<FormState>();
+  final _deductForm = GlobalKey<FormState>();
   final _extraForm = GlobalKey<FormState>();
 
   // UI-only: scroll anchors for the quick-action buttons
   final _addSectionKey = GlobalKey();
+  final _deductSectionKey = GlobalKey();
   final _extraSectionKey = GlobalKey();
 
   @override
@@ -566,6 +575,8 @@ class _BalanceTabState extends State<BalanceTab> {
   void dispose() {
     _addAmount.dispose();
     _addNote.dispose();
+    _deductAmount.dispose();
+    _deductNote.dispose();
     _extraAmount.dispose();
     _extraReason.dispose();
     super.dispose();
@@ -578,12 +589,19 @@ class _BalanceTabState extends State<BalanceTab> {
     });
     try {
       final b = await CustomerDetailService.fetchBalance(widget.customerId);
-      if (mounted) setState(() { _balance = b; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _balance = b;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() {
-        _loading = false;
-        _error = e is ApiException ? (e.message ?? 'Error') : '$e';
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e is ApiException ? (e.message ?? 'Error') : '$e';
+        });
+      }
     }
   }
 
@@ -605,6 +623,29 @@ class _BalanceTabState extends State<BalanceTab> {
       AppSnackbar.success(context, 'Balance added');
       _addAmount.clear();
       _addNote.clear();
+      await _load();
+    } catch (e) {
+      if (mounted) AppSnackbar.error(context, e is ApiException ? (e.message ?? 'Error') : '$e');
+    }
+  }
+
+  Future<void> _submitDeduct() async {
+    if (!(_deductForm.currentState?.validate() ?? false)) return;
+    final amt = double.tryParse(_deductAmount.text.trim());
+    if (amt == null || amt <= 0) {
+      AppSnackbar.error(context, 'Enter a valid amount');
+      return;
+    }
+    try {
+      await CustomerDetailService.deductBalance(
+        widget.customerId,
+        amount: amt,
+        note: _deductNote.text.trim().isEmpty ? null : _deductNote.text.trim(),
+      );
+      if (!mounted) return;
+      AppSnackbar.success(context, 'Deducted from wallet');
+      _deductAmount.clear();
+      _deductNote.clear();
       await _load();
     } catch (e) {
       if (mounted) AppSnackbar.error(context, e is ApiException ? (e.message ?? 'Error') : '$e');
@@ -637,9 +678,9 @@ class _BalanceTabState extends State<BalanceTab> {
           ],
         ),
         content: Text(
-          chargeType == 'separate'
+          chargeType == _kChargeSeparate
               ? '₹${amt.toStringAsFixed(0)} will be added to pending due.\n$reason'
-              : '₹${amt.toStringAsFixed(0)} will be deducted from subscription balance.\n$reason',
+              : '₹${amt.toStringAsFixed(0)} will be deducted from wallet balance.\n$reason',
           style: const TextStyle(fontSize: 13, color: _P.s600),
         ),
         actions: [
@@ -665,7 +706,10 @@ class _BalanceTabState extends State<BalanceTab> {
         chargeType: chargeType,
       );
       if (!mounted) return;
-      AppSnackbar.success(context, 'Charge recorded');
+      AppSnackbar.success(
+        context,
+        chargeType == _kChargeSeparate ? 'Pending due updated' : 'Deducted from wallet',
+      );
       _extraAmount.clear();
       _extraReason.clear();
       await _load();
@@ -832,7 +876,7 @@ class _BalanceTabState extends State<BalanceTab> {
                           style: _P.redOutlineBtn,
                           icon: const Icon(Icons.remove_rounded, size: 16),
                           label: const Text('Deduct Amount'),
-                          onPressed: () => _scrollTo(_extraSectionKey),
+                          onPressed: () => _scrollTo(_deductSectionKey),
                         ),
                       ),
                     ),
@@ -923,15 +967,70 @@ class _BalanceTabState extends State<BalanceTab> {
           ),
           const SizedBox(height: 28),
 
+          // ── Deduct from wallet (manual adjustment) ────────────────
+          Row(
+            key: _deductSectionKey,
+            children: const [
+              Icon(Icons.remove_circle_outline_rounded, color: _P.red, size: 18),
+              SizedBox(width: 6),
+              Text('Deduct from wallet',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: _P.s900)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Reduces wallet balance only. Subscription prepaid balance is unchanged.',
+            style: TextStyle(fontSize: 12, color: _P.s400, height: 1.35),
+          ),
+          const SizedBox(height: 10),
+          Form(
+            key: _deductForm,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _deductAmount,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                  decoration: _P.inputDec('Amount'),
+                  style: const TextStyle(fontSize: 14, color: _P.s900),
+                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _deductNote,
+                  decoration: _P.inputDec('Note (optional)'),
+                  style: const TextStyle(fontSize: 14, color: _P.s900),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: ElevatedButton.icon(
+                    style: _P.redSolidBtn,
+                    icon: const Icon(Icons.remove_rounded, size: 16),
+                    label: const Text('Deduct from wallet'),
+                    onPressed: _submitDeduct,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 28),
+
           // ── Extra Charge section ──────────────────────────────────
           Row(
             key: _extraSectionKey,
             children: const [
               Icon(Icons.remove_circle_outline_rounded, color: _P.red, size: 18),
               SizedBox(width: 6),
-              Text('Extra Charge',
+              Text('Extra charge',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: _P.s900)),
             ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Bill an extra item: either add to pending due, or take payment from wallet.',
+            style: TextStyle(fontSize: 12, color: _P.s400, height: 1.35),
           ),
           const SizedBox(height: 10),
           Form(
@@ -963,7 +1062,7 @@ class _BalanceTabState extends State<BalanceTab> {
                           style: _P.purpleOutlineBtn,
                           icon: const Icon(Icons.person_add_alt_1_rounded, size: 15),
                           label: const Text('Charge Separately', maxLines: 1, overflow: TextOverflow.ellipsis),
-                          onPressed: () => _confirmExtra('separate'),
+                          onPressed: () => _confirmExtra(_kChargeSeparate),
                         ),
                       ),
                     ),
@@ -974,8 +1073,8 @@ class _BalanceTabState extends State<BalanceTab> {
                         child: ElevatedButton.icon(
                           style: _P.redSolidBtn,
                           icon: const Icon(Icons.remove_circle_rounded, size: 15),
-                          label: const Text('Deduct'),
-                          onPressed: () => _confirmExtra('subscription'),
+                          label: const Text('From wallet'),
+                          onPressed: () => _confirmExtra(_kChargeWallet),
                         ),
                       ),
                     ),

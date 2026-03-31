@@ -51,7 +51,7 @@ const transactionSchema = new mongoose.Schema(
       default: "cash",
       trim: true,
     },
-    /** e.g. wallet_topup, extra_charge_separate, extra_charge_subscription */
+    /** e.g. wallet_topup, wallet_deduction, extra_charge_separate, extra_charge_wallet, extra_charge_subscription */
     source: {
       type: String,
       default: "manual",

@@ -8,6 +8,7 @@ import {
   bulkCreateCustomers,
   deleteCustomer,
   walletCredit,
+  walletDebit,
 } from "../controllers/customer.controller.js";
 import { createCustomerPlan } from "../controllers/plan.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -30,6 +31,7 @@ router.post("/bulk", bulkRateLimit, bulkCreateCustomers);
 router.put("/:id", updateCustomer);
 router.delete("/:id", deleteCustomer);
 router.post("/:id/wallet/credit", walletCredit);
+router.post("/:id/wallet/debit", walletDebit);
 
 // Create a custom meal plan directly for a specific customer
 router.post("/:customerId/plans", createCustomerPlan);

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Payment, { PAYMENT_METHODS } from "../models/Payment.model.js";
 import Customer from "../models/Customer.model.js";
 import Invoice from "../models/Invoice.model.js";
+import Subscription from "../models/Subscription.model.js";
 import { createRazorpayOrder } from "../services/payment.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
@@ -117,7 +118,7 @@ export const createPayment = asyncHandler(async (req, res) => {
     ? new mongoose.Types.ObjectId(value.subscriptionId)
     : null;
 
-  const [customer, invoice] = await Promise.all([
+  const [customer, invoice, subscription] = await Promise.all([
     Customer.findOne({
       _id: customerId,
       ownerId,
@@ -125,6 +126,14 @@ export const createPayment = asyncHandler(async (req, res) => {
     }),
     invoiceId
       ? Invoice.findOne({ _id: invoiceId, ownerId })
+      : Promise.resolve(null),
+    subscriptionId
+      ? Subscription.findOne({
+          _id: subscriptionId,
+          ownerId,
+          customerId,
+          status: { $in: ["active", "paused"] },
+        })
       : Promise.resolve(null),
   ]);
 
@@ -136,6 +145,9 @@ export const createPayment = asyncHandler(async (req, res) => {
     if (value.amount > invoice.balanceDue) {
       throw new ApiError(400, "PAYMENT_EXCEEDS_DUE");
     }
+  }
+  if (subscriptionId && !subscription) {
+    throw new ApiError(404, "Subscription not found");
   }
 
   const session = await mongoose.startSession();
@@ -177,7 +189,14 @@ export const createPayment = asyncHandler(async (req, res) => {
     if (isWalletTopUp) {
       await Customer.findByIdAndUpdate(
         customerId,
-        { $inc: { balance: value.amount } },
+        { $inc: { balance: value.amount, walletBalance: value.amount } },
+        { session }
+      );
+    }
+    if (subscriptionId) {
+      await Subscription.findByIdAndUpdate(
+        subscriptionId,
+        { $inc: { paidAmount: value.amount, remainingBalance: value.amount } },
         { session }
       );
     }

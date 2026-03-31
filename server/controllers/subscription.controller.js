@@ -229,20 +229,53 @@ export const createSubscription = asyncHandler(async (req, res) => {
   console.log("📅 Total Days:", totalDays);
   console.log("💰 Total Amount:", totalAmount);
 
-  const subscription = await Subscription.create({
-    ownerId,
-    customerId,
-    planId,
-    startDate,
-    endDate,
-    deliverySlot: value.deliverySlot,
-    deliveryDays: value.deliveryDays,
-    status: "active",
-    totalAmount,
-    paidAmount: 0,
-    autoRenew: value.autoRenew ?? false,
-    notes: value.notes,
-  });
+  const walletBalance = Number(customer.walletBalance ?? customer.balance ?? 0);
+  if (walletBalance < totalAmount) {
+    throw new ApiError(
+      400,
+      `Insufficient wallet balance. Available: ₹${walletBalance}, Required: ₹${totalAmount}`
+    );
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  let subscription;
+  try {
+    [subscription] = await Subscription.create(
+      [
+        {
+          ownerId,
+          customerId,
+          planId,
+          startDate,
+          endDate,
+          deliverySlot: value.deliverySlot,
+          deliveryDays: value.deliveryDays,
+          status: "active",
+          totalAmount,
+          paidAmount: totalAmount,
+          remainingBalance: totalAmount,
+          autoRenew: value.autoRenew ?? false,
+          notes: value.notes,
+        },
+      ],
+      { session }
+    );
+
+    await Customer.findByIdAndUpdate(
+      customerId,
+      { $inc: { walletBalance: -totalAmount, balance: -totalAmount } },
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
   await sendNotification({
     customerId: subscription.customerId,
     ownerId: ownerId.toString(),
@@ -314,23 +347,61 @@ export const renewSubscription = asyncHandler(async (req, res) => {
     (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
   const totalAmount = plan.price * totalDays;
 
-  const updated = await Subscription.findOneAndUpdate(
-    { _id: id, ownerId },
-    {
-      $set: {
-        startDate,
-        endDate,
-        status: "active",
-        totalAmount,
+  const customer = await Customer.findOne({
+    _id: subscription.customerId,
+    ownerId,
+    isDeleted: { $ne: true },
+  }).lean();
+  if (!customer) {
+    throw new ApiError(404, "Customer not found");
+  }
+
+  const walletBalance = Number(customer.walletBalance ?? customer.balance ?? 0);
+  if (walletBalance < totalAmount) {
+    throw new ApiError(
+      400,
+      `Insufficient wallet balance. Available: ₹${walletBalance}, Required: ₹${totalAmount}`
+    );
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  let updated;
+  try {
+    updated = await Subscription.findOneAndUpdate(
+      { _id: id, ownerId },
+      {
+        $set: {
+          startDate,
+          endDate,
+          status: "active",
+          totalAmount,
+          paidAmount: totalAmount,
+          remainingBalance: totalAmount,
+        },
+        // Renew = new term; remove pause fields entirely (MongoDB $unset).
+        $unset: { pausedFrom: 1, pausedUntil: 1 },
       },
-      // Renew = new term; remove pause fields entirely (MongoDB $unset).
-      $unset: { pausedFrom: 1, pausedUntil: 1 },
-    },
-    { new: true, runValidators: true }
-  )
-    .populate("customerId", "name phone address")
-    .populate("planId", "planName price planType")
-    .lean();
+      { new: true, runValidators: true, session }
+    )
+      .populate("customerId", "name phone address")
+      .populate("planId", "planName price planType");
+
+    await Customer.findByIdAndUpdate(
+      subscription.customerId,
+      { $inc: { walletBalance: -totalAmount, balance: -totalAmount } },
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+    updated = updated?.toObject ? updated.toObject() : updated;
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
 
   const response = new ApiResponse(200, "Subscription renewed", updated);
   res.status(response.statusCode).json({

@@ -31,34 +31,40 @@ const VALID_TRANSITIONS = {
 };
 
 /**
- * Deduct order.amount from Customer.balance within the given session.
- * Returns { newBalance, deducted } or throws ApiError on insufficient funds.
+ * Deduct order.amount from Subscription.remainingBalance within the given session.
+ * Returns { newSubscriptionBalance, deducted } or throws ApiError on insufficient funds.
  */
-const deductBalanceForOrder = async (order, vendorSettings, session) => {
+const deductBalanceForOrder = async (order, _vendorSettings, session) => {
   const orderAmount = order.amount || 0;
-  if (orderAmount <= 0) return { newBalance: null, deducted: 0 };
+  if (orderAmount <= 0) return { newSubscriptionBalance: null, deducted: 0 };
 
-  const allowNegative = vendorSettings?.allowNegativeBalance ?? false;
+  if (!order.subscriptionId) {
+    throw new ApiError(400, "Order has no subscription for deduction");
+  }
 
-  const customer = await Customer.findById(order.customerId).session(session);
-  if (!customer) throw new ApiError(404, "Customer not found");
+  const subscription = await Subscription.findById(order.subscriptionId).session(
+    session
+  );
+  if (!subscription) throw new ApiError(404, "Subscription not found");
 
-  const newBalance = customer.balance - orderAmount;
-
-  if (!allowNegative && newBalance < 0) {
+  const current = Number(
+    subscription.remainingBalance ?? subscription.totalAmount ?? 0
+  );
+  const newSubscriptionBalance = current - orderAmount;
+  if (newSubscriptionBalance < 0) {
     throw new ApiError(
       400,
-      `Insufficient balance for customer "${customer.name}". Available: ₹${customer.balance}, Required: ₹${orderAmount}`
+      `Insufficient subscription balance. Available: ₹${current}, Required: ₹${orderAmount}`
     );
   }
 
-  await Customer.findByIdAndUpdate(
-    order.customerId,
-    { $inc: { balance: -orderAmount } },
+  await Subscription.findByIdAndUpdate(
+    subscription._id,
+    { $inc: { remainingBalance: -orderAmount } },
     { session }
   );
 
-  return { newBalance, deducted: orderAmount, customerId: customer._id };
+  return { newSubscriptionBalance, deducted: orderAmount };
 };
 
 /**
@@ -259,7 +265,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   session.startTransaction();
 
   try {
-    const { newBalance, deducted } = await deductBalanceForOrder(
+    const { newSubscriptionBalance, deducted } = await deductBalanceForOrder(
       order,
       vendor?.settings,
       session
@@ -273,7 +279,9 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     session.endSession();
 
     const balanceMsg =
-      newBalance !== null ? ` Wallet balance: ₹${newBalance}` : "";
+      newSubscriptionBalance !== null
+        ? ` Subscription balance: ₹${newSubscriptionBalance}`
+        : "";
 
     await Promise.all([
       sendNotification({
@@ -282,7 +290,11 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
         type: NOTIFICATION_TYPES.DELIVERED,
         title: "Order Delivered 🛵",
         message: `Your tiffin has been delivered!${balanceMsg}`,
-        data: { orderId: id, status: "delivered", newBalance },
+        data: {
+          orderId: id,
+          status: "delivered",
+          newSubscriptionBalance,
+        },
       }),
       ...vendorAlertUserIds.map((userId) =>
         sendNotification({
@@ -301,43 +313,40 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     ]);
 
     // Low balance alert
-    if (newBalance !== null) {
-      const threshold = vendor?.settings?.lowBalanceThreshold ?? 100;
-      if (newBalance < threshold) {
-        const customerDoc = await Customer.findById(order.customerId)
-          .select("name")
-          .lean();
-        await Promise.all([
+    if (newSubscriptionBalance !== null && newSubscriptionBalance < 100) {
+      const customerDoc = await Customer.findById(order.customerId)
+        .select("name")
+        .lean();
+      await Promise.all([
+        sendNotification({
+          customerId: order.customerId,
+          ownerId,
+          type: NOTIFICATION_TYPES.LOW_BALANCE,
+          title: "Low subscription balance ⚠️",
+          message: `₹${newSubscriptionBalance.toFixed(2)} subscription balance remaining.`,
+          data: { balance: newSubscriptionBalance, screen: "wallet" },
+        }),
+        ...vendorAlertUserIds.map((userId) =>
           sendNotification({
-            customerId: order.customerId,
+            userId,
             ownerId,
             type: NOTIFICATION_TYPES.LOW_BALANCE,
-            title: "Low balance alert ⚠️",
-            message: `₹${newBalance.toFixed(2)} remaining. Please recharge.`,
-            data: { balance: newBalance, screen: "wallet" },
-          }),
-          ...vendorAlertUserIds.map((userId) =>
-            sendNotification({
-              userId,
-              ownerId,
-              type: NOTIFICATION_TYPES.LOW_BALANCE,
-              title: "Customer low balance",
-              message: `${customerDoc?.name || "A customer"} has low balance (₹${newBalance.toFixed(2)})`,
-              data: {
-                customerId: order.customerId.toString(),
-                balance: newBalance,
-              },
-            })
-          ),
-        ]);
-      }
+            title: "Customer subscription balance low",
+            message: `${customerDoc?.name || "A customer"} has low subscription balance (₹${newSubscriptionBalance.toFixed(2)})`,
+            data: {
+              customerId: order.customerId.toString(),
+              balance: newSubscriptionBalance,
+            },
+          })
+        ),
+      ]);
     }
 
     return res.status(200).json(
       new ApiResponse(200, "Order marked delivered", {
         order,
         balanceDeducted: deducted,
-        customerNewBalance: newBalance,
+        customerNewBalance: newSubscriptionBalance,
       })
     );
   } catch (err) {
@@ -351,7 +360,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
 /**
  * POST /api/v1/daily-orders/mark-delivered
- * Legacy bulk endpoint — marks all matching orders as delivered and deducts balance.
+ * Legacy bulk endpoint — marks all matching orders as delivered and deducts subscription balance.
  * Prefer PATCH /:id/status for single-order flow (used by delivery boy).
  */
 export const markDelivered = asyncHandler(async (req, res) => {
@@ -370,7 +379,7 @@ export const markDelivered = asyncHandler(async (req, res) => {
   if (customerId) filter.customerId = customerId;
 
   const orders = await DailyOrder.find(filter)
-    .select("_id customerId amount status")
+    .select("_id customerId subscriptionId amount status")
     .lean();
 
   if (!orders.length) {
@@ -379,20 +388,18 @@ export const markDelivered = asyncHandler(async (req, res) => {
     );
   }
 
-  const vendor = await User.findById(ownerId).select("settings").lean();
-  const allowNegative = vendor?.settings?.allowNegativeBalance ?? false;
-
-  // Aggregate total deduction per customer
+  // Aggregate total deduction per subscription
   const deductionMap = {};
   for (const o of orders) {
-    const cid = o.customerId.toString();
-    deductionMap[cid] = (deductionMap[cid] || 0) + (o.amount || 0);
+    if (!o.subscriptionId) continue;
+    const sid = o.subscriptionId.toString();
+    deductionMap[sid] = (deductionMap[sid] || 0) + (o.amount || 0);
   }
 
   const session = await mongoose.startSession();
   session.startTransaction();
 
-  // Track new balances per customer to fire low-balance alerts after commit
+  // Track new balances per subscription to fire low-balance alerts after commit
   const newBalanceMap = {};
 
   try {
@@ -403,26 +410,31 @@ export const markDelivered = asyncHandler(async (req, res) => {
       { session }
     );
 
-    // Deduct balance per customer
-    for (const [cid, totalDeduction] of Object.entries(deductionMap)) {
+    // Deduct balance per subscription
+    for (const [sid, totalDeduction] of Object.entries(deductionMap)) {
       if (totalDeduction <= 0) continue;
 
-      const customer = await Customer.findById(cid).session(session);
-      if (!customer) continue;
+      const subscription = await Subscription.findById(sid).session(session);
+      if (!subscription) continue;
 
-      const newBalance = customer.balance - totalDeduction;
-      if (!allowNegative && newBalance < 0) {
-        // Skip deduction for this customer (don't block the whole batch)
-        continue;
+      const current = Number(
+        subscription.remainingBalance ?? subscription.totalAmount ?? 0
+      );
+      const newBalance = current - totalDeduction;
+      if (newBalance < 0) {
+        throw new ApiError(
+          400,
+          `Insufficient subscription balance for subscription ${sid}`
+        );
       }
 
-      await Customer.findByIdAndUpdate(
-        cid,
-        { $inc: { balance: -totalDeduction } },
+      await Subscription.findByIdAndUpdate(
+        sid,
+        { $inc: { remainingBalance: -totalDeduction } },
         { session }
       );
 
-      newBalanceMap[cid] = { newBalance, name: customer.name };
+      newBalanceMap[sid] = { newBalance };
     }
 
     await session.commitTransaction();
@@ -433,7 +445,7 @@ export const markDelivered = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  const threshold = vendor?.settings?.lowBalanceThreshold ?? 100;
+  const threshold = 100;
 
   // Send delivery + low-balance notifications after transaction
   await Promise.all(
@@ -449,27 +461,27 @@ export const markDelivered = asyncHandler(async (req, res) => {
     )
   );
 
-  // Low balance alerts for customers whose balance dropped below threshold
+  // Low balance alerts for subscriptions whose balance dropped below threshold
   const lowBalanceCustomers = Object.entries(newBalanceMap).filter(
     ([, { newBalance }]) => newBalance < threshold
   );
 
   await Promise.all(
-    lowBalanceCustomers.flatMap(([cid, { newBalance, name }]) => [
+    lowBalanceCustomers.flatMap(([sid, { newBalance }]) => [
       sendNotification({
-        customerId: cid,
+        customerId: orders.find((o) => o.subscriptionId?.toString() === sid)?.customerId,
         ownerId,
         type: NOTIFICATION_TYPES.LOW_BALANCE,
-        title: "Low balance alert ⚠️",
-        message: `₹${newBalance.toFixed(2)} remaining. Please recharge.`,
+        title: "Low subscription balance ⚠️",
+        message: `₹${newBalance.toFixed(2)} subscription balance remaining.`,
         data: { balance: newBalance, screen: "wallet" },
       }),
       sendNotification({
         userId: ownerId,
         type: NOTIFICATION_TYPES.LOW_BALANCE,
-        title: "Customer low balance",
-        message: `${name || "A customer"} has low balance (₹${newBalance.toFixed(2)})`,
-        data: { customerId: cid, balance: newBalance },
+        title: "Subscription low balance",
+        message: `Subscription ${sid} has low balance (₹${newBalance.toFixed(2)})`,
+        data: { subscriptionId: sid, balance: newBalance },
       }),
     ])
   );

@@ -178,7 +178,32 @@ abstract final class CustomerDetailService {
     }
   }
 
-  /// Posts extra charge (separate pending due or subscription deduction).
+  /// Posts manual wallet deduction (same ledger as vendor wallet debit).
+  static Future<CustomerDetailBalance> deductBalance(
+    String customerId, {
+    required double amount,
+    String? note,
+  }) async {
+    await _ensureNetwork();
+    try {
+      final res = await DioClient.instance.post(
+        '$_prefix/$customerId/deduct-balance',
+        data: <String, dynamic>{
+          'amount': amount,
+          if (note != null && note.isNotEmpty) 'note': note,
+        },
+      );
+      _parse(res);
+      return fetchBalance(customerId);
+    } on DioException catch (e) {
+      throw ApiException(
+        e.message ?? 'Network error',
+        e.response?.statusCode,
+      );
+    }
+  }
+
+  /// Posts extra charge: [chargeType] `separate` = pending due; `wallet` (or legacy `subscription`) = deduct from wallet.
   static Future<Map<String, dynamic>> extraCharge(
     String customerId, {
     required double amount,

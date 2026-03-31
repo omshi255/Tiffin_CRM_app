@@ -178,7 +178,7 @@ export const getPendingPaymentsReport = async (ownerId) => {
   if (ownerId != null) invoiceFilter.ownerId = ownerId;
 
   const customerFilter = {
-    balance: { $lt: 0 },
+    $or: [{ walletBalance: { $lt: 0 } }, { balance: { $lt: 0 } }],
     isDeleted: { $ne: true },
   };
   if (ownerId != null) customerFilter.ownerId = ownerId;
@@ -191,7 +191,7 @@ export const getPendingPaymentsReport = async (ownerId) => {
       .lean(),
 
     Customer.find(customerFilter)
-      .select("name phone balance address ownerId")
+      .select("name phone walletBalance balance address ownerId")
       .populate("ownerId", "businessName ownerName phone")
       .lean(),
   ]);

@@ -108,14 +108,11 @@ async function assertCustomer(ownerId, customerId) {
 }
 
 /**
- * Effective wallet total. Uses the higher of legacy `balance` and `walletBalance`
- * so a new `walletBalance` field that was only partially incremented (e.g. 0→50)
- * while `balance` still holds the full ledger (e.g. 6320→6370) never shows as only the top-up.
+ * Effective wallet total. `walletBalance` is canonical; `balance` is legacy fallback.
  */
 function effectiveWallet(c) {
-  const b = Number(c.balance ?? 0);
-  const w = Number(c.walletBalance ?? 0);
-  return Math.max(b, w);
+  if (c?.walletBalance != null) return Number(c.walletBalance);
+  return Number(c?.balance ?? 0);
 }
 
 /** Remaining subscription balance with sane defaults. */
@@ -493,6 +490,11 @@ const addBalanceSchema = Joi.object({
   note: Joi.string().allow("").optional(),
 });
 
+const deductBalanceSchema = Joi.object({
+  amount: Joi.number().positive().required(),
+  note: Joi.string().allow("").optional(),
+});
+
 /**
  * POST /api/v1/customer-details/:customerId/add-balance
  * Increments wallet balance and records a credit transaction.
@@ -572,10 +574,92 @@ router.post(
   })
 );
 
+/**
+ * POST /api/v1/customer-details/:customerId/deduct-balance
+ * Decrements wallet balance and records a debit transaction.
+ */
+router.post(
+  "/:customerId/deduct-balance",
+  asyncHandler(async (req, res) => {
+    const ownerId = resolveOwnerId(req);
+    const { customerId } = req.params;
+    const { error, value } = deductBalanceSchema.validate(req.body, {
+      stripUnknown: true,
+    });
+    if (error) {
+      throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+    }
+    const customerBefore = await assertCustomer(ownerId, customerId);
+    const amount = Number(value.amount);
+    if (effectiveWallet(customerBefore) < amount) {
+      throw new ApiError(400, "Insufficient wallet balance");
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const updated = await Customer.findByIdAndUpdate(
+        customerId,
+        {
+          $inc: { walletBalance: -amount, balance: -amount },
+        },
+        { new: true, session }
+      ).lean();
+
+      await Transaction.create(
+        [
+          {
+            ownerId,
+            customerId,
+            date: new Date(),
+            description: value.note || "Wallet deduction",
+            amount,
+            type: "debit",
+            paymentMode: "cash",
+            source: "wallet_deduction",
+            items: [],
+          },
+        ],
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      const subAfter = await Subscription.findOne({
+        ownerId,
+        customerId,
+        status: "active",
+        endDate: { $gte: new Date() },
+      })
+        .sort({ endDate: -1 })
+        .lean();
+
+      const response = new ApiResponse(200, "Balance deducted", {
+        success: true,
+        updatedWalletBalance: effectiveWallet(updated),
+        updatedSubscriptionBalance: effectiveRemaining(subAfter),
+      });
+      return res.status(response.statusCode).json({
+        success: response.success,
+        message: response.message,
+        data: response.data,
+      });
+    } catch (e) {
+      await session.abortTransaction();
+      session.endSession();
+      throw e;
+    }
+  })
+);
+
 const extraChargeSchema = Joi.object({
   amount: Joi.number().positive().required(),
   note: Joi.string().trim().required(),
-  chargeType: Joi.string().valid("separate", "subscription").required(),
+  /** separate = pending due; wallet | subscription = deduct from customer wallet */
+  chargeType: Joi.string()
+    .valid("separate", "subscription", "wallet")
+    .required(),
 });
 
 /**
@@ -679,26 +763,16 @@ router.post(
           { session }
         );
       } else {
-        const sub = await Subscription.findOne({
-          ownerId,
+        // Manual charges always hit wallet (not subscription prepaid balance).
+        const cust = await Customer.findById(customerId).session(session).lean();
+        if (!cust) throw new ApiError(404, "Customer not found");
+        const wallet = effectiveWallet(cust);
+        if (wallet < amt) {
+          throw new ApiError(400, "Insufficient wallet balance");
+        }
+        await Customer.findByIdAndUpdate(
           customerId,
-          status: "active",
-          endDate: { $gte: new Date() },
-        })
-          .sort({ endDate: -1 })
-          .session(session)
-          .exec();
-
-        if (!sub) {
-          throw new ApiError(400, "No active subscription to deduct from");
-        }
-        const cur = effectiveRemaining(sub.toObject ? sub.toObject() : sub);
-        if (cur < amt) {
-          throw new ApiError(400, "Insufficient subscription balance");
-        }
-        await Subscription.findByIdAndUpdate(
-          sub._id,
-          { $inc: { remainingBalance: -amt } },
+          { $inc: { walletBalance: -amt, balance: -amt } },
           { session }
         );
         await Transaction.create(
@@ -711,7 +785,10 @@ router.post(
               amount: amt,
               type: "debit",
               paymentMode: "cash",
-              source: "extra_charge_subscription",
+              source:
+                value.chargeType === "wallet"
+                  ? "extra_charge_wallet"
+                  : "extra_charge_subscription",
               items: [
                 {
                   name: value.note,

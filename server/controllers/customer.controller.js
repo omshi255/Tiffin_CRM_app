@@ -120,7 +120,7 @@ export const listCustomers = asyncHandler(async (req, res) => {
   if (value.lowBalance) {
     const vendor = await User.findById(ownerId).select("settings").lean();
     const threshold = vendor?.settings?.lowBalanceThreshold ?? 100;
-    filter.balance = { $lt: threshold };
+    filter.$or = [{ walletBalance: { $lt: threshold } }, { balance: { $lt: threshold } }];
   }
 
   const [data, total] = await Promise.all([
@@ -394,10 +394,18 @@ const walletCreditSchema = Joi.object({
   notes: Joi.string().trim().allow("").optional(),
 });
 
+const walletDebitSchema = Joi.object({
+  amount: Joi.number().precision(2).min(0.01).required().messages({
+    "number.base": "Amount is required",
+    "number.min": "Amount must be greater than 0",
+  }),
+  notes: Joi.string().trim().allow("").optional(),
+});
+
 /**
  * POST /api/v1/customers/:id/wallet/credit
  * Vendor adds cash/offline balance to customer wallet.
- * Increments Customer.balance and creates a Payment record.
+ * Increments customer wallet and creates a Payment record.
  */
 export const walletCredit = asyncHandler(async (req, res) => {
   const { error, value } = walletCreditSchema.validate(req.body, {
@@ -424,7 +432,7 @@ export const walletCredit = asyncHandler(async (req, res) => {
   try {
     const updatedCustomer = await Customer.findByIdAndUpdate(
       id,
-      { $inc: { balance: value.amount } },
+      { $inc: { balance: value.amount, walletBalance: value.amount } },
       { new: true, session }
     ).lean();
 
@@ -448,8 +456,81 @@ export const walletCredit = asyncHandler(async (req, res) => {
 
     res.status(201).json(
       new ApiResponse(201, "Balance added successfully", {
-        newBalance: updatedCustomer.balance,
+        newBalance: updatedCustomer.walletBalance ?? updatedCustomer.balance,
         amountAdded: value.amount,
+        paymentId: payment._id,
+      })
+    );
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
+});
+
+/**
+ * POST /api/v1/customers/:id/wallet/debit
+ * Vendor manually deducts from customer wallet.
+ * Decrements both balance fields to keep them consistent.
+ */
+export const walletDebit = asyncHandler(async (req, res) => {
+  const { error, value } = walletDebitSchema.validate(req.body, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
+  const ownerId = req.user.userId;
+  const { id } = req.params;
+  const amount = Number(value.amount);
+
+  const customer = await Customer.findOne({
+    _id: id,
+    ownerId,
+    isDeleted: { $ne: true },
+  })
+    .select("balance walletBalance")
+    .lean();
+  if (!customer) throw new ApiError(404, "Customer not found");
+
+  const currentWallet = Number(customer.walletBalance ?? customer.balance ?? 0);
+  if (currentWallet < amount) {
+    throw new ApiError(400, "Insufficient wallet balance");
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const updatedCustomer = await Customer.findByIdAndUpdate(
+      id,
+      { $inc: { balance: -amount, walletBalance: -amount } },
+      { new: true, session }
+    ).lean();
+
+    const [payment] = await Payment.create(
+      [
+        {
+          ownerId,
+          customerId: id,
+          amount,
+          paymentMethod: "cash",
+          notes: value.notes || "Manual wallet deduction",
+          status: "captured",
+          type: "order_deduction",
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json(
+      new ApiResponse(201, "Wallet amount deducted successfully", {
+        newBalance: updatedCustomer.walletBalance ?? updatedCustomer.balance,
+        amountDeducted: amount,
         paymentId: payment._id,
       })
     );

@@ -85,7 +85,7 @@ const customerSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    /** Wallet balance for customer-details APIs; falls back to balance if unset in app logic. */
+    /** Canonical wallet balance. Keep in sync with legacy `balance` during migration. */
     walletBalance: {
       type: Number,
       default: 0,
