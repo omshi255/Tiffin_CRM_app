@@ -27,8 +27,15 @@ abstract final class ReceiptPdfGenerator {
 
     PdfColor statusColor(String status) {
       final s = status.toLowerCase();
-      if (s.contains('paid') || s.contains('success')) return PdfColors.green700;
+      if (s.contains('paid') ||
+          s.contains('success') ||
+          s.contains('covered') ||
+          s.contains('subscription')) {
+        return PdfColors.green700;
+      }
+      if (s.contains('partial')) return PdfColors.orange700;
       if (s.contains('pending')) return PdfColors.orange700;
+      if (s == '—' || s == '-') return PdfColors.grey700;
       return PdfColors.red700;
     }
 

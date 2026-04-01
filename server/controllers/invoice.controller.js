@@ -351,6 +351,19 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
 
   const dueAmount = grandTotal - paidAmount;
 
+  /** Receipt badge: not order status — reflects cash vs subscription settlement for this day. */
+  const eps = 0.01;
+  let paymentStatus = "Pending";
+  if (grandTotal <= eps) {
+    paymentStatus = "—";
+  } else if (dueAmount <= eps) {
+    paymentStatus = "Paid";
+  } else if (subscriptionDeductedToday >= grandTotal - eps) {
+    paymentStatus = "Covered by subscription";
+  } else if (subscriptionDeductedToday > eps || paidAmount > eps) {
+    paymentStatus = "Partially settled";
+  }
+
   const runningAgg = await Invoice.aggregate([
     {
       $match: {
@@ -427,6 +440,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
       subscriptionDeductedToday,
       paidAmount,
       dueAmount,
+      paymentStatus,
       runningBalance,
       totalDeliveredItems,
     },
@@ -439,6 +453,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
     subscriptionDeductedToday,
     paidAmount,
     dueAmount,
+    paymentStatus,
     runningBalance,
   };
 

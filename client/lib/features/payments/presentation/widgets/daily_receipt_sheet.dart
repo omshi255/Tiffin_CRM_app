@@ -162,7 +162,20 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
     if (d == null) return '';
     final summary = d['summary'];
     if (summary is Map) {
-      return summary['paymentStatus']?.toString() ?? '';
+      final ps = summary['paymentStatus']?.toString();
+      if (ps != null && ps.isNotEmpty) return ps;
+      // Older backends without paymentStatus — mirror subscription vs cash logic.
+      final grand = _num(summary['grandTotal'] ?? d['grandTotal']);
+      final due = _num(summary['dueAmount'] ?? d['dueAmount']);
+      final sub = _num(
+        summary['subscriptionDeductedToday'] ?? d['subscriptionDeductedToday'],
+      );
+      final paid = _num(summary['paidAmount'] ?? d['paidAmount']);
+      if (grand <= 0.01) return '—';
+      if (due <= 0.01) return 'Paid';
+      if (sub >= grand - 0.01) return 'Covered by subscription';
+      if (sub > 0.01 || paid > 0.01) return 'Partially settled';
+      return 'Pending';
     }
     return d['paymentStatus']?.toString() ?? '';
   }
