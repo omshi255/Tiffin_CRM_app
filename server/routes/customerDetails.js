@@ -14,6 +14,7 @@ import { requireRole } from "../middleware/rbac.middleware.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
+import { effectiveRemaining } from "../utils/subscriptionBalance.js";
 
 const router = Router();
 
@@ -113,15 +114,6 @@ async function assertCustomer(ownerId, customerId) {
 function effectiveWallet(c) {
   if (c?.walletBalance != null) return Number(c.walletBalance);
   return Number(c?.balance ?? 0);
-}
-
-/** Remaining subscription balance with sane defaults. */
-function effectiveRemaining(sub) {
-  if (!sub) return 0;
-  if (sub.remainingBalance != null) return Number(sub.remainingBalance);
-  const total = Number(sub.totalAmount) || 0;
-  const paid = Number(sub.paidAmount) || 0;
-  return Math.max(0, total - paid);
 }
 
 /** Sums meal item quantities across all slots (items per day). */
@@ -462,7 +454,7 @@ router.get(
     const sub = await Subscription.findOne({
       ownerId,
       customerId,
-      status: "active",
+      status: { $in: ["active", "paused"] },
       endDate: { $gte: new Date() },
     })
       .sort({ endDate: -1 })

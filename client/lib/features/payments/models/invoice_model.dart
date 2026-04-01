@@ -35,6 +35,18 @@ class InvoiceModel {
     if (json['dueDate'] != null && json['dueDate'] is String) {
       due = DateTime.tryParse(json['dueDate'] as String);
     }
+    final isVoid = json['isVoid'] == true;
+    final resolvedStatus = isVoid
+        ? 'voided'
+        : (json['paymentStatus']?.toString() ??
+              json['status']?.toString() ??
+              'unpaid');
+    final double resolvedAmount = (json['netAmount'] is num)
+        ? (json['netAmount'] as num).toDouble()
+        : (json['amount'] is num)
+            ? (json['amount'] as num).toDouble()
+            : 0.0;
+
     return InvoiceModel(
       id: id,
       customerId: json['customerId'] is String
@@ -42,8 +54,8 @@ class InvoiceModel {
           : (json['customerId'] as Map?)?['_id']?.toString() ?? '',
       billingStart: start,
       billingEnd: end,
-      amount: (json['amount'] is num) ? (json['amount'] as num).toDouble() : 0,
-      status: json['status']?.toString() ?? 'unpaid',
+      amount: resolvedAmount,
+      status: resolvedStatus,
       dueDate: due,
       shareToken: json['shareToken']?.toString(),
       customerName: json['customerId'] is Map

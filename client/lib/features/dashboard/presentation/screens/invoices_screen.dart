@@ -95,6 +95,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
     switch (status.toLowerCase()) {
       case 'paid':
         return (_success, _successSoft, 'PAID');
+      case 'partial':
+        return (_warning, _warningSoft, 'PARTIAL');
       case 'voided':
         return (_textSecondary, _divider, 'VOIDED');
       default:
@@ -175,8 +177,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             itemBuilder: (_) => [
               _popupItem(null, 'All Invoices', Icons.list_alt_rounded),
               _popupItem('unpaid', 'Unpaid', Icons.pending_outlined),
+              _popupItem('partial', 'Partial', Icons.timelapse_rounded),
               _popupItem('paid', 'Paid', Icons.check_circle_outline_rounded),
-              _popupItem('voided', 'Voided', Icons.block_rounded),
             ],
           ),
         ],
@@ -542,6 +544,8 @@ class _InvoiceDetailSheet extends StatelessWidget {
     switch (s.toLowerCase()) {
       case 'paid':
         return (_success, _successSoft, 'PAID');
+      case 'partial':
+        return (_warning, _warningSoft, 'PARTIAL');
       case 'voided':
         return (_textSecondary, _divider, 'VOIDED');
       default:

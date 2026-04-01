@@ -172,8 +172,11 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
       );
       final paid = _num(summary['paidAmount'] ?? d['paidAmount']);
       if (grand <= 0.01) return '—';
-      if (due <= 0.01) return 'Paid';
-      if (sub >= grand - 0.01) return 'Covered by subscription';
+      if (due <= 0.01) {
+        if (paid > 0.01 && sub > 0.01) return 'Settled';
+        if (paid > 0.01) return 'Paid';
+        return 'Covered by subscription';
+      }
       if (sub > 0.01 || paid > 0.01) return 'Partially settled';
       return 'Pending';
     }

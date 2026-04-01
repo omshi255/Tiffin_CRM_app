@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart';
+
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/utils/account_balance.dart';
 import '../../../models/customer_model.dart';
 import '../../../models/notification_model.dart';
 import '../../orders/models/order_model.dart';
@@ -14,35 +17,19 @@ abstract final class CustomerPortalApi {
       throw ApiException('Invalid response');
     }
 
-    final walletBalance = (profileData['walletBalance'] is num)
-        ? (profileData['walletBalance'] as num).toDouble()
-        : (profileData['balance'] is num)
-            ? (profileData['balance'] as num).toDouble()
-            : 0.0;
-
     double subscriptionBalance = 0.0;
     try {
       final planRes = await DioClient.instance.get(ApiEndpoints.customerMePlan);
       final planData = parseData(planRes);
       if (planData is Map<String, dynamic>) {
-        if (planData['remainingBalance'] is num) {
-          subscriptionBalance = (planData['remainingBalance'] as num).toDouble();
-        } else {
-          final total = (planData['totalAmount'] is num)
-              ? (planData['totalAmount'] as num).toDouble()
-              : 0.0;
-          final paid = (planData['paidAmount'] is num)
-              ? (planData['paidAmount'] as num).toDouble()
-              : 0.0;
-          subscriptionBalance = total > 0 ? total : paid;
-        }
+        subscriptionBalance = effectiveSubscriptionRemaining(planData);
       }
     } catch (_) {
       subscriptionBalance = 0.0;
     }
 
     return CustomerBalanceModel(
-      walletBalance: walletBalance,
+      walletBalance: effectiveWalletBalance(profileData),
       subscriptionBalance: subscriptionBalance,
     );
   }
@@ -65,9 +52,23 @@ abstract final class CustomerPortalApi {
   }
 
   static Future<CustomerBalanceModel> getMyBalance() async {
-    // Use fallback-only path for now to avoid any /customer/me/balance probing
-    // against production where the endpoint is not deployed yet.
-    return _getMyBalanceFallback();
+    try {
+      final response = await DioClient.instance.get(ApiEndpoints.customerMeBalance);
+      final data = parseData(response);
+      if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
+      return CustomerBalanceModel.fromJson(data);
+    } on ApiException catch (e) {
+      if (e.statusCode == 401 || e.statusCode == 403) rethrow;
+      return _getMyBalanceFallback();
+    } on DioException catch (e) {
+      final sc = e.response?.statusCode;
+      if (sc == 401 || sc == 403) {
+        throw ApiException(e.message ?? 'Unauthorized', sc);
+      }
+      return _getMyBalanceFallback();
+    } catch (_) {
+      return _getMyBalanceFallback();
+    }
   }
 
   static Future<SubscriptionModel?> getMyActivePlan() async {

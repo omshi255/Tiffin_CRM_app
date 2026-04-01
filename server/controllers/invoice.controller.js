@@ -249,8 +249,11 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
 
   let subtotal = 0;
 
+  // Bill only delivered orders — matches Subscription.remainingBalance deductions.
   if (orders.length) {
     for (const order of orders) {
+      if (order.status !== "delivered") continue;
+
       const slotKey = order.mealType || "meal";
 
       const lineItems = [];
@@ -280,7 +283,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
         });
       }
 
-      addDelivery(slotKey, lineItems);
+      if (lineItems.length) addDelivery(slotKey, lineItems);
     }
   } else if (subscription?.planId) {
     const plan = subscription.planId;
@@ -349,17 +352,24 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
   ]);
   const paidAmount = paidAgg[0]?.total ?? 0;
 
-  const dueAmount = grandTotal - paidAmount;
+  /** Net still owed for this day's bill after cash + subscription prepayment applied. */
+  const dueAmount = Math.max(
+    0,
+    grandTotal - paidAmount - subscriptionDeductedToday
+  );
 
-  /** Receipt badge: not order status — reflects cash vs subscription settlement for this day. */
+  /** Receipt badge: cash vs subscription settlement (not order delivery status). */
   const eps = 0.01;
   let paymentStatus = "Pending";
   if (grandTotal <= eps) {
     paymentStatus = "—";
   } else if (dueAmount <= eps) {
-    paymentStatus = "Paid";
-  } else if (subscriptionDeductedToday >= grandTotal - eps) {
-    paymentStatus = "Covered by subscription";
+    paymentStatus =
+      paidAmount > eps && subscriptionDeductedToday > eps
+        ? "Settled"
+        : paidAmount > eps
+          ? "Paid"
+          : "Covered by subscription";
   } else if (subscriptionDeductedToday > eps || paidAmount > eps) {
     paymentStatus = "Partially settled";
   }

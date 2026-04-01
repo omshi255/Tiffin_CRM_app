@@ -6,6 +6,7 @@ import Notification from "../models/Notification.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
+import { effectiveRemaining } from "../utils/subscriptionBalance.js";
 
 const ORDER_STATUSES = [
   "pending",
@@ -20,16 +21,6 @@ const ORDER_STATUSES = [
 function effectiveWallet(customer) {
   if (customer?.walletBalance != null) return Number(customer.walletBalance);
   return Number(customer?.balance ?? 0);
-}
-
-function effectiveRemaining(subscription) {
-  if (!subscription) return 0;
-  if (subscription.remainingBalance != null) {
-    return Number(subscription.remainingBalance);
-  }
-  const total = Number(subscription.totalAmount ?? 0);
-  if (total > 0) return total;
-  return Number(subscription.paidAmount ?? 0);
 }
 
 // Allow portal users to update contact + profile fields (phone is the login identity for many flows).
