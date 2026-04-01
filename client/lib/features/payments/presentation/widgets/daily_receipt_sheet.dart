@@ -602,18 +602,30 @@ class _DailyReceiptSheetState extends State<DailyReceiptSheet> {
             _num(summary['grandTotal'] ?? d['grandTotal']),
             bold: true,
           ),
+          _line(
+            theme,
+            'Deducted from subscription',
+            _num(
+              summary['subscriptionDeductedToday'] ??
+                  d['subscriptionDeductedToday'],
+            ),
+          ),
           const SizedBox(height: 6),
           Divider(height: 1, color: AppColors.outlineVariant),
           const SizedBox(height: 6),
-          _line(theme, 'Paid', _num(summary['paidAmount'] ?? d['paidAmount'])),
           _line(
             theme,
-            'Balance Due',
+            'Paid (cash/online)',
+            _num(summary['paidAmount'] ?? d['paidAmount']),
+          ),
+          _line(
+            theme,
+            'This receipt due',
             _num(summary['dueAmount'] ?? d['dueAmount']),
           ),
           _line(
             theme,
-            'Running balance',
+            'Account running balance',
             _num(summary['runningBalance'] ?? d['runningBalance']),
           ),
         ],

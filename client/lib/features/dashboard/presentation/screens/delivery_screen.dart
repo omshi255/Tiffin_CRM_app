@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/router/app_routes.dart';
 import '../../../../core/socket/delivery_tracking_socket.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
@@ -998,19 +996,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
         ),
       );
     }
-    return FloatingActionButton.extended(
-      heroTag: 'delivery_fab_map',
-      onPressed: () => context.push(AppRoutes.maps),
-      backgroundColor: _P.g1,
-      foregroundColor: Colors.white,
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      icon: const Icon(Icons.map_outlined, size: 18),
-      label: const Text(
-        'View Map',
-        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   // ── BUILD ─────────────────────────────────────────────────────────────────

@@ -28,8 +28,8 @@ function effectiveRemaining(subscription) {
     return Number(subscription.remainingBalance);
   }
   const total = Number(subscription.totalAmount ?? 0);
-  const paid = Number(subscription.paidAmount ?? 0);
-  return Math.max(0, total - paid);
+  if (total > 0) return total;
+  return Number(subscription.paidAmount ?? 0);
 }
 
 // Allow portal users to update contact + profile fields (phone is the login identity for many flows).

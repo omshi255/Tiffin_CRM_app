@@ -12,6 +12,7 @@ class CustomerModel {
     this.notes,
     this.tags,
     this.balance,
+    this.walletBalance,
     this.location,
     this.vendorId,
     this.createdAt,
@@ -29,11 +30,13 @@ class CustomerModel {
   final String? notes;
   final List<String>? tags;
   final double? balance;
+  final double? walletBalance;
   final GeoPoint? location;
   final String? vendorId;
   final DateTime? createdAt;
 
   String get fullName => name;
+  double get effectiveWalletBalance => walletBalance ?? balance ?? 0;
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
     final id = json['_id']?.toString() ?? json['id']?.toString() ?? '';
@@ -76,6 +79,9 @@ class CustomerModel {
       tags: tags,
       balance: (json['balance'] is num)
           ? (json['balance'] as num).toDouble()
+          : null,
+      walletBalance: (json['walletBalance'] is num)
+          ? (json['walletBalance'] as num).toDouble()
           : null,
       location: location,
       vendorId: json['vendorId']?.toString(),

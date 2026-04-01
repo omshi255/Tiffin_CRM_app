@@ -21,6 +21,26 @@ const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
 const DEFAULT_PAGE = 1;
 
+function normalizeSubscriptionLedger(subscription) {
+  if (!subscription || typeof subscription !== "object") return subscription;
+
+  const total = Number(subscription.totalAmount ?? 0);
+  const hasPositiveTotal = Number.isFinite(total) && total > 0;
+  const paid = Number(subscription.paidAmount ?? 0);
+
+  // Legacy safety: older rows may have paidAmount missing/0 while new flow
+  // always prepays full subscription amount from wallet at create/renew time.
+  if (hasPositiveTotal && paid <= 0) {
+    subscription.paidAmount = total;
+  }
+
+  if (hasPositiveTotal && subscription.remainingBalance == null) {
+    subscription.remainingBalance = total;
+  }
+
+  return subscription;
+}
+
 const createSubscriptionSchema = Joi.object({
   customerId: Joi.string().hex().length(24).required(),
   planId: Joi.string().hex().length(24).required(),
@@ -81,10 +101,13 @@ export const listSubscriptions = asyncHandler(async (req, res) => {
     Subscription.countDocuments(filter),
   ]);
 
+  const normalizedData = data.map((subscription) =>
+    normalizeSubscriptionLedger(subscription)
+  );
   const totalPages = Math.ceil(total / limit);
 
   const response = new ApiResponse(200, "Subscriptions fetched", {
-    data,
+    data: normalizedData,
     total,
     page,
     limit,
@@ -113,7 +136,11 @@ export const getSubscriptionById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Subscription not found");
   }
 
-  const response = new ApiResponse(200, "Subscription fetched", subscription);
+  const response = new ApiResponse(
+    200,
+    "Subscription fetched",
+    normalizeSubscriptionLedger(subscription)
+  );
   res.status(response.statusCode).json({
     success: response.success,
     message: response.message,

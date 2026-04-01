@@ -34,7 +34,7 @@ abstract final class CustomerPortalApi {
           final paid = (planData['paidAmount'] is num)
               ? (planData['paidAmount'] as num).toDouble()
               : 0.0;
-          subscriptionBalance = (total - paid).clamp(0, double.infinity);
+          subscriptionBalance = total > 0 ? total : paid;
         }
       }
     } catch (_) {

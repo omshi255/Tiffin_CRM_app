@@ -224,6 +224,19 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
     .sort({ mealType: 1 })
     .lean();
 
+  const orderCharge = (order) => {
+    if (typeof order?.amount === "number") return order.amount;
+    if (Array.isArray(order?.resolvedItems)) {
+      return order.resolvedItems.reduce((sum, ri) => {
+        if (typeof ri?.subtotal === "number") return sum + ri.subtotal;
+        const qty = Number(ri?.quantity ?? 0);
+        const unitPrice = Number(ri?.unitPrice ?? 0);
+        return sum + qty * unitPrice;
+      }, 0);
+    }
+    return 0;
+  };
+
   const slotToDelivery = new Map();
 
   const addDelivery = (slotKey, items) => {
@@ -319,6 +332,9 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
 
   const tax = 0;
   const grandTotal = subtotal + tax;
+  const subscriptionDeductedToday = orders
+    .filter((o) => o.status === "delivered")
+    .reduce((sum, o) => sum + orderCharge(o), 0);
 
   const paidAgg = await Payment.aggregate([
     {
@@ -408,6 +424,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
       taxRate: 0,
       taxAmount: tax,
       grandTotal,
+      subscriptionDeductedToday,
       paidAmount,
       dueAmount,
       runningBalance,
@@ -419,6 +436,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
     tax,
     subtotal,
     grandTotal,
+    subscriptionDeductedToday,
     paidAmount,
     dueAmount,
     runningBalance,

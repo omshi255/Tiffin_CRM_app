@@ -20,6 +20,7 @@ class SubscriptionModel {
     this.planPrice,
     this.totalAmount,
     this.paidAmount,
+    this.remainingBalance,
   });
 
   final String id;
@@ -42,6 +43,7 @@ class SubscriptionModel {
   final double? planPrice;
   final double? totalAmount;
   final double? paidAmount;
+  final double? remainingBalance;
 
   factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
     final id = json['_id']?.toString() ?? json['id']?.toString() ?? '';
@@ -124,6 +126,7 @@ class SubscriptionModel {
       planPrice: planPrice,
       totalAmount: (json['totalAmount'] as num?)?.toDouble(),
       paidAmount: (json['paidAmount'] as num?)?.toDouble(),
+      remainingBalance: (json['remainingBalance'] as num?)?.toDouble(),
     );
   }
 }

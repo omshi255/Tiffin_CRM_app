@@ -785,8 +785,12 @@ class _SubscriptionDetailSheetState extends State<_SubscriptionDetailSheet> {
         sub.status.toLowerCase() == 'cancelled';
     final isActive = sub.status.toLowerCase() == 'active';
     final isPaused = sub.status.toLowerCase() == 'paused';
-    final isPaidFull =
-        (sub.paidAmount ?? 0) >= (sub.totalAmount ?? double.infinity);
+    final remainingAmountDisplay =
+        sub.remainingBalance ??
+        ((sub.totalAmount ?? 0) > 0
+        ? sub.totalAmount
+        : sub.paidAmount);
+    final hasRemaining = (remainingAmountDisplay ?? 0) > 0;
 
     return Container(
       decoration: const BoxDecoration(
@@ -881,7 +885,7 @@ class _SubscriptionDetailSheetState extends State<_SubscriptionDetailSheet> {
                 ),
               ),
 
-              // ── Stat cards: Total + Paid ──
+              // ── Stat cards: Total + Remaining ──
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
                 child: Row(
@@ -901,20 +905,20 @@ class _SubscriptionDetailSheetState extends State<_SubscriptionDetailSheet> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _statCard(
-                        label: 'Paid',
-                        value: sub.paidAmount != null
-                            ? '₹${sub.paidAmount!.toStringAsFixed(0)}'
+                        label: 'Remaining',
+                        value: remainingAmountDisplay != null
+                            ? '₹${remainingAmountDisplay!.toStringAsFixed(0)}'
                             : '—',
-                        valueColor: isPaidFull
+                        valueColor: hasRemaining
                             ? _AppPurple.green600
                             : _AppPurple.red600,
-                        bgColor: isPaidFull
+                        bgColor: hasRemaining
                             ? _AppPurple.green100
                             : _AppPurple.red100,
-                        borderColor: isPaidFull
+                        borderColor: hasRemaining
                             ? _AppPurple.green300
                             : _AppPurple.red300,
-                        labelColor: isPaidFull
+                        labelColor: hasRemaining
                             ? _AppPurple.green600
                             : _AppPurple.red600,
                       ),

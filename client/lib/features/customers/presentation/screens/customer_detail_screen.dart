@@ -256,7 +256,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     if (phone.isEmpty) return;
     final msg = WhatsAppHelper.lowBalanceMessage(
       _customer!.name,
-      _customer!.balance ?? 0,
+      _customer!.effectiveWalletBalance,
     );
     WhatsAppHelper.openWithMessage(phone, msg);
   }
@@ -325,6 +325,20 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final c = _customer ?? widget.customer;
+    SubscriptionModel? activeSubscription;
+    for (final subscription in _subscriptions) {
+      final status = subscription.status.toLowerCase();
+      if ((status == 'active' || status == 'paused') &&
+          subscription.endDate.isAfter(DateTime.now())) {
+        activeSubscription = subscription;
+        break;
+      }
+    }
+    final subscriptionBalance =
+        activeSubscription?.remainingBalance ??
+        activeSubscription?.totalAmount ??
+        activeSubscription?.paidAmount ??
+        0;
 
     if (_isLoading && _customer == null) {
       return Scaffold(
@@ -354,7 +368,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       );
     }
 
-    final isLowBalance = (c.balance ?? 0) < 100;
+    final isLowBalance = c.effectiveWalletBalance < 100;
 
     return Scaffold(
       backgroundColor: _P.bg,
@@ -512,77 +526,118 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                       horizontal: 18,
                       vertical: 16,
                     ),
-                    child: Row(
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Wallet balance',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white.withValues(alpha: 0.75),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '₹${(c.balance ?? 0).toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              if (isLowBalance) ...[
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: const Text(
-                                    'Low balance',
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Wallet balance',
                                     style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white.withValues(alpha: 0.75),
                                     ),
                                   ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '₹${c.effectiveWalletBalance.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  if (isLowBalance) ...[
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Text(
+                                        'Low balance',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: _showCreditWalletSheet,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
                                 ),
-                              ],
-                            ],
-                          ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.3),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: const Text(
+                                  '+ Add Money',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        GestureDetector(
-                          onTap: _showCreditWalletSheet,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
+                        const SizedBox(height: 10),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.22),
+                              width: 0.5,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.3),
-                                width: 0.5,
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Subscription remaining',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            child: const Text(
-                              '+ Add Money',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                              const Spacer(),
+                              Text(
+                                '₹${subscriptionBalance.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ],
