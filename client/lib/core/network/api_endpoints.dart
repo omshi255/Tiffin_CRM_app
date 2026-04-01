@@ -22,6 +22,7 @@ abstract final class ApiEndpoints {
 
   // Customer portal (self-service)
   static const String customerMe = '/customer/me';
+  static const String customerMeBalance = '/customer/me/balance';
   static const String customerMePlan = '/customer/me/plan';
   static const String customerMeOrders = '/customer/me/orders';
   static const String customerMeNotifications = '/customer/me/notifications';

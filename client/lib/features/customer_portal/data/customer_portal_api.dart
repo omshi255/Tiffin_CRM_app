@@ -1,12 +1,54 @@
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/config/app_config.dart';
 import '../../../models/customer_model.dart';
 import '../../../models/notification_model.dart';
+import 'package:dio/dio.dart';
 import '../../orders/models/order_model.dart';
 import '../../subscriptions/models/subscription_model.dart';
 
 abstract final class CustomerPortalApi {
+  static Future<CustomerBalanceModel> _getMyBalanceFallback() async {
+    final profileRes = await DioClient.instance.get(ApiEndpoints.customerMe);
+    final profileData = parseData(profileRes);
+    if (profileData is! Map<String, dynamic>) {
+      throw ApiException('Invalid response');
+    }
+
+    final walletBalance = (profileData['walletBalance'] is num)
+        ? (profileData['walletBalance'] as num).toDouble()
+        : (profileData['balance'] is num)
+            ? (profileData['balance'] as num).toDouble()
+            : 0.0;
+
+    double subscriptionBalance = 0.0;
+    try {
+      final planRes = await DioClient.instance.get(ApiEndpoints.customerMePlan);
+      final planData = parseData(planRes);
+      if (planData is Map<String, dynamic>) {
+        if (planData['remainingBalance'] is num) {
+          subscriptionBalance = (planData['remainingBalance'] as num).toDouble();
+        } else {
+          final total = (planData['totalAmount'] is num)
+              ? (planData['totalAmount'] as num).toDouble()
+              : 0.0;
+          final paid = (planData['paidAmount'] is num)
+              ? (planData['paidAmount'] as num).toDouble()
+              : 0.0;
+          subscriptionBalance = (total - paid).clamp(0, double.infinity);
+        }
+      }
+    } catch (_) {
+      subscriptionBalance = 0.0;
+    }
+
+    return CustomerBalanceModel(
+      walletBalance: walletBalance,
+      subscriptionBalance: subscriptionBalance,
+    );
+  }
+
   static Future<CustomerModel> getMyProfile() async {
     final response = await DioClient.instance.get(ApiEndpoints.customerMe);
     final data = parseData(response);
@@ -22,6 +64,39 @@ abstract final class CustomerPortalApi {
     final data = parseData(response);
     if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
     return CustomerModel.fromJson(data);
+  }
+
+  static Future<CustomerBalanceModel> getMyBalance() async {
+    // Production backend currently doesn't expose /customer/me/balance.
+    // Skip the probe call there to avoid repetitive 404 noise.
+    if (!AppConfig.useLocalApi) {
+      return _getMyBalanceFallback();
+    }
+
+    final response = await DioClient.instance.get(
+      ApiEndpoints.customerMeBalance,
+      options: Options(
+        // Prevent noisy 404 exceptions on older deployed backends.
+        validateStatus: (code) => code != null && code < 500,
+      ),
+    );
+
+    if ((response.statusCode ?? 500) < 400) {
+      final data = parseData(response);
+      if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
+      return CustomerBalanceModel.fromJson(data);
+    }
+
+    // Backward-compatible fallback for environments where /customer/me/balance
+    // is not deployed yet: derive from profile + active plan APIs.
+    try {
+      return _getMyBalanceFallback();
+    } on DioException catch (e) {
+      throw ApiException(
+        e.message ?? 'Network error',
+        e.response?.statusCode,
+      );
+    }
   }
 
   static Future<SubscriptionModel?> getMyActivePlan() async {

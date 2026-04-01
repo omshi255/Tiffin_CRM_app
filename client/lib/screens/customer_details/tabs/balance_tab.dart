@@ -550,19 +550,14 @@ class _BalanceTabState extends State<BalanceTab> {
   final _addNote = TextEditingController();
   String _payMode = 'cash';
 
-  final _deductAmount = TextEditingController();
-  final _deductNote = TextEditingController();
-
   final _extraAmount = TextEditingController();
   final _extraReason = TextEditingController();
 
   final _addForm = GlobalKey<FormState>();
-  final _deductForm = GlobalKey<FormState>();
   final _extraForm = GlobalKey<FormState>();
 
   // UI-only: scroll anchors for the quick-action buttons
   final _addSectionKey = GlobalKey();
-  final _deductSectionKey = GlobalKey();
   final _extraSectionKey = GlobalKey();
 
   @override
@@ -575,8 +570,6 @@ class _BalanceTabState extends State<BalanceTab> {
   void dispose() {
     _addAmount.dispose();
     _addNote.dispose();
-    _deductAmount.dispose();
-    _deductNote.dispose();
     _extraAmount.dispose();
     _extraReason.dispose();
     super.dispose();
@@ -623,29 +616,6 @@ class _BalanceTabState extends State<BalanceTab> {
       AppSnackbar.success(context, 'Balance added');
       _addAmount.clear();
       _addNote.clear();
-      await _load();
-    } catch (e) {
-      if (mounted) AppSnackbar.error(context, e is ApiException ? (e.message ?? 'Error') : '$e');
-    }
-  }
-
-  Future<void> _submitDeduct() async {
-    if (!(_deductForm.currentState?.validate() ?? false)) return;
-    final amt = double.tryParse(_deductAmount.text.trim());
-    if (amt == null || amt <= 0) {
-      AppSnackbar.error(context, 'Enter a valid amount');
-      return;
-    }
-    try {
-      await CustomerDetailService.deductBalance(
-        widget.customerId,
-        amount: amt,
-        note: _deductNote.text.trim().isEmpty ? null : _deductNote.text.trim(),
-      );
-      if (!mounted) return;
-      AppSnackbar.success(context, 'Deducted from wallet');
-      _deductAmount.clear();
-      _deductNote.clear();
       await _load();
     } catch (e) {
       if (mounted) AppSnackbar.error(context, e is ApiException ? (e.message ?? 'Error') : '$e');
@@ -876,7 +846,7 @@ class _BalanceTabState extends State<BalanceTab> {
                           style: _P.redOutlineBtn,
                           icon: const Icon(Icons.remove_rounded, size: 16),
                           label: const Text('Deduct Amount'),
-                          onPressed: () => _scrollTo(_deductSectionKey),
+                          onPressed: () => _scrollTo(_extraSectionKey),
                         ),
                       ),
                     ),
@@ -960,56 +930,6 @@ class _BalanceTabState extends State<BalanceTab> {
                     icon: const Icon(Icons.check_rounded, size: 16),
                     label: const Text('Add Balance'),
                     onPressed: _submitAdd,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 28),
-
-          // ── Deduct from wallet (manual adjustment) ────────────────
-          Row(
-            key: _deductSectionKey,
-            children: const [
-              Icon(Icons.remove_circle_outline_rounded, color: _P.red, size: 18),
-              SizedBox(width: 6),
-              Text('Deduct from wallet',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: _P.s900)),
-            ],
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Reduces wallet balance only. Subscription prepaid balance is unchanged.',
-            style: TextStyle(fontSize: 12, color: _P.s400, height: 1.35),
-          ),
-          const SizedBox(height: 10),
-          Form(
-            key: _deductForm,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _deductAmount,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-                  decoration: _P.inputDec('Amount'),
-                  style: const TextStyle(fontSize: 14, color: _P.s900),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _deductNote,
-                  decoration: _P.inputDec('Note (optional)'),
-                  style: const TextStyle(fontSize: 14, color: _P.s900),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 46,
-                  child: ElevatedButton.icon(
-                    style: _P.redSolidBtn,
-                    icon: const Icon(Icons.remove_rounded, size: 16),
-                    label: const Text('Deduct from wallet'),
-                    onPressed: _submitDeduct,
                   ),
                 ),
               ],

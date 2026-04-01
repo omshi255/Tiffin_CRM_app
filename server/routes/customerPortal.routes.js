@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getMyProfile,
+  getMyBalance,
   updateMyProfile,
   getMyActivePlan,
   getMyOrders,
@@ -19,6 +20,7 @@ router.use(authMiddleware);
 router.use(requireRole(["customer"]));
 
 router.get("/me", getMyProfile);
+router.get("/me/balance", getMyBalance);
 router.put("/me", updateMyProfile);
 router.get("/me/plan", getMyActivePlan);
 router.get("/me/orders", getMyOrders);

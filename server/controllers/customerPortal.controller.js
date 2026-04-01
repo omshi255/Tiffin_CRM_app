@@ -17,6 +17,21 @@ const ORDER_STATUSES = [
   "skipped",
 ];
 
+function effectiveWallet(customer) {
+  if (customer?.walletBalance != null) return Number(customer.walletBalance);
+  return Number(customer?.balance ?? 0);
+}
+
+function effectiveRemaining(subscription) {
+  if (!subscription) return 0;
+  if (subscription.remainingBalance != null) {
+    return Number(subscription.remainingBalance);
+  }
+  const total = Number(subscription.totalAmount ?? 0);
+  const paid = Number(subscription.paidAmount ?? 0);
+  return Math.max(0, total - paid);
+}
+
 // Allow portal users to update contact + profile fields (phone is the login identity for many flows).
 const PHONE_PATTERN = /^\d{10,15}$/;
 
@@ -57,6 +72,38 @@ export const getMyProfile = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json(new ApiResponse(200, "Profile fetched", customer));
+});
+
+/**
+ * GET /api/v1/customer/me/balance
+ * Returns wallet + active subscription remaining balance.
+ */
+export const getMyBalance = asyncHandler(async (req, res) => {
+  const { customerId } = req.user;
+  if (!customerId) throw new ApiError(403, "Customer ID not found in token");
+
+  const [customer, subscription] = await Promise.all([
+    Customer.findOne({ _id: customerId, isDeleted: { $ne: true } })
+      .select("balance walletBalance")
+      .lean(),
+    Subscription.findOne({
+      customerId,
+      status: { $in: ["active", "paused"] },
+      endDate: { $gte: new Date() },
+    })
+      .sort({ endDate: -1 })
+      .select("remainingBalance totalAmount paidAmount")
+      .lean(),
+  ]);
+
+  if (!customer) throw new ApiError(404, "Customer profile not found");
+
+  return res.status(200).json(
+    new ApiResponse(200, "Balance fetched", {
+      walletBalance: effectiveWallet(customer),
+      subscriptionBalance: effectiveRemaining(subscription),
+    })
+  );
 });
 
 /**

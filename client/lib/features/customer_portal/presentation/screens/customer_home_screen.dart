@@ -307,6 +307,7 @@ class _CustomerHomeTab extends StatefulWidget {
 class _CustomerHomeTabState extends State<_CustomerHomeTab> {
   OrderModel? _todayOrder;
   CustomerModel? _profile;
+  CustomerBalanceModel? _balance;
   bool _loading = true;
   Timer? _refreshTimer;
 
@@ -328,12 +329,19 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final order = await CustomerPortalApi.getTodayOrder();
-      final profile = await CustomerPortalApi.getMyProfile();
+      final results = await Future.wait([
+        CustomerPortalApi.getTodayOrder(),
+        CustomerPortalApi.getMyProfile(),
+        CustomerPortalApi.getMyBalance(),
+      ]);
+      final order = results[0] as OrderModel?;
+      final profile = results[1] as CustomerModel;
+      final balance = results[2] as CustomerBalanceModel;
       if (mounted) {
         setState(() {
           _todayOrder = order;
           _profile = profile;
+          _balance = balance;
         });
       }
     } catch (e) {
@@ -404,11 +412,12 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading && _todayOrder == null && _profile == null) {
+    if (_loading && _todayOrder == null && _profile == null && _balance == null) {
       return const Center(child: CircularProgressIndicator(color: _green600));
     }
-    final balance = _profile?.balance ?? 0.0;
-    final lowBalance = balance < 100;
+    final walletBalance = _balance?.walletBalance ?? _profile?.balance ?? 0.0;
+    final subscriptionBalance = _balance?.subscriptionBalance ?? 0.0;
+    final lowBalance = walletBalance < 100;
     final firstName = (_profile?.name ?? 'there').split(' ').first;
     final (thoughtIcon, thoughtText) = _todaysThought;
 
@@ -518,10 +527,10 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
           // ── Wallet card ───────────────────────────────────────────────────
           _sectionLabel('Wallet'),
           const SizedBox(height: 8),
-          _walletCard(balance),
+          _walletCard(walletBalance, subscriptionBalance),
 
           // ── Low balance warning ───────────────────────────────────────────
-          if (lowBalance && balance >= 0) ...[
+          if (lowBalance && walletBalance >= 0) ...[
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(14),
@@ -692,7 +701,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
     ),
   );
 
-  Widget _walletCard(double balance) => Container(
+  Widget _walletCard(double walletBalance, double subscriptionBalance) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: _surface,
@@ -719,7 +728,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Rs.${balance.toStringAsFixed(0)}',
+              'Rs.${walletBalance.toStringAsFixed(0)}',
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
@@ -729,6 +738,15 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
             const Text(
               'Available balance',
               style: TextStyle(fontSize: 12, color: _text2),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Subscription: Rs.${subscriptionBalance.toStringAsFixed(0)}',
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: _text2,
+              ),
             ),
           ],
         ),
@@ -1742,7 +1760,7 @@ class _CustomerWalletTab extends StatefulWidget {
 }
 
 class _CustomerWalletTabState extends State<_CustomerWalletTab> {
-  CustomerModel? _profile;
+  CustomerBalanceModel? _balance;
   bool _loading = true;
 
   @override
@@ -1754,8 +1772,8 @@ class _CustomerWalletTabState extends State<_CustomerWalletTab> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final profile = await CustomerPortalApi.getMyProfile();
-      if (mounted) setState(() => _profile = profile);
+      final balance = await CustomerPortalApi.getMyBalance();
+      if (mounted) setState(() => _balance = balance);
     } catch (e) {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
@@ -1768,8 +1786,9 @@ class _CustomerWalletTabState extends State<_CustomerWalletTab> {
     if (_loading) {
       return const Center(child: CircularProgressIndicator(color: _green600));
     }
-    final balance = _profile?.balance ?? 0.0;
-    final lowBalance = balance < 100;
+    final walletBalance = _balance?.walletBalance ?? 0.0;
+    final subscriptionBalance = _balance?.subscriptionBalance ?? 0.0;
+    final lowBalance = walletBalance < 100;
 
     return RefreshIndicator(
       color: _green600,
@@ -1819,7 +1838,7 @@ class _CustomerWalletTabState extends State<_CustomerWalletTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rs.${balance.toStringAsFixed(0)}',
+                      'Rs.${walletBalance.toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
@@ -1835,7 +1854,7 @@ class _CustomerWalletTabState extends State<_CustomerWalletTab> {
               ],
             ),
           ),
-          if (lowBalance && balance >= 0) ...[
+          if (lowBalance && walletBalance >= 0) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(14),
@@ -1866,6 +1885,44 @@ class _CustomerWalletTabState extends State<_CustomerWalletTab> {
               ),
             ),
           ],
+          const SizedBox(height: 14),
+          _sectionLabel('Subscription Balance'),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: _green50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _border),
+                  ),
+                  child: const Icon(
+                    Icons.subscriptions_rounded,
+                    size: 18,
+                    color: _green700,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Rs.${subscriptionBalance.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: _text1,
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
           _sectionLabel('Transaction History'),
           const SizedBox(height: 10),

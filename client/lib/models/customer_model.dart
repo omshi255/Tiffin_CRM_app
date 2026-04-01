@@ -109,3 +109,24 @@ class GeoPoint {
   final double lat;
   final double lng;
 }
+
+class CustomerBalanceModel {
+  const CustomerBalanceModel({
+    required this.walletBalance,
+    required this.subscriptionBalance,
+  });
+
+  final double walletBalance;
+  final double subscriptionBalance;
+
+  factory CustomerBalanceModel.fromJson(Map<String, dynamic> json) {
+    return CustomerBalanceModel(
+      walletBalance: (json['walletBalance'] is num)
+          ? (json['walletBalance'] as num).toDouble()
+          : 0,
+      subscriptionBalance: (json['subscriptionBalance'] is num)
+          ? (json['subscriptionBalance'] as num).toDouble()
+          : 0,
+    );
+  }
+}
