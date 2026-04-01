@@ -237,7 +237,11 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => _OrderDetailSheet(
         order: order,
-        onAssign: () => _openAssignSheet(ctx, [order.id]),
+        onAssign: () => _openAssignSheet(
+          ctx,
+          [order.id],
+          closeParentSheetOnAssigned: true,
+        ),
         onStatusChange: (status) async {
           try {
             await OrderApi.updateStatus(order.id, status);
@@ -262,6 +266,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   Future<void> _openAssignSheet(
     BuildContext sheetContext,
     List<String> orderIds,
+    {bool closeParentSheetOnAssigned = false}
   ) async {
     List<DeliveryStaffModel> staff = [];
     try {
@@ -279,7 +284,15 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
         orderIds: orderIds,
         onAssigned: () {
           Navigator.pop(ctx);
-          if (sheetContext.mounted) Navigator.pop(sheetContext);
+          if (closeParentSheetOnAssigned && sheetContext.mounted) {
+            Navigator.pop(sheetContext);
+          }
+          if (mounted) {
+            setState(() {
+              _bulkMode = false;
+              _selectedIds.clear();
+            });
+          }
           _load();
         },
       ),
@@ -969,7 +982,11 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
     if (_bulkMode && _selectedIds.isNotEmpty) {
       return FloatingActionButton.extended(
         heroTag: 'delivery_fab_assign',
-        onPressed: () => _openAssignSheet(context, _selectedIds.toList()),
+        onPressed: () => _openAssignSheet(
+          context,
+          _selectedIds.toList(),
+          closeParentSheetOnAssigned: false,
+        ),
         backgroundColor: _P.g1,
         foregroundColor: Colors.white,
         elevation: 6,

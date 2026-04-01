@@ -1,10 +1,8 @@
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
-import '../../../core/config/app_config.dart';
 import '../../../models/customer_model.dart';
 import '../../../models/notification_model.dart';
-import 'package:dio/dio.dart';
 import '../../orders/models/order_model.dart';
 import '../../subscriptions/models/subscription_model.dart';
 
@@ -67,36 +65,9 @@ abstract final class CustomerPortalApi {
   }
 
   static Future<CustomerBalanceModel> getMyBalance() async {
-    // Production backend currently doesn't expose /customer/me/balance.
-    // Skip the probe call there to avoid repetitive 404 noise.
-    if (!AppConfig.useLocalApi) {
-      return _getMyBalanceFallback();
-    }
-
-    final response = await DioClient.instance.get(
-      ApiEndpoints.customerMeBalance,
-      options: Options(
-        // Prevent noisy 404 exceptions on older deployed backends.
-        validateStatus: (code) => code != null && code < 500,
-      ),
-    );
-
-    if ((response.statusCode ?? 500) < 400) {
-      final data = parseData(response);
-      if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
-      return CustomerBalanceModel.fromJson(data);
-    }
-
-    // Backward-compatible fallback for environments where /customer/me/balance
-    // is not deployed yet: derive from profile + active plan APIs.
-    try {
-      return _getMyBalanceFallback();
-    } on DioException catch (e) {
-      throw ApiException(
-        e.message ?? 'Network error',
-        e.response?.statusCode,
-      );
-    }
+    // Use fallback-only path for now to avoid any /customer/me/balance probing
+    // against production where the endpoint is not deployed yet.
+    return _getMyBalanceFallback();
   }
 
   static Future<SubscriptionModel?> getMyActivePlan() async {
