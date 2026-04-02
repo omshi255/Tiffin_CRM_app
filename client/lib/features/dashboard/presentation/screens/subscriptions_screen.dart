@@ -13,6 +13,7 @@ import '../../../subscriptions/data/subscription_api.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../subscriptions/models/subscription_model.dart';
+import '../../../../core/utils/subscription_calendar_days.dart';
 import '../../../../models/customer_model.dart';
 
 // ─── Purple Accent Pro palette ───────────────────────────────────────────────
@@ -531,13 +532,14 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
                             itemCount: _list.length,
                             itemBuilder: (context, index) {
                               final sub = _list[index];
-                              final totalDays = sub.endDate
-                                  .difference(sub.startDate)
-                                  .inDays;
-                              final now = DateTime.now();
-                              final daysRemaining = sub.endDate.isAfter(now)
-                                  ? sub.endDate.difference(now).inDays
-                                  : 0;
+                              final totalDays = totalDaysInclusiveIST(
+                                sub.startDate,
+                                sub.endDate,
+                              );
+                              final daysRemaining = remainingDaysInclusiveIST(
+                                sub.startDate,
+                                sub.endDate,
+                              );
                               final progress = totalDays > 0
                                   ? (1 - (daysRemaining / totalDays)).clamp(
                                       0.0,

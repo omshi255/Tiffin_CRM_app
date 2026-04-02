@@ -4,6 +4,11 @@ import Customer, { CUSTOMER_STATUSES } from "../models/Customer.model.js";
 import Payment, { PAYMENT_METHODS } from "../models/Payment.model.js";
 import User from "../models/User.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import {
+  displayWalletBalance,
+  effectiveWallet,
+} from "../utils/customerWallet.js";
+import { notifyIfWalletJustHitZero } from "../utils/walletZeroNotification.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 
@@ -135,10 +140,15 @@ export const listCustomers = asyncHandler(async (req, res) => {
   const totalPages = Math.ceil(total / limit);
 
   // Prefer the dedicated whatsapp number if set; fall back to the registered phone.
-  const enriched = data.map((c) => ({
-    ...c,
-    whatsappUrl: `https://wa.me/91${c.whatsapp || c.phone}`,
-  }));
+  const enriched = data.map((c) => {
+    const w = displayWalletBalance(c);
+    return {
+      ...c,
+      balance: w,
+      walletBalance: w,
+      whatsappUrl: `https://wa.me/91${c.whatsapp || c.phone}`,
+    };
+  });
 
   const response = new ApiResponse(200, "Customers fetched", {
     data: enriched,
@@ -171,8 +181,11 @@ export const getCustomerById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Customer not found");
   }
 
+  const w = displayWalletBalance(customer);
   const data = {
     ...customer,
+    balance: w,
+    walletBalance: w,
     whatsappUrl: `https://wa.me/91${customer.whatsapp || customer.phone}`,
   };
 
@@ -456,7 +469,7 @@ export const walletCredit = asyncHandler(async (req, res) => {
 
     res.status(201).json(
       new ApiResponse(201, "Balance added successfully", {
-        newBalance: updatedCustomer.walletBalance ?? updatedCustomer.balance,
+        newBalance: displayWalletBalance(updatedCustomer),
         amountAdded: value.amount,
         paymentId: payment._id,
       })
@@ -495,7 +508,7 @@ export const walletDebit = asyncHandler(async (req, res) => {
     .lean();
   if (!customer) throw new ApiError(404, "Customer not found");
 
-  const currentWallet = Number(customer.walletBalance ?? customer.balance ?? 0);
+  const currentWallet = effectiveWallet(customer);
   if (currentWallet < amount) {
     throw new ApiError(400, "Insufficient wallet balance");
   }
@@ -527,9 +540,16 @@ export const walletDebit = asyncHandler(async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+    await notifyIfWalletJustHitZero({
+      ownerId,
+      customerId: id,
+      customerBefore: customer,
+      customerAfter: updatedCustomer,
+    });
+
     res.status(201).json(
       new ApiResponse(201, "Wallet amount deducted successfully", {
-        newBalance: updatedCustomer.walletBalance ?? updatedCustomer.balance,
+        newBalance: displayWalletBalance(updatedCustomer),
         amountDeducted: amount,
         paymentId: payment._id,
       })

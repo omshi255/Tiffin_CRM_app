@@ -2,14 +2,15 @@
 // so portal fallback stays aligned when /customer/me/balance is unavailable.
 
 double effectiveWalletBalance(Map<String, dynamic> customer) {
+  double raw;
   final w = customer['walletBalance'];
   if (w != null) {
-    if (w is num) return w.toDouble();
-    return double.tryParse('$w') ?? 0;
+    raw = w is num ? w.toDouble() : (double.tryParse('$w') ?? 0);
+  } else {
+    final b = customer['balance'];
+    raw = b is num ? b.toDouble() : (double.tryParse('$b') ?? 0);
   }
-  final b = customer['balance'];
-  if (b is num) return b.toDouble();
-  return double.tryParse('$b') ?? 0;
+  return raw < 0 ? 0 : raw;
 }
 
 // Same rules as server/utils/subscriptionBalance.js → effectiveRemaining.

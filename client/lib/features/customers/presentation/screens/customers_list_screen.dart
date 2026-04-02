@@ -578,8 +578,8 @@ class _CustomerRow extends StatelessWidget {
     final avatarColor = colorFromName(customer.name);
     final accent = _accentColor(customer.status);
     final hasArea = customer.area?.isNotEmpty == true;
-    final hasBal = customer.balance != null;
-    final isLowBal = hasBal && customer.balance! < 100;
+    final walletShown = customer.effectiveWalletBalance;
+    final isLowBal = walletShown < 100;
 
     return Slidable(
       key: ValueKey(customer.id),
@@ -743,31 +743,30 @@ class _CustomerRow extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
 
-                      // Balance column
-                      if (hasBal)
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '₹${customer.balance!.toStringAsFixed(0)}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: isLowBal
-                                    ? const Color(0xFF92400E)
-                                    : const Color(0xFF0F172A),
-                              ),
+                      // Balance column (same source as detail: walletBalance ?? balance, ≥ 0)
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '₹${walletShown.toStringAsFixed(0)}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: isLowBal
+                                  ? const Color(0xFF92400E)
+                                  : const Color(0xFF0F172A),
                             ),
-                            const Text(
-                              'balance',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Color(0xFF94A3B8),
-                              ),
+                          ),
+                          const Text(
+                            'balance',
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: Color(0xFF94A3B8),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

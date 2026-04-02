@@ -15,6 +15,19 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import { effectiveRemaining } from "../utils/subscriptionBalance.js";
+import {
+  displayWalletBalance,
+  effectiveWallet,
+} from "../utils/customerWallet.js";
+import { notifyIfWalletJustHitZero } from "../utils/walletZeroNotification.js";
+import { sendNotification } from "../services/inAppNotification.service.js";
+import { NOTIFICATION_TYPES } from "../utils/notificationTypes.js";
+import {
+  istTodayYmd,
+  remainingDaysInclusiveIST,
+  totalDaysInclusiveIST,
+  ymdIST,
+} from "../utils/subscriptionCalendarDays.js";
 
 const router = Router();
 
@@ -108,14 +121,6 @@ async function assertCustomer(ownerId, customerId) {
   return customer;
 }
 
-/**
- * Effective wallet total. `walletBalance` is canonical; `balance` is legacy fallback.
- */
-function effectiveWallet(c) {
-  if (c?.walletBalance != null) return Number(c.walletBalance);
-  return Number(c?.balance ?? 0);
-}
-
 /** Sums meal item quantities across all slots (items per day). */
 function countItemsPerDay(plan) {
   if (!plan?.mealSlots?.length) return 0;
@@ -138,17 +143,6 @@ function formatOrderItems(resolvedItems) {
       return `${name} x${q}`;
     })
     .join(", ");
-}
-
-/** IST calendar date string YYYY-MM-DD for "today" comparisons. */
-function istTodayYmd() {
-  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
-}
-
-/** YYYY-MM-DD in Asia/Kolkata for a stored Date. */
-function ymdIST(d) {
-  if (!d) return "";
-  return new Date(d).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 }
 
 /** Short label when there are no daily orders yet (plan summary). */
@@ -235,13 +229,10 @@ router.get(
       const itemsPerDay = countItemsPerDay(plan);
       const end = activeSub.endDate ? new Date(activeSub.endDate) : null;
       const start = activeSub.startDate ? new Date(activeSub.startDate) : null;
-      let remainingDays = 0;
-      if (end) {
-        remainingDays = Math.max(
-          0,
-          Math.ceil((end.getTime() - now.getTime()) / 86400000)
-        );
-      }
+      const remainingDays = remainingDaysInclusiveIST(
+        activeSub.startDate,
+        activeSub.endDate
+      );
       activePlan = {
         id: activeSub._id.toString(),
         planName: plan.planName || "",
@@ -463,7 +454,7 @@ router.get(
     const subBal = effectiveRemaining(sub);
 
     const payload = {
-      walletBalance: effectiveWallet(customer),
+      walletBalance: displayWalletBalance(customer),
       subscriptionBalance: subBal,
     };
 
@@ -550,7 +541,7 @@ router.post(
 
       const response = new ApiResponse(200, "Balance added", {
         success: true,
-        updatedWalletBalance: effectiveWallet(updated),
+        updatedWalletBalance: displayWalletBalance(updated),
         updatedSubscriptionBalance: effectiveRemaining(subAfter),
       });
       return res.status(response.statusCode).json({
@@ -618,6 +609,13 @@ router.post(
       await session.commitTransaction();
       session.endSession();
 
+      await notifyIfWalletJustHitZero({
+        ownerId,
+        customerId,
+        customerBefore: customerBefore,
+        customerAfter: updated,
+      });
+
       const subAfter = await Subscription.findOne({
         ownerId,
         customerId,
@@ -629,7 +627,7 @@ router.post(
 
       const response = new ApiResponse(200, "Balance deducted", {
         success: true,
-        updatedWalletBalance: effectiveWallet(updated),
+        updatedWalletBalance: displayWalletBalance(updated),
         updatedSubscriptionBalance: effectiveRemaining(subAfter),
       });
       return res.status(response.statusCode).json({
@@ -722,6 +720,7 @@ router.post(
     await assertCustomer(ownerId, customerId);
 
     const amt = Number(value.amount);
+    let walletChargeBefore = null;
 
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -758,6 +757,7 @@ router.post(
         // Manual charges always hit wallet (not subscription prepaid balance).
         const cust = await Customer.findById(customerId).session(session).lean();
         if (!cust) throw new ApiError(404, "Customer not found");
+        walletChargeBefore = cust;
         const wallet = effectiveWallet(cust);
         if (wallet < amt) {
           throw new ApiError(400, "Insufficient wallet balance");
@@ -808,9 +808,18 @@ router.post(
       await session.commitTransaction();
       session.endSession();
 
+      if (walletChargeBefore && customer) {
+        await notifyIfWalletJustHitZero({
+          ownerId,
+          customerId,
+          customerBefore: walletChargeBefore,
+          customerAfter: customer,
+        });
+      }
+
       const response = new ApiResponse(200, "Charge recorded", {
         success: true,
-        updatedWalletBalance: effectiveWallet(customer),
+        updatedWalletBalance: displayWalletBalance(customer),
         updatedSubscriptionBalance: effectiveRemaining(subAfter),
       });
       return res.status(response.statusCode).json({
@@ -823,6 +832,55 @@ router.post(
       session.endSession();
       throw e;
     }
+  })
+);
+
+/**
+ * POST /api/v1/customer-details/:customerId/notify-wallet-reminder
+ * Push + in-app reminder; returns WhatsApp text for optional follow-up.
+ */
+router.post(
+  "/:customerId/notify-wallet-reminder",
+  asyncHandler(async (req, res) => {
+    const ownerId = resolveOwnerId(req);
+    const { customerId } = req.params;
+    const customer = await assertCustomer(ownerId, customerId);
+    const w = displayWalletBalance(customer);
+    const name = (customer.name || "").trim();
+    const whatsappMessage = !name
+      ? `Hi, your Tiffin wallet balance is ₹${w.toFixed(0)}. Please top up when you can. 🙏`
+      : `Hi ${name}, your Tiffin wallet balance is ₹${w.toFixed(0)}. Please top up when you can. 🙏`;
+
+    const pushMessage = name
+      ? `${name}, your wallet balance is ₹${w.toFixed(0)}. Please top up when you can.`
+      : `Your wallet balance is ₹${w.toFixed(0)}. Please top up when you can.`;
+
+    try {
+      await sendNotification({
+        customerId,
+        ownerId,
+        type: NOTIFICATION_TYPES.LOW_BALANCE,
+        title: "Wallet reminder",
+        message: pushMessage,
+        data: {
+          walletBalance: w,
+          screen: "wallet",
+          reason: "vendor_reminder",
+        },
+      });
+    } catch (err) {
+      console.error("[notify-wallet-reminder]", err?.message || err);
+    }
+
+    const response = new ApiResponse(200, "Reminder sent", {
+      walletBalance: w,
+      whatsappMessage,
+    });
+    return res.status(response.statusCode).json({
+      success: response.success,
+      message: response.message,
+      data: response.data,
+    });
   })
 );
 
@@ -867,20 +925,14 @@ router.get(
     const startMs = new Date(`${startYmd}T00:00:00+05:30`).getTime();
     const endMs = new Date(`${endYmd}T00:00:00+05:30`).getTime();
     const dayMs = 86400000;
-    const totalDays =
-      startMs > endMs
-        ? 0
-        : Math.floor((endMs - startMs) / dayMs) + 1;
-
-    const todayYmd = istTodayYmd();
-    const todayMs = new Date(`${todayYmd}T00:00:00+05:30`).getTime();
-    const remStartMs = Math.max(startMs, todayMs);
-    let remainingDays = 0;
-    if (remStartMs <= endMs) {
-      for (let t = remStartMs; t <= endMs; t += dayMs) {
-        remainingDays += 1;
-      }
-    }
+    const totalDays = totalDaysInclusiveIST(
+      subscription.startDate,
+      subscription.endDate
+    );
+    const remainingDays = remainingDaysInclusiveIST(
+      subscription.startDate,
+      subscription.endDate
+    );
 
     const rangeStart = new Date(`${startYmd}T00:00:00+05:30`);
     const rangeEnd = new Date(`${endYmd}T23:59:59.999+05:30`);

@@ -262,6 +262,7 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/utils/subscription_calendar_days.dart';
 import '../../../models/customer_detail_subscription_model.dart';
 import '../../../services/customer_detail_service.dart';
 import 'customer_info_tab.dart';
@@ -493,7 +494,12 @@ class _ActivePlanFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool lowDays = plan.remainingDays <= 5;
+    final start = DateTime.tryParse(plan.startDate);
+    final end = DateTime.tryParse(plan.endDate);
+    final int displayRemaining = (start != null && end != null)
+        ? remainingDaysInclusiveIST(start, end)
+        : plan.remainingDays;
+    final bool lowDays = displayRemaining <= 5;
 
     return Container(
       decoration: BoxDecoration(
@@ -518,7 +524,7 @@ class _ActivePlanFields extends StatelessWidget {
           _FieldRow(
             icon: Icons.hourglass_bottom_rounded,
             label: 'Days remaining',
-            value: '${plan.remainingDays}',
+            value: '$displayRemaining',
             valueColor: lowDays ? Colors.orange.shade700 : _C.primary,
           ),
         ],

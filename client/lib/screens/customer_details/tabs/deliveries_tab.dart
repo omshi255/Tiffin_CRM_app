@@ -568,6 +568,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/utils/subscription_calendar_days.dart';
 import '../../../models/customer_detail_delivery_model.dart';
 import '../../../services/customer_detail_service.dart';
 
@@ -960,8 +961,14 @@ class _SubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalDays = sub.totalDays;
-    final remaining = sub.remainingDays;
+    final start = DateTime.tryParse(sub.startDate);
+    final end = DateTime.tryParse(sub.endDate);
+    final int totalDays = (start != null && end != null)
+        ? totalDaysInclusiveIST(start, end)
+        : sub.totalDays;
+    final int remaining = (start != null && end != null)
+        ? remainingDaysInclusiveIST(start, end)
+        : sub.remainingDays;
     final done = totalDays > 0 ? ((totalDays - remaining) / totalDays).clamp(0.0, 1.0) : 0.0;
 
     return Container(

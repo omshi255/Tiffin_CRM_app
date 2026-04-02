@@ -472,6 +472,7 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
   bool _loading = true;
   String? _error;
   bool _sendingLink = false;
+  bool _sendingWalletReminder = false;
 
   @override
   void initState() {
@@ -508,6 +509,42 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
       if (mounted) ErrorHandler.show(context, e);
     } finally {
       if (mounted) setState(() => _sendingLink = false);
+    }
+  }
+
+  Future<void> _onCallTap(String phone) async {
+    final ok = await WhatsAppHelper.callPhone(phone);
+    if (!mounted) return;
+    if (!ok) {
+      AppSnackbar.error(context, 'Could not open phone dialer');
+    }
+  }
+
+  Future<void> _sendWalletReminder(CustomerDetailInfo info) async {
+    setState(() => _sendingWalletReminder = true);
+    try {
+      final data =
+          await CustomerDetailService.notifyWalletReminder(widget.customerId);
+      if (!mounted) return;
+      final msg = data['whatsappMessage']?.toString() ??
+          WhatsAppHelper.lowBalanceMessage(
+            info.name,
+            (data['walletBalance'] as num?)?.toDouble() ?? 0,
+          );
+      final ok = await WhatsAppHelper.openWithMessage(info.phone, msg);
+      if (!mounted) return;
+      if (ok) {
+        AppSnackbar.success(context, 'Reminder sent (notification + WhatsApp)');
+      } else {
+        AppSnackbar.success(
+          context,
+          'In-app reminder sent. Open WhatsApp manually if needed.',
+        );
+      }
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    } finally {
+      if (mounted) setState(() => _sendingWalletReminder = false);
     }
   }
 
@@ -706,7 +743,7 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
                 sub: 'Open dialer',
                 iconBg: _P.redBg,
                 iconColor: _P.red,
-                onTap: () => WhatsAppHelper.openChat(i.phone),
+                onTap: () => _onCallTap(i.phone),
               ),
               _ActionTile(
                 icon: Icons.chat_rounded,
@@ -727,10 +764,10 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
               _ActionTile(
                 icon: Icons.notifications_outlined,
                 label: 'Low balance',
-                sub: 'Send reminder',
+                sub: _sendingWalletReminder ? 'Sending…' : 'Send reminder',
                 iconBg: _P.amberBg,
                 iconColor: _P.amber,
-                onTap: () {},
+                onTap: _sendingWalletReminder ? () {} : () => _sendWalletReminder(i),
               ),
             ],
           ),

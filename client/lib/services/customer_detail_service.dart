@@ -277,6 +277,28 @@ abstract final class CustomerDetailService {
     }
   }
 
+  /// Push + in-app wallet reminder; response includes [whatsappMessage] for WhatsApp.
+  static Future<Map<String, dynamic>> notifyWalletReminder(
+    String customerId,
+  ) async {
+    await _ensureNetwork();
+    try {
+      final res = await DioClient.instance.post(
+        '$_prefix/$customerId/notify-wallet-reminder',
+      );
+      final data = _parse(res);
+      if (data is! Map<String, dynamic>) {
+        throw ApiException('Invalid response', res.statusCode);
+      }
+      return data;
+    } on DioException catch (e) {
+      throw ApiException(
+        e.message ?? 'Network error',
+        e.response?.statusCode,
+      );
+    }
+  }
+
   /// Requests a one-time customer portal login link for WhatsApp sharing.
   static Future<Map<String, dynamic>> sendLoginLink(String customerId) async {
     await _ensureNetwork();

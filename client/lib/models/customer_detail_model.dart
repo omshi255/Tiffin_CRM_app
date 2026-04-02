@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// Wallet + subscription balances for the Balance tab.
 class CustomerDetailBalance {
   const CustomerDetailBalance({
@@ -9,10 +11,11 @@ class CustomerDetailBalance {
   final double subscriptionBalance;
 
   factory CustomerDetailBalance.fromJson(Map<String, dynamic> json) {
+    final raw = (json['walletBalance'] is num)
+        ? (json['walletBalance'] as num).toDouble()
+        : 0.0;
     return CustomerDetailBalance(
-      walletBalance: (json['walletBalance'] is num)
-          ? (json['walletBalance'] as num).toDouble()
-          : 0,
+      walletBalance: math.max(0, raw),
       subscriptionBalance: (json['subscriptionBalance'] is num)
           ? (json['subscriptionBalance'] as num).toDouble()
           : 0,

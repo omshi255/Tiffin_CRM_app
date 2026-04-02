@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 class CustomerModel {
   const CustomerModel({
     required this.id,
@@ -36,7 +38,12 @@ class CustomerModel {
   final DateTime? createdAt;
 
   String get fullName => name;
-  double get effectiveWalletBalance => walletBalance ?? balance ?? 0;
+
+  /// Canonical wallet (walletBalance, else legacy balance), never negative for display.
+  double get effectiveWalletBalance => math.max(
+        0,
+        walletBalance ?? balance ?? 0,
+      );
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
     final id = json['_id']?.toString() ?? json['id']?.toString() ?? '';

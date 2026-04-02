@@ -4,10 +4,12 @@ import '../../../../core/router/app_routes.dart';
 // ignore: unused_import
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
+import '../../../../core/utils/subscription_calendar_days.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../../../../core/utils/whatsapp_helper.dart';
 import '../../../../core/widgets/bottom_sheet_handle.dart';
 import '../../../../models/customer_model.dart';
+import '../../../../services/customer_detail_service.dart';
 import '../../data/customer_api.dart';
 import '../../../subscriptions/data/subscription_api.dart';
 import '../../../subscriptions/models/subscription_model.dart';
@@ -168,6 +170,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   CustomerModel? _customer;
   List<SubscriptionModel> _subscriptions = [];
   bool _isLoading = true;
+  bool _sendingWalletReminder = false;
 
   @override
   void initState() {
@@ -251,14 +254,40 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     );
   }
 
-  void _openWhatsAppLowBalance() {
-    final phone = _customer?.whatsapp ?? _customer?.phone ?? '';
-    if (phone.isEmpty) return;
-    final msg = WhatsAppHelper.lowBalanceMessage(
-      _customer!.name,
-      _customer!.effectiveWalletBalance,
-    );
-    WhatsAppHelper.openWithMessage(phone, msg);
+  Future<void> _sendWalletReminder() async {
+    final c = _customer;
+    if (c == null) return;
+    setState(() => _sendingWalletReminder = true);
+    try {
+      final data = await CustomerDetailService.notifyWalletReminder(c.id);
+      if (!mounted) return;
+      final msg = data['whatsappMessage']?.toString() ??
+          WhatsAppHelper.lowBalanceMessage(
+            c.name,
+            (data['walletBalance'] as num?)?.toDouble() ??
+                c.effectiveWalletBalance,
+          );
+      final phone =
+          (c.whatsapp?.isNotEmpty == true) ? c.whatsapp! : c.phone;
+      if (phone.isEmpty) {
+        AppSnackbar.error(context, 'No phone number');
+        return;
+      }
+      final ok = await WhatsAppHelper.openWithMessage(phone, msg);
+      if (!mounted) return;
+      if (ok) {
+        AppSnackbar.success(context, 'Reminder sent (notification + WhatsApp)');
+      } else {
+        AppSnackbar.success(
+          context,
+          'In-app reminder sent. Open WhatsApp manually if needed.',
+        );
+      }
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    } finally {
+      if (mounted) setState(() => _sendingWalletReminder = false);
+    }
   }
 
   void _confirmDelete() {
@@ -683,9 +712,30 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: Column(
                     children: [
-                      // Row 1: WhatsApp + Credit Wallet
+                      // Row 1: Call + WhatsApp + Credit Wallet
                       Row(
                         children: [
+                          Expanded(
+                            child: _actionBtn(
+                              icon: Icons.phone_rounded,
+                              label: 'Call',
+                              fg: _P.redTxt,
+                              bg: _P.redBg,
+                              bdr: _P.redBdr,
+                              onTap: () async {
+                                final ok =
+                                    await WhatsAppHelper.callPhone(c.phone);
+                                if (!mounted) return;
+                                if (!ok) {
+                                  AppSnackbar.error(
+                                    context,
+                                    'Could not open phone dialer',
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: _actionBtn(
                               icon: Icons.chat_rounded,
@@ -698,11 +748,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: _actionBtn(
                               icon: Icons.account_balance_wallet_outlined,
-                              label: 'Credit Wallet',
+                              label: 'Wallet',
                               fg: _P.v700,
                               bg: _P.v50,
                               bdr: _P.v300,
@@ -737,19 +787,18 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                       ),
 
                       const SizedBox(height: 10),
-                      // Low balance alert (conditional)
-                      if (isLowBalance) ...[
-                        _actionBtn(
-                          icon: Icons.chat_rounded,
-                          label: 'Send Low Balance Reminder',
-                          fg: _P.amberTxt,
-                          bg: _P.amberBg,
-                          bdr: _P.amberBdr,
-                          onTap: _openWhatsAppLowBalance,
-                          fullWidth: true,
-                        ),
-                        const SizedBox(height: 10),
-                      ],
+                      _actionBtn(
+                        icon: Icons.notifications_outlined,
+                        label: _sendingWalletReminder
+                            ? 'Sending reminder…'
+                            : 'Send wallet reminder',
+                        fg: _P.amberTxt,
+                        bg: _P.amberBg,
+                        bdr: _P.amberBdr,
+                        onTap: _sendingWalletReminder ? () {} : _sendWalletReminder,
+                        fullWidth: true,
+                      ),
+                      const SizedBox(height: 10),
 
                       // Delete
                       _actionBtn(
@@ -825,12 +874,14 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         final isDone =
                             s.status.toLowerCase() == 'expired' ||
                             s.status.toLowerCase() == 'cancelled';
-                        final totalDays = s.endDate
-                            .difference(s.startDate)
-                            .inDays;
-                        final remaining = s.endDate.isAfter(DateTime.now())
-                            ? s.endDate.difference(DateTime.now()).inDays
-                            : 0;
+                        final totalDays = totalDaysInclusiveIST(
+                          s.startDate,
+                          s.endDate,
+                        );
+                        final remaining = remainingDaysInclusiveIST(
+                          s.startDate,
+                          s.endDate,
+                        );
                         final progress = totalDays > 0
                             ? (1 - (remaining / totalDays)).clamp(0.0, 1.0)
                             : 1.0;

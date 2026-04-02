@@ -7,6 +7,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import { effectiveRemaining } from "../utils/subscriptionBalance.js";
+import { displayWalletBalance } from "../utils/customerWallet.js";
 
 const ORDER_STATUSES = [
   "pending",
@@ -17,11 +18,6 @@ const ORDER_STATUSES = [
   "failed",
   "skipped",
 ];
-
-function effectiveWallet(customer) {
-  if (customer?.walletBalance != null) return Number(customer.walletBalance);
-  return Number(customer?.balance ?? 0);
-}
 
 // Allow portal users to update contact + profile fields (phone is the login identity for many flows).
 const PHONE_PATTERN = /^\d{10,15}$/;
@@ -91,7 +87,7 @@ export const getMyBalance = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     new ApiResponse(200, "Balance fetched", {
-      walletBalance: effectiveWallet(customer),
+      walletBalance: displayWalletBalance(customer),
       subscriptionBalance: effectiveRemaining(subscription),
     })
   );

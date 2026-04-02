@@ -512,15 +512,6 @@ class _P {
         textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
       );
 
-  // Outlined red button style
-  static ButtonStyle get redOutlineBtn => OutlinedButton.styleFrom(
-        foregroundColor: _P.redDark,
-        side: const BorderSide(color: _P.red, width: 1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        padding: const EdgeInsets.symmetric(vertical: 13),
-        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-      );
-
   // Outlined purple button style
   static ButtonStyle get purpleOutlineBtn => OutlinedButton.styleFrom(
         foregroundColor: _P.g1,
@@ -555,10 +546,6 @@ class _BalanceTabState extends State<BalanceTab> {
 
   final _addForm = GlobalKey<FormState>();
   final _extraForm = GlobalKey<FormState>();
-
-  // UI-only: scroll anchors for the quick-action buttons
-  final _addSectionKey = GlobalKey();
-  final _extraSectionKey = GlobalKey();
 
   @override
   void initState() {
@@ -688,13 +675,6 @@ class _BalanceTabState extends State<BalanceTab> {
     }
   }
 
-  void _scrollTo(GlobalKey key) {
-    final ctx = key.currentContext;
-    if (ctx == null) return;
-    Scrollable.ensureVisible(ctx,
-        duration: const Duration(milliseconds: 350), curve: Curves.easeInOut);
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -820,38 +800,6 @@ class _BalanceTabState extends State<BalanceTab> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const Divider(height: 1, thickness: 0.8, color: _P.s200),
-                const SizedBox(height: 14),
-
-                // ── Quick action buttons ────────────────────────────
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 42,
-                        child: ElevatedButton.icon(
-                          style: _P.solidBtn,
-                          icon: const Icon(Icons.add_rounded, size: 16),
-                          label: const Text('Add Amount'),
-                          onPressed: () => _scrollTo(_addSectionKey),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SizedBox(
-                        height: 42,
-                        child: OutlinedButton.icon(
-                          style: _P.redOutlineBtn,
-                          icon: const Icon(Icons.remove_rounded, size: 16),
-                          label: const Text('Deduct Amount'),
-                          onPressed: () => _scrollTo(_extraSectionKey),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -859,7 +807,6 @@ class _BalanceTabState extends State<BalanceTab> {
 
           // ── Add Balance section ───────────────────────────────────
           Row(
-            key: _addSectionKey,
             children: const [
               Icon(Icons.add_circle_outline_rounded, color: _P.green, size: 18),
               SizedBox(width: 6),
@@ -939,7 +886,6 @@ class _BalanceTabState extends State<BalanceTab> {
 
           // ── Extra Charge section ──────────────────────────────────
           Row(
-            key: _extraSectionKey,
             children: const [
               Icon(Icons.remove_circle_outline_rounded, color: _P.red, size: 18),
               SizedBox(width: 6),

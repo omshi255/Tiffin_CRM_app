@@ -6,11 +6,13 @@ import Subscription, {
 import Customer from "../models/Customer.model.js";
 import MealPlan from "../models/Plan.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { effectiveWallet } from "../utils/customerWallet.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import { generateDailyOrdersForDate } from "../services/dailyOrder.service.js";
 import { sendNotification } from "../services/inAppNotification.service.js";
 import { NOTIFICATION_TYPES } from "../utils/notificationTypes.js";
+import { notifyIfWalletJustHitZero } from "../utils/walletZeroNotification.js";
 
 const pauseSchema = Joi.object({
   pausedFrom: Joi.date().iso().required(),
@@ -256,11 +258,12 @@ export const createSubscription = asyncHandler(async (req, res) => {
   console.log("📅 Total Days:", totalDays);
   console.log("💰 Total Amount:", totalAmount);
 
-  const walletBalance = Number(customer.walletBalance ?? customer.balance ?? 0);
+  const walletBalance = effectiveWallet(customer);
   if (walletBalance < totalAmount) {
+    const shown = Math.max(0, walletBalance);
     throw new ApiError(
       400,
-      `Insufficient wallet balance. Available: ₹${walletBalance}, Required: ₹${totalAmount}`
+      `Insufficient wallet balance. Available: ₹${shown}, Required: ₹${totalAmount}`
     );
   }
 
@@ -303,6 +306,15 @@ export const createSubscription = asyncHandler(async (req, res) => {
     session.endSession();
     throw err;
   }
+
+  const customerAfterWallet = await Customer.findById(customerId).lean();
+  await notifyIfWalletJustHitZero({
+    ownerId,
+    customerId,
+    customerBefore: customer,
+    customerAfter: customerAfterWallet,
+  });
+
   await sendNotification({
     customerId: subscription.customerId,
     ownerId: ownerId.toString(),
@@ -383,11 +395,12 @@ export const renewSubscription = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Customer not found");
   }
 
-  const walletBalance = Number(customer.walletBalance ?? customer.balance ?? 0);
+  const walletBalance = effectiveWallet(customer);
   if (walletBalance < totalAmount) {
+    const shown = Math.max(0, walletBalance);
     throw new ApiError(
       400,
-      `Insufficient wallet balance. Available: ₹${walletBalance}, Required: ₹${totalAmount}`
+      `Insufficient wallet balance. Available: ₹${shown}, Required: ₹${totalAmount}`
     );
   }
 
@@ -429,6 +442,14 @@ export const renewSubscription = asyncHandler(async (req, res) => {
     session.endSession();
     throw err;
   }
+
+  const customerAfterRenew = await Customer.findById(subscription.customerId).lean();
+  await notifyIfWalletJustHitZero({
+    ownerId,
+    customerId: subscription.customerId,
+    customerBefore: customer,
+    customerAfter: customerAfterRenew,
+  });
 
   const response = new ApiResponse(200, "Subscription renewed", updated);
   res.status(response.statusCode).json({

@@ -34,11 +34,19 @@ abstract final class WhatsAppHelper {
     return false;
   }
 
-  static Future<void> callPhone(String phone) async {
-    final url = Uri.parse('tel:$phone');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    }
+  /// Opens the device phone dialer with [phone] (digits / + prefix preserved).
+  static Future<bool> callPhone(String phone) async {
+    var d = phone.replaceAll(RegExp(r'[\s\-().]'), '');
+    d = d.replaceAll(RegExp(r'[^\d+]'), '');
+    if (d.replaceAll('+', '').isEmpty) return false;
+    final uri = Uri.parse('tel:$d');
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return true;
+      }
+    } catch (_) {}
+    return false;
   }
 
   /// Low balance message template for customer.
