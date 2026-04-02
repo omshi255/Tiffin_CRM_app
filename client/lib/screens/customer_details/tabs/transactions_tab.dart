@@ -152,7 +152,7 @@ class _TransactionsTabState extends State<TransactionsTab> {
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: 6,
-          itemBuilder: (_, __) => Padding(
+          itemBuilder: (_, _) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Container(
               height: 72,

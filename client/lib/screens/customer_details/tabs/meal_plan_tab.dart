@@ -308,12 +308,19 @@ class _MealPlanTabState extends State<MealPlanTab> {
     });
     try {
       final d = await CustomerDetailService.fetchSubscriptions(widget.customerId);
-      if (mounted) setState(() { _data = d; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _data = d;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() {
-        _loading = false;
-        _error = e is ApiException ? (e.message ?? 'Error') : '$e';
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e is ApiException ? (e.message ?? 'Error') : '$e';
+        });
+      }
     }
   }
 

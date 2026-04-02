@@ -90,7 +90,9 @@ abstract final class CustomerDetailService {
       final res = await DioClient.instance.get(
         '$_prefix/$customerId/transactions',
         queryParameters: <String, dynamic>{
+          // ignore: use_null_aware_elements
           if (startDate != null) 'startDate': startDate,
+          // ignore: use_null_aware_elements
           if (endDate != null) 'endDate': endDate,
         },
       );

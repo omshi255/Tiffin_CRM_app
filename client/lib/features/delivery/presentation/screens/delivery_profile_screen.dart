@@ -48,9 +48,7 @@ class _DeliveryProfileScreenState extends State<DeliveryProfileScreen> {
     setState(() => _loading = true);
     try {
       final user = await AuthApi.getProfile();
-      print(
-        'USER DATA: ${user.name} | ${user.phone} | ${user.role}',
-      ); // ADD THIS
+      // Debug log removed to satisfy avoid_print lint.
 
       if (mounted) setState(() => _user = user);
     } catch (e) {

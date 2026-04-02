@@ -484,12 +484,19 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
     setState(() { _loading = true; _error = null; });
     try {
       final data = await CustomerDetailService.fetchInfo(widget.customerId);
-      if (mounted) setState(() { _info = data; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _info = data;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() {
-        _loading = false;
-        _error = e is ApiException ? (e.message ?? 'Error') : '$e';
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e is ApiException ? (e.message ?? 'Error') : '$e';
+        });
+      }
     }
   }
 
@@ -890,7 +897,7 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
     child: ListView.builder(
       padding: const EdgeInsets.all(14),
       itemCount: 5,
-      itemBuilder: (_, __) => Padding(
+      itemBuilder: (_, _) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Container(
           height: 72,

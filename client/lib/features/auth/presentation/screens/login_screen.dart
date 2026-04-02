@@ -424,12 +424,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _updateFcmToken() async {
     try {
       await NotificationService().registerTokenAfterLogin();
     } catch (_) {}
   }
 
+  // ignore: unused_element
   Future<void> _navigateAfterLogin(BuildContext context, UserModel user) async {
     final role = user.role;
     if (role == 'vendor') {
