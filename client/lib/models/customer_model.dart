@@ -1,5 +1,30 @@
 import 'dart:math' as math;
 
+/// Vendor fields exposed to customers (e.g. UPI for payments).
+class CustomerVendorInfo {
+  const CustomerVendorInfo({
+    this.businessName,
+    this.ownerName,
+    this.phone,
+    this.upiId,
+  });
+
+  final String? businessName;
+  final String? ownerName;
+  final String? phone;
+  final String? upiId;
+
+  factory CustomerVendorInfo.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return const CustomerVendorInfo();
+    return CustomerVendorInfo(
+      businessName: json['businessName']?.toString(),
+      ownerName: json['ownerName']?.toString(),
+      phone: json['phone']?.toString(),
+      upiId: json['upiId']?.toString(),
+    );
+  }
+}
+
 class CustomerModel {
   const CustomerModel({
     required this.id,
@@ -17,6 +42,7 @@ class CustomerModel {
     this.walletBalance,
     this.location,
     this.vendorId,
+    this.vendor,
     this.createdAt,
   });
 
@@ -35,6 +61,7 @@ class CustomerModel {
   final double? walletBalance;
   final GeoPoint? location;
   final String? vendorId;
+  final CustomerVendorInfo? vendor;
   final DateTime? createdAt;
 
   String get fullName => name;
@@ -92,6 +119,9 @@ class CustomerModel {
           : null,
       location: location,
       vendorId: json['vendorId']?.toString(),
+      vendor: json['vendor'] is Map<String, dynamic>
+          ? CustomerVendorInfo.fromJson(json['vendor'] as Map<String, dynamic>)
+          : null,
       createdAt: createdAt,
     );
   }

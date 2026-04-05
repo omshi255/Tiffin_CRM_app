@@ -259,8 +259,10 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen>
             notes: null,
             tags: null,
             balance: null,
+            walletBalance: null,
             location: null,
             vendorId: null,
+            vendor: null,
             status: 'active',
             createdAt: null,
           );

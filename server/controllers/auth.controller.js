@@ -62,6 +62,7 @@ const buildAuthUserPayload = (user, role, extra = {}) => {
     payload.businessName = (u.businessName || "").trim();
     payload.ownerName = (u.ownerName || "").trim();
     payload.address = (u.address || "").trim();
+    payload.upiId = (u.upiId || "").trim();
   }
   return payload;
 };
@@ -557,6 +558,7 @@ export const getMeController = asyncHandler(async (req, res, next) => {
     ownerName: user.ownerName || "",
     address: user.address || "",
     city: user.city,
+    upiId: (user.upiId || "").trim(),
     fcmToken: user.fcmToken,
     settings: user.settings,
     loginHistory: user.loginHistory || [],
@@ -629,6 +631,7 @@ export const updateMe = asyncHandler(async (req, res) => {
     address: Joi.string().trim().optional(),
     email: Joi.string().email().optional(),
     logoUrl: Joi.string().uri().optional(),
+    upiId: Joi.string().trim().max(100).allow("", null).optional(),
   }).min(1);
 
   const { error, value } = schema.validate(req.body, {
@@ -642,6 +645,15 @@ export const updateMe = asyncHandler(async (req, res) => {
   const updatePayload = { ...value };
   if (updatePayload.ownerName && !updatePayload.name) {
     updatePayload.name = updatePayload.ownerName;
+  }
+  if (updatePayload.upiId !== undefined && updatePayload.upiId !== null) {
+    updatePayload.upiId = String(updatePayload.upiId).trim();
+  }
+
+  const existingUser = await User.findById(req.user.userId).select("role").lean();
+  if (!existingUser) throw new ApiError(404, "User not found");
+  if (existingUser.role !== "vendor") {
+    delete updatePayload.upiId;
   }
 
   const user = await User.findByIdAndUpdate(
@@ -671,6 +683,7 @@ export const updateMe = asyncHandler(async (req, res) => {
       ownerName: user.ownerName || "",
       address: user.address || "",
       city: user.city,
+      upiId: (user.upiId || "").trim(),
       fcmToken: user.fcmToken,
     },
   });

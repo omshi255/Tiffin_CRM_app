@@ -41,6 +41,12 @@ const userSchema = new mongoose.Schema(
     logoUrl: {
       type: String,
     },
+    /** Shown on customer app for UPI payments (e.g. name@paytm). */
+    upiId: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     fcmToken: {
       type: String,
       default: null,

@@ -28,7 +28,10 @@ const normalizePhone = (phone) =>
 const sendOtpLimiter = rateLimit({
   windowMs: AUTH_WINDOW_MS,
   max: 30, // per IP
-  message: { success: false, message: "Too many OTP requests, try again later" },
+  message: {
+    success: false,
+    message: "Too many OTP requests, try again later",
+  },
 });
 
 const sendOtpPhoneLimiter = rateLimit({
@@ -55,7 +58,9 @@ const verifyOtpPhoneLimiter = rateLimit({
   max: 25, // per phone
   keyGenerator: (req) => {
     const phone = normalizePhone(req.body?.phone);
-    return phone ? `verify-otp:${phone}` : `verify-otp-ip:${ipKeyGenerator(req)}`;
+    return phone
+      ? `verify-otp:${phone}`
+      : `verify-otp-ip:${ipKeyGenerator(req)}`;
   },
   message: {
     success: false,
@@ -66,10 +71,18 @@ const verifyOtpPhoneLimiter = rateLimit({
 const refreshTokenLimiter = rateLimit({
   windowMs: AUTH_WINDOW_MS,
   max: 200,
-  message: { success: false, message: "Too many refresh requests, try again later" },
+  message: {
+    success: false,
+    message: "Too many refresh requests, try again later",
+  },
 });
 
-router.post("/send-otp", sendOtpLimiter, sendOtpPhoneLimiter, sendOtpController);
+router.post(
+  "/send-otp",
+  sendOtpLimiter,
+  sendOtpPhoneLimiter,
+  sendOtpController
+);
 router.post(
   "/verify-otp",
   verifyOtpLimiter,

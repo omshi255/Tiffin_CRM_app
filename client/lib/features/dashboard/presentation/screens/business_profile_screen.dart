@@ -38,6 +38,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   final _cityCtrl = TextEditingController();
   final _pincodeCtrl = TextEditingController();
   final _gstCtrl = TextEditingController();
+  final _upiCtrl = TextEditingController();
 
   bool _loading = true;
   bool _saving = false;
@@ -61,6 +62,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     _cityCtrl.dispose();
     _pincodeCtrl.dispose();
     _gstCtrl.dispose();
+    _upiCtrl.dispose();
     super.dispose();
   }
 
@@ -80,6 +82,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
           _emailCtrl.text = data['email'] as String? ?? '';
           _gstCtrl.text =
               data['gstNumber'] as String? ?? data['gst'] as String? ?? '';
+          _upiCtrl.text = data['upiId'] as String? ?? '';
           final address = data['address'];
           if (address is Map<String, dynamic>) {
             _addressCtrl.text = address['street'] as String? ?? '';
@@ -112,6 +115,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         'city': _cityCtrl.text.trim(),
         'pincode': _pincodeCtrl.text.trim(),
         'gstNumber': _gstCtrl.text.trim(),
+        'upiId': _upiCtrl.text.trim(),
       });
       if (mounted) {
         AppSnackbar.success(context, 'Business profile updated');
@@ -264,6 +268,27 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           ),
                         ),
                       ],
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // ── Customer payments (shown on customer app) ───────────
+                    _sectionLabel('UPI for customers'),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Customers see this on their app to pay you (e.g. yourname@paytm).',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _textSecondary.withValues(alpha: 0.9),
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _VioletField(
+                      controller: _upiCtrl,
+                      label: 'UPI ID',
+                      icon: Icons.currency_rupee_rounded,
+                      hint: 'e.g. vendor@oksbi',
                     ),
 
                     const SizedBox(height: 22),

@@ -10,6 +10,7 @@ class UserModel {
     this.logoUrl = '',
     this.city = '',
     this.address = '',
+    this.upiId = '',
     this.fcmToken = '',
     this.isActive = true,
   });
@@ -24,6 +25,7 @@ class UserModel {
   final String logoUrl;
   final String city;
   final String address;
+  final String upiId;
   final String fcmToken;
   final bool isActive;
 
@@ -43,6 +45,7 @@ class UserModel {
       logoUrl: json['logoUrl']?.toString() ?? '',
       city: json['city']?.toString() ?? '',
       address: json['address']?.toString() ?? '',
+      upiId: json['upiId']?.toString() ?? '',
       fcmToken: json['fcmToken']?.toString() ?? '',
       isActive: json['isActive'] as bool? ?? true,
     );
@@ -57,6 +60,7 @@ class UserModel {
       if (logoUrl.isNotEmpty) 'logoUrl': logoUrl,
       if (city.isNotEmpty) 'city': city,
       if (address.isNotEmpty) 'address': address,
+      if (upiId.isNotEmpty) 'upiId': upiId,
       'isActive': isActive,
       if (fcmToken.isNotEmpty) 'fcmToken': fcmToken,
     };

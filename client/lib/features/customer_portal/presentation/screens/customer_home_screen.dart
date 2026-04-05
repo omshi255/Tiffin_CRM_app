@@ -52,6 +52,8 @@ class CustomerHomeScreen extends StatefulWidget {
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   int _selectedIndex = 0;
   int _unreadCount = 0;
+  String? _vendorUpiId;
+  String _vendorPayLabel = 'vendor';
 
   static final List<Widget> _tabs = [
     RepaintBoundary(child: _CustomerHomeTab()),
@@ -65,6 +67,29 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   void initState() {
     super.initState();
     _loadUnreadCount();
+    _loadVendorUpiBanner();
+  }
+
+  Future<void> _loadVendorUpiBanner() async {
+    try {
+      final profile = await CustomerPortalApi.getMyProfile();
+      final v = profile.vendor;
+      final upi = v?.upiId?.trim() ?? '';
+      if (!mounted) return;
+      if (upi.isEmpty) {
+        setState(() => _vendorUpiId = null);
+        return;
+      }
+      final biz = v?.businessName?.trim() ?? '';
+      final owner = v?.ownerName?.trim() ?? '';
+      final label = biz.isNotEmpty ? biz : (owner.isNotEmpty ? owner : 'vendor');
+      setState(() {
+        _vendorUpiId = upi;
+        _vendorPayLabel = label;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _vendorUpiId = null);
+    }
   }
 
   Future<void> _loadUnreadCount() async {
@@ -179,7 +204,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           child: Container(height: 1, color: _border),
         ),
       ),
-      body: IndexedStack(index: _selectedIndex, children: _tabs),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_vendorUpiId != null && _vendorUpiId!.isNotEmpty)
+            _CustomerVendorUpiBanner(
+              vendorLabel: _vendorPayLabel,
+              upiId: _vendorUpiId!,
+            ),
+          Expanded(
+            child: IndexedStack(index: _selectedIndex, children: _tabs),
+          ),
+        ],
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: _surface,
@@ -293,6 +330,69 @@ class _NavItem extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Shown under the app bar on every customer tab when the vendor set a UPI ID.
+class _CustomerVendorUpiBanner extends StatelessWidget {
+  const _CustomerVendorUpiBanner({
+    required this.vendorLabel,
+    required this.upiId,
+  });
+
+  final String vendorLabel;
+  final String upiId;
+
+  Future<void> _copy(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: upiId));
+    if (!context.mounted) return;
+    AppSnackbar.success(context, 'UPI ID copied');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: _green50,
+      child: InkWell(
+        onTap: () => _copy(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              Icon(Icons.qr_code_2_rounded, color: _green700, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Pay $vendorLabel (UPI)',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: _text2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      upiId,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: _text1,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.copy_rounded, size: 20, color: _green600),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

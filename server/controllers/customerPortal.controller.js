@@ -1,5 +1,6 @@
 import Joi from "joi";
 import Customer from "../models/Customer.model.js";
+import User from "../models/User.model.js";
 import Subscription from "../models/Subscription.model.js";
 import DailyOrder from "../models/DailyOrder.model.js";
 import Notification from "../models/Notification.model.js";
@@ -42,6 +43,20 @@ const ordersQuerySchema = Joi.object({
     .optional(),
 });
 
+const vendorPublicForCustomer = async (ownerId) => {
+  if (!ownerId) return null;
+  const v = await User.findById(ownerId)
+    .select("businessName ownerName phone upiId")
+    .lean();
+  if (!v) return null;
+  return {
+    businessName: (v.businessName || "").trim(),
+    ownerName: (v.ownerName || "").trim(),
+    phone: (v.phone || "").trim(),
+    upiId: (v.upiId || "").trim(),
+  };
+};
+
 /**
  * GET /api/v1/customer/me
  */
@@ -56,7 +71,11 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 
   if (!customer) throw new ApiError(404, "Customer profile not found");
 
-  res.status(200).json(new ApiResponse(200, "Profile fetched", customer));
+  const vendor = await vendorPublicForCustomer(customer.ownerId);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Profile fetched", { ...customer, vendor }));
 });
 
 /**
@@ -163,7 +182,11 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 
   if (!updated) throw new ApiError(404, "Customer profile not found");
 
-  res.status(200).json(new ApiResponse(200, "Profile updated", updated));
+  const vendor = await vendorPublicForCustomer(updated.ownerId);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Profile updated", { ...updated, vendor }));
 });
 
 /**
@@ -187,7 +210,7 @@ export const getMyActivePlan = asyncHandler(async (req, res) => {
         select: "name unitPrice unit",
       },
     })
-    .populate("ownerId", "businessName ownerName phone")
+    .populate("ownerId", "businessName ownerName phone upiId")
     .lean();
 
   if (!subscription) {
