@@ -290,7 +290,9 @@ router.get(
     const { customerId, transactionId } = req.params;
     await assertCustomer(ownerId, customerId);
 
-    const vendor = await User.findById(ownerId).select("businessName ownerName").lean();
+    const vendor = await User.findById(ownerId)
+      .select("businessName ownerName")
+      .lean();
     const businessName =
       vendor?.businessName || vendor?.ownerName || "Business";
 
@@ -309,7 +311,8 @@ router.get(
       const payload = {
         businessName,
         date: p.paymentDate ? new Date(p.paymentDate).toISOString() : "",
-        description: p.notes || (p.type === "wallet_credit" ? "Wallet credit" : "Payment"),
+        description:
+          p.notes || (p.type === "wallet_credit" ? "Wallet credit" : "Payment"),
         items,
         total,
         paymentMode: p.paymentMethod || "cash",
@@ -411,8 +414,7 @@ router.get(
       id: `pay_${p._id.toString()}`,
       date: p.paymentDate ? new Date(p.paymentDate).toISOString() : "",
       description:
-        p.notes ||
-        (p.type === "wallet_credit" ? "Wallet credit" : "Payment"),
+        p.notes || (p.type === "wallet_credit" ? "Wallet credit" : "Payment"),
       amount: Number(p.amount) || 0,
       type: p.type === "wallet_credit" ? "credit" : "debit",
       paymentMode: p.paymentMethod || "cash",
@@ -755,7 +757,9 @@ router.post(
         );
       } else {
         // Manual charges always hit wallet (not subscription prepaid balance).
-        const cust = await Customer.findById(customerId).session(session).lean();
+        const cust = await Customer.findById(customerId)
+          .session(session)
+          .lean();
         if (!cust) throw new ApiError(404, "Customer not found");
         walletChargeBefore = cust;
         const wallet = effectiveWallet(cust);
@@ -794,7 +798,9 @@ router.post(
         );
       }
 
-      const customer = await Customer.findById(customerId).session(session).lean();
+      const customer = await Customer.findById(customerId)
+        .session(session)
+        .lean();
       const subAfter = await Subscription.findOne({
         ownerId,
         customerId,
@@ -1055,7 +1061,9 @@ router.patch(
       orderDate: { $gte: start, $lte: end },
     }).lean();
 
-    const itemsText = formatOrderItems(orders.flatMap((o) => o.resolvedItems || []));
+    const itemsText = formatOrderItems(
+      orders.flatMap((o) => o.resolvedItems || [])
+    );
 
     await DeliverySchedule.findOneAndUpdate(
       { customerId, date: { $gte: start, $lte: end } },

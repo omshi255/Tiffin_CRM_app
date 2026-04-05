@@ -56,9 +56,7 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 
   if (!customer) throw new ApiError(404, "Customer profile not found");
 
-  res
-    .status(200)
-    .json(new ApiResponse(200, "Profile fetched", customer));
+  res.status(200).json(new ApiResponse(200, "Profile fetched", customer));
 });
 
 /**
@@ -128,8 +126,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 
     if (!existing) throw new ApiError(404, "Customer profile not found");
 
-    const ownerId =
-      ownerIdFromToken || existing.ownerId?.toString?.() || null;
+    const ownerId = ownerIdFromToken || existing.ownerId?.toString?.() || null;
     if (!ownerId) {
       throw new ApiError(403, "Owner context not found for this customer");
     }
@@ -183,8 +180,12 @@ export const getMyActivePlan = asyncHandler(async (req, res) => {
   })
     .populate({
       path: "planId",
-      select: "planName price planType mealSlots includesBreakfast includesLunch includesDinner",
-      populate: { path: "mealSlots.items.itemId", select: "name unitPrice unit" },
+      select:
+        "planName price planType mealSlots includesBreakfast includesLunch includesDinner",
+      populate: {
+        path: "mealSlots.items.itemId",
+        select: "name unitPrice unit",
+      },
     })
     .populate("ownerId", "businessName ownerName phone")
     .lean();
@@ -368,10 +369,7 @@ export const markAllNotificationsRead = asyncHandler(async (req, res) => {
   const { customerId } = req.user;
   if (!customerId) throw new ApiError(403, "Customer ID not found in token");
 
-  await Notification.updateMany(
-    { customerId },
-    { $set: { isRead: true } }
-  );
+  await Notification.updateMany({ customerId }, { $set: { isRead: true } });
 
   res
     .status(200)

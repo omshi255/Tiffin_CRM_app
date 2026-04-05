@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getSummary,
   getTodayDeliveries,
+  getDeliveredOrderAmount,
   getExpiringSubscriptions,
   getPendingPayments,
 } from "../controllers/report.controller.js";
@@ -15,6 +16,7 @@ router.use(requireRole(["vendor", "admin"]));
 
 router.get("/summary", getSummary);
 router.get("/today-deliveries", getTodayDeliveries);
+router.get("/delivered-amount", getDeliveredOrderAmount);
 router.get("/expiring-subscriptions", getExpiringSubscriptions);
 router.get("/pending-payments", getPendingPayments);
 

@@ -8,32 +8,42 @@ import '../models/user_model.dart';
 
 abstract final class AuthApi {
   static Future<void> sendOtp(String phone) async {
-    final dio = Dio(BaseOptions(
-      baseUrl: DioClient.instance.options.baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-    ));
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: DioClient.instance.options.baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    );
     final response = await dio.post(
       ApiEndpoints.sendOtp,
       data: {'phone': phone},
       options: Options(
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
       ),
     );
     throwIfNotSuccess(response);
   }
 
   static Future<AuthResponseModel> verifyOtp(String phone, String otp) async {
-    final dio = Dio(BaseOptions(
-      baseUrl: DioClient.instance.options.baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-    ));
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: DioClient.instance.options.baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    );
     final response = await dio.post(
       ApiEndpoints.verifyOtp,
       data: {'phone': phone, 'otp': otp},
       options: Options(
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
       ),
     );
     final data = response.data;
@@ -63,7 +73,10 @@ abstract final class AuthApi {
         ApiEndpoints.refreshToken,
         data: {'refreshToken': refreshToken},
         options: Options(
-          headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
         ),
       );
       final data = response.data;

@@ -3,7 +3,7 @@ import Subscription from "../models/Subscription.model.js";
 import MealPlan from "../models/Plan.model.js";
 import Item from "../models/Item.model.js";
 
-const parseUTC = (d) => {
+export const parseUTC = (d) => {
   if (!d) return new Date();
   if (d instanceof Date) {
     const date = new Date(d);

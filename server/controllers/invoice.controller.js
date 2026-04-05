@@ -261,8 +261,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
         for (const ri of order.resolvedItems) {
           const qty = ri.quantity ?? 1;
           const unitPrice = ri.unitPrice ?? 0;
-          const lineTotal =
-            ri.subtotal != null ? ri.subtotal : qty * unitPrice;
+          const lineTotal = ri.subtotal != null ? ri.subtotal : qty * unitPrice;
           subtotal += lineTotal;
           lineItems.push({
             name: ri.itemName || "Item",
@@ -404,8 +403,7 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
 
   const totalDeliveredItems = deliveries.reduce(
     (sum, slot) =>
-      sum +
-      slot.items.reduce((s, item) => s + (Number(item.quantity) || 0), 0),
+      sum + slot.items.reduce((s, item) => s + (Number(item.quantity) || 0), 0),
     0
   );
 
@@ -431,7 +429,8 @@ export const getDailyInvoiceReceipt = asyncHandler(async (req, res) => {
       address: customer.address || "",
       area: customer.area || "",
       customerCode:
-        customer.customerCode || customer._id.toString().slice(-6).toUpperCase(),
+        customer.customerCode ||
+        customer._id.toString().slice(-6).toUpperCase(),
     },
     subscription: {
       planName: subscription?.planId?.planName || "",

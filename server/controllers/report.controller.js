@@ -3,6 +3,7 @@ import {
   getTodayDeliveriesReport,
   getExpiringSubscriptionsReport,
   getPendingPaymentsReport,
+  getDeliveredOrderAmountReport,
 } from "../services/report.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
@@ -35,6 +36,24 @@ export const getTodayDeliveries = asyncHandler(async (req, res) => {
   const data = await getTodayDeliveriesReport(ownerId);
 
   const response = new ApiResponse(200, "Today's deliveries fetched", data);
+  res.status(response.statusCode).json(response);
+});
+
+/**
+ * GET /api/v1/reports/delivered-amount?date=YYYY-MM-DD
+ * Sum of DailyOrder.amount where status is delivered for that UTC orderDate day.
+ * Omit date for today (UTC). Vendor: own orders. Admin: all vendors.
+ */
+export const getDeliveredOrderAmount = asyncHandler(async (req, res) => {
+  const { date } = req.query;
+  const ownerId = req.user.role === "admin" ? null : req.user.userId;
+  const data = await getDeliveredOrderAmountReport(ownerId, date);
+
+  const response = new ApiResponse(
+    200,
+    "Delivered order amount fetched",
+    data
+  );
   res.status(response.statusCode).json(response);
 });
 

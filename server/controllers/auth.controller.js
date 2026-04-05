@@ -30,9 +30,7 @@ const getDeliveryStaffDisplayName = async (userId, staffIdFromToken) => {
       .lean();
     if (byId?.name?.trim()) return byId.name.trim();
   }
-  const byUser = await DeliveryStaff.findOne({ userId })
-    .select("name")
-    .lean();
+  const byUser = await DeliveryStaff.findOne({ userId }).select("name").lean();
   if (byUser?.name?.trim()) return byUser.name.trim();
   return "";
 };
@@ -43,7 +41,8 @@ const getDeliveryStaffDisplayName = async (userId, staffIdFromToken) => {
  * Pass [staffDisplayName] in [extra] for delivery_staff (stripped from spread output).
  */
 const buildAuthUserPayload = (user, role, extra = {}) => {
-  const u = user && typeof user.toObject === "function" ? user.toObject() : user;
+  const u =
+    user && typeof user.toObject === "function" ? user.toObject() : user;
   const id = u._id?.toString?.() ?? String(u._id);
   const { staffDisplayName, ...restExtra } = extra;
   const name = (
@@ -240,9 +239,19 @@ export const resetPasswordController = asyncHandler(async (req, res, next) => {
   // Admin is never overridden
   let resolved;
   if (user.role === "admin") {
-    resolved = { role: "admin", ownerId: null, staffId: null, customerId: null };
+    resolved = {
+      role: "admin",
+      ownerId: null,
+      staffId: null,
+      customerId: null,
+    };
   } else if (user.role === "vendor") {
-    resolved = { role: "vendor", ownerId: null, staffId: null, customerId: null };
+    resolved = {
+      role: "vendor",
+      ownerId: null,
+      staffId: null,
+      customerId: null,
+    };
   } else {
     resolved = await resolveRoleForPhone(user.phone);
   }
@@ -449,9 +458,19 @@ export const refreshTokenController = asyncHandler(async (req, res, next) => {
   // Admin is never overridden; vendor uses stored role; others use resolveRoleForPhone
   let resolved;
   if (user.role === "admin") {
-    resolved = { role: "admin", ownerId: null, staffId: null, customerId: null };
+    resolved = {
+      role: "admin",
+      ownerId: null,
+      staffId: null,
+      customerId: null,
+    };
   } else if (user.role === "vendor") {
-    resolved = { role: "vendor", ownerId: null, staffId: null, customerId: null };
+    resolved = {
+      role: "vendor",
+      ownerId: null,
+      staffId: null,
+      customerId: null,
+    };
   } else {
     resolved = await resolveRoleForPhone(user.phone);
   }

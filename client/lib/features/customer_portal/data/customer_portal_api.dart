@@ -41,7 +41,9 @@ abstract final class CustomerPortalApi {
     return CustomerModel.fromJson(data);
   }
 
-  static Future<CustomerModel> updateMyProfile(Map<String, dynamic> body) async {
+  static Future<CustomerModel> updateMyProfile(
+    Map<String, dynamic> body,
+  ) async {
     final response = await DioClient.instance.put(
       ApiEndpoints.customerMe,
       data: body,
@@ -53,7 +55,9 @@ abstract final class CustomerPortalApi {
 
   static Future<CustomerBalanceModel> getMyBalance() async {
     try {
-      final response = await DioClient.instance.get(ApiEndpoints.customerMeBalance);
+      final response = await DioClient.instance.get(
+        ApiEndpoints.customerMeBalance,
+      );
       final data = parseData(response);
       if (data is! Map<String, dynamic>) throw ApiException('Invalid response');
       return CustomerBalanceModel.fromJson(data);
@@ -95,17 +99,27 @@ abstract final class CustomerPortalApi {
     );
     final data = parseData(response);
     if (data is! Map<String, dynamic>) {
-      return {'orders': <OrderModel>[], 'total': 0, 'page': page, 'totalPages': 0};
+      return {
+        'orders': <OrderModel>[],
+        'total': 0,
+        'page': page,
+        'totalPages': 0,
+      };
     }
     final list = data['data'] is List ? data['data'] as List : [];
     final orders = list
         .whereType<Map<String, dynamic>>()
         .map((e) => OrderModel.fromJson(e))
         .toList();
-    final total = (data['total'] is num) ? (data['total'] as num).toInt() : orders.length;
-    final currentPage = (data['page'] is num) ? (data['page'] as num).toInt() : page;
-    final totalPages =
-        (data['totalPages'] is num) ? (data['totalPages'] as num).toInt() : 1;
+    final total = (data['total'] is num)
+        ? (data['total'] as num).toInt()
+        : orders.length;
+    final currentPage = (data['page'] is num)
+        ? (data['page'] as num).toInt()
+        : page;
+    final totalPages = (data['totalPages'] is num)
+        ? (data['totalPages'] as num).toInt()
+        : 1;
     return {
       'orders': orders,
       'total': total,
@@ -118,7 +132,11 @@ abstract final class CustomerPortalApi {
   static Future<OrderModel?> getTodayOrder() async {
     final res = await getMyOrders(page: 1, limit: 20);
     final orders = res['orders'] as List<OrderModel>? ?? [];
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
     for (final o in orders) {
       final od = DateTime(o.date.year, o.date.month, o.date.day);
       if (od == today) return o;
@@ -153,9 +171,12 @@ abstract final class CustomerPortalApi {
         .map((e) => NotificationModel.fromJson(e))
         .toList();
     final total = (data['total'] is num) ? (data['total'] as num).toInt() : 0;
-    final currentPage = (data['page'] is num) ? (data['page'] as num).toInt() : page;
-    final totalPages =
-        (data['totalPages'] is num) ? (data['totalPages'] as num).toInt() : 1;
+    final currentPage = (data['page'] is num)
+        ? (data['page'] as num).toInt()
+        : page;
+    final totalPages = (data['totalPages'] is num)
+        ? (data['totalPages'] as num).toInt()
+        : 1;
     return {
       'notifications': notifications,
       'total': total,
@@ -188,4 +209,3 @@ abstract final class CustomerPortalApi {
     );
   }
 }
-
