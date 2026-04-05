@@ -35,6 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _addressCtrl = TextEditingController();
   final _cityCtrl = TextEditingController();
   final _pincodeCtrl = TextEditingController();
+  final _upiCtrl = TextEditingController();
 
   bool _loading = true;
   bool _saving = false;
@@ -56,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _addressCtrl.dispose();
     _cityCtrl.dispose();
     _pincodeCtrl.dispose();
+    _upiCtrl.dispose();
     super.dispose();
   }
 
@@ -82,6 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _cityCtrl.text = data['city'] as String? ?? '';
             _pincodeCtrl.text = data['pincode'] as String? ?? '';
           }
+          _upiCtrl.text = data['upiId'] as String? ?? '';
         });
       }
     } catch (e) {
@@ -102,6 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'address': _addressCtrl.text.trim(),
         'city': _cityCtrl.text.trim(),
         'pincode': _pincodeCtrl.text.trim(),
+        'upiId': _upiCtrl.text.trim(),
       });
       if (mounted) {
         AppSnackbar.success(context, 'Profile updated successfully');
@@ -244,6 +248,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ],
+                    ),
+
+                    const SizedBox(height: 22),
+                    _sectionLabel('UPI for customers'),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Shown in the customer app so they can pay you (e.g. yourname@paytm).',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _textSecondary.withValues(alpha: 0.9),
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _VioletField(
+                      controller: _upiCtrl,
+                      label: 'UPI ID',
+                      icon: Icons.currency_rupee_rounded,
+                      hint: 'e.g. vendor@oksbi',
                     ),
 
                     const SizedBox(height: 32),
@@ -542,6 +565,7 @@ class _VioletField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.icon,
+    this.hint,
     this.validator,
     this.keyboardType,
     this.maxLines = 1,
@@ -550,6 +574,7 @@ class _VioletField extends StatelessWidget {
 
   final TextEditingController? controller;
   final String label;
+  final String? hint;
   final IconData icon;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
@@ -580,7 +605,12 @@ class _VioletField extends StatelessWidget {
       ),
       decoration: InputDecoration(
         labelText: label,
+        hintText: hint,
         labelStyle: const TextStyle(fontSize: 13, color: _textSecondary),
+        hintStyle: TextStyle(
+          fontSize: 13,
+          color: _textSecondary.withValues(alpha: 0.5),
+        ),
         prefixIcon: Padding(
           padding: const EdgeInsets.only(left: 14, right: 10),
           child: Icon(icon, size: 18, color: _violet600),

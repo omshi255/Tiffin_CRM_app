@@ -62,8 +62,8 @@ class SettingsScreen extends StatelessWidget {
           _SectionLabel(label: 'Account'),
           _SettingsTile(
             icon: Icons.person_outline_rounded,
-            title: 'Admin / User Profile',
-            subtitle: 'Manage your personal info',
+            title: 'Business Profile',
+            subtitle: 'Name, address, phone, UPI for customers',
             onTap: () => context.push(AppRoutes.profile),
           ),
 
@@ -72,9 +72,9 @@ class SettingsScreen extends StatelessWidget {
           // ── Business ──────────────────────────────────────────────────────
           _SectionLabel(label: 'Business'),
           _SettingsTile(
-            icon: Icons.business_outlined,
-            title: 'Business Profile',
-            subtitle: 'Name, address, contact details',
+            icon: Icons.receipt_outlined,
+            title: 'GST & extended business',
+            subtitle: 'GST number and extra fields',
             onTap: () => context.push(AppRoutes.businessProfile),
           ),
           _SettingsTile(
