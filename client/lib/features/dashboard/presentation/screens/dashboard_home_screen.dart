@@ -416,8 +416,13 @@ import '../../../customers/data/customer_api.dart';
 import '../../../delivery/data/delivery_api.dart';
 import '../../data/daily_items_api.dart';
 import '../../../orders/data/order_api.dart';
-import '../../../payments/data/payment_api.dart';
-import '../../../payments/models/payment_model.dart';
+import '../../../orders/models/order_status.dart';
+
+/// Fixed width for each status pill in the horizontal “today’s orders” strip.
+const double _kTodayOrdersTileWidth = 118;
+
+/// Height of the strip (tiles + room for scrollbar inside the card).
+const double _kTodayOrdersStripHeight = 128;
 
 enum _DailyItemsChip { all, veg, nonVeg }
 
@@ -435,8 +440,12 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   bool _loading = true;
   int _customersCount = 0;
   int _ordersCount = 0;
+  int _ordersPendingCount = 0;
+  int _ordersProcessingCount = 0;
+  int _ordersOutForDeliveryCount = 0;
+  int _ordersDeliveredCount = 0;
+  int _ordersCancelledCount = 0;
   int _deliveryStaffCount = 0;
-  List<PaymentModel> _recentPayments = [];
 
   bool _itemsListLoading = true;
   Object? _itemsError;
@@ -446,6 +455,8 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   late DateTime _itemsDay;
   _DailyItemsChip _itemsChip = _DailyItemsChip.all;
   _MealSlot _mealSlot = _MealSlot.all;
+
+  final ScrollController _todayOrdersStripController = ScrollController();
 
   static String _greeting() {
     final hour = DateTime.now().hour;
@@ -461,16 +472,6 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     return '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}';
   }
 
-  /// Avoids web/runtime issues when [DateTime] fields are invalid.
-  static String _formatPaymentDate(DateTime? pd) {
-    if (pd == null) return '—';
-    try {
-      return '${pd.day}/${pd.month}/${pd.year}';
-    } catch (_) {
-      return '—';
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -478,6 +479,12 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     _itemsDay = DateTime(n.year, n.month, n.day);
     _loadStats();
     _loadDailyItems();
+  }
+
+  @override
+  void dispose() {
+    _todayOrdersStripController.dispose();
+    super.dispose();
   }
 
   static String? _mealSlotQueryParam(_MealSlot slot) {
@@ -710,11 +717,44 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     } catch (_) {}
     if (mounted) setState(() => _customersCount = customersCount);
 
+    var ordPending = 0;
+    var ordProcessing = 0;
+    var ordOut = 0;
+    var ordDelivered = 0;
+    var ordCancelled = 0;
     try {
       final orders = await OrderApi.getToday();
       ordersCount = orders.length;
+      for (final order in orders) {
+        switch (OrderStatus.fromApi(order.status)) {
+          case OrderStatus.pending:
+            ordPending++;
+            break;
+          case OrderStatus.processing:
+            ordProcessing++;
+            break;
+          case OrderStatus.outForDelivery:
+            ordOut++;
+            break;
+          case OrderStatus.delivered:
+            ordDelivered++;
+            break;
+          case OrderStatus.cancelled:
+            ordCancelled++;
+            break;
+        }
+      }
     } catch (_) {}
-    if (mounted) setState(() => _ordersCount = ordersCount);
+    if (mounted) {
+      setState(() {
+        _ordersCount = ordersCount;
+        _ordersPendingCount = ordPending;
+        _ordersProcessingCount = ordProcessing;
+        _ordersOutForDeliveryCount = ordOut;
+        _ordersDeliveredCount = ordDelivered;
+        _ordersCancelledCount = ordCancelled;
+      });
+    }
 
     try {
       final response = await DioClient.instance.get(
@@ -737,11 +777,6 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     if (mounted) setState(() => _deliveryStaffCount = deliveryCount);
 
     if (mounted) setState(() => _loading = false);
-
-    try {
-      final payments = await PaymentApi.list(page: 1, limit: 5);
-      if (mounted) setState(() => _recentPayments = payments.items);
-    } catch (_) {}
   }
 
   @override
@@ -824,6 +859,185 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                   ),
                 ),
               ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── Today's orders (horizontal strip, above items count) ─
+            Row(
+              children: [
+                const Expanded(
+                  child: _SectionLabel(label: "Today's orders"),
+                ),
+                TextButton(
+                  onPressed: () => context.push(AppRoutes.delivery),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primaryAccent,
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    'Open delivery',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_loading)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                      child: SizedBox(
+                        height: _kTodayOrdersStripHeight,
+                        child: Shimmer.fromColors(
+                          baseColor: AppColors.shimmerBase,
+                          highlightColor: AppColors.shimmerHighlight,
+                          child: Row(
+                            children: List.generate(
+                              6,
+                              (i) => Padding(
+                                padding: EdgeInsets.only(right: i < 5 ? 10 : 0),
+                                child: Container(
+                                  width: _kTodayOrdersTileWidth,
+                                  height: _kTodayOrdersStripHeight,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            scrollbarTheme: ScrollbarThemeData(
+                              thumbVisibility:
+                                  const WidgetStatePropertyAll<bool>(true),
+                              thickness:
+                                  const WidgetStatePropertyAll<double>(3),
+                              radius: const Radius.circular(4),
+                              crossAxisMargin: 0,
+                              mainAxisMargin: 4,
+                              thumbColor: WidgetStateProperty.resolveWith(
+                                (states) {
+                                  if (states.contains(WidgetState.dragged)) {
+                                    return AppColors.primary;
+                                  }
+                                  return AppColors.primary
+                                      .withValues(alpha: 0.45);
+                                },
+                              ),
+                              trackColor: const WidgetStatePropertyAll<
+                                  Color>(Colors.transparent),
+                              trackBorderColor: const WidgetStatePropertyAll<
+                                  Color>(Colors.transparent),
+                            ),
+                          ),
+                          child: Scrollbar(
+                            controller: _todayOrdersStripController,
+                            thumbVisibility: true,
+                            trackVisibility: false,
+                            thickness: 3,
+                            radius: const Radius.circular(4),
+                            interactive: true,
+                            child: SingleChildScrollView(
+                              controller: _todayOrdersStripController,
+                              scrollDirection: Axis.horizontal,
+                              primary: false,
+                              padding: const EdgeInsets.fromLTRB(
+                                12,
+                                12,
+                                12,
+                                10,
+                              ),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minWidth: constraints.maxWidth - 24,
+                                ),
+                                child: Row(
+                                  children: [
+                                    _OrderStatusCountTile(
+                                      width: _kTodayOrdersTileWidth,
+                                      label: 'Total',
+                                      count: _ordersCount,
+                                      icon: Icons.receipt_long_rounded,
+                                      accent: const Color(0xFF1D9E75),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    _OrderStatusCountTile(
+                                      width: _kTodayOrdersTileWidth,
+                                      label: 'Pending',
+                                      count: _ordersPendingCount,
+                                      icon: Icons.schedule_rounded,
+                                      accent: AppColors.warning,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    _OrderStatusCountTile(
+                                      width: _kTodayOrdersTileWidth,
+                                      label: 'Processing',
+                                      count: _ordersProcessingCount,
+                                      icon: Icons.restaurant_rounded,
+                                      accent: AppColors.processingChipText,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    _OrderStatusCountTile(
+                                      width: _kTodayOrdersTileWidth,
+                                      label: 'Out for delivery',
+                                      count: _ordersOutForDeliveryCount,
+                                      icon: Icons.delivery_dining_rounded,
+                                      accent: AppColors.primaryAccent,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    _OrderStatusCountTile(
+                                      width: _kTodayOrdersTileWidth,
+                                      label: 'Delivered',
+                                      count: _ordersDeliveredCount,
+                                      icon: Icons.check_circle_outline_rounded,
+                                      accent: const Color(0xFF0F6E56),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    _OrderStatusCountTile(
+                                      width: _kTodayOrdersTileWidth,
+                                      label: 'Cancelled',
+                                      count: _ordersCancelledCount,
+                                      icon: Icons.cancel_outlined,
+                                      accent: AppColors.error,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  const SizedBox(height: 2),
+                ],
+              ),
             ),
 
             const SizedBox(height: 20),
@@ -1090,78 +1304,6 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
               ],
             ),
 
-            const SizedBox(height: 20),
-
-            // ── Recent Activity ──────────────────────────────
-            Row(
-              children: [
-                const Expanded(child: _SectionLabel(label: 'Recent Activity')),
-                TextButton(
-                  onPressed: () => context.push(AppRoutes.payments),
-                  style: TextButton.styleFrom(foregroundColor: AppColors.primary, padding: EdgeInsets.zero, minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  child: const Text('See all', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            if (_loading)
-              Container(height: 120,
-                decoration: BoxDecoration(color: AppColors.cardBackground, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
-                child: const Center(child: CircularProgressIndicator()))
-            else if (_recentPayments.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(color: AppColors.cardBackground, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
-                child: Column(children: [
-                  Icon(Icons.receipt_long_outlined, size: 36, color: AppColors.textHint),
-                  const SizedBox(height: 8),
-                  Text('No recent activity', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
-                ]),
-              )
-            else
-              Container(
-                decoration: BoxDecoration(color: AppColors.cardBackground, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border)),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _recentPayments.length,
-                  // ignore: unnecessary_underscores
-                  separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.border, indent: 16, endIndent: 16),
-                  itemBuilder: (context, index) {
-                    final p = _recentPayments[index];
-                    final name = p.customerName ?? p.customerId;
-                    final initials = name.isNotEmpty
-                        ? name.trim().split(' ').map((w) => w[0]).take(2).join().toUpperCase()
-                        : '?';
-                    final date = _formatPaymentDate(p.paymentDate);
-                    final method = p.paymentMethod.replaceAll('_', ' ').split(' ')
-                        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '').join(' ');
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Row(children: [
-                        Container(width: 40, height: 40,
-                          decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
-                          child: Center(child: Text(initials, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)))),
-                        const SizedBox(width: 12),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text('$method · $date', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                        ])),
-                        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                          Text('+₹${p.amount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF1D9E75))),
-                          Container(
-                            margin: const EdgeInsets.only(top: 4),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(color: const Color(0xFF1D9E75).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-                            child: const Text('Paid', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF0F6E56))),
-                          ),
-                        ]),
-                      ]),
-                    );
-                  },
-                ),
-              ),
           ],
         ),
       ),
@@ -1178,6 +1320,84 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(label.toUpperCase(),
       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.8));
+  }
+}
+
+/// Compact count pill for the horizontal “today’s orders” strip (neutral card).
+class _OrderStatusCountTile extends StatelessWidget {
+  const _OrderStatusCountTile({
+    required this.width,
+    required this.label,
+    required this.count,
+    required this.icon,
+    required this.accent,
+  });
+
+  final double width;
+  final String label;
+  final int count;
+  final IconData icon;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: _kTodayOrdersStripHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.textSecondary.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 18, color: accent),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: accent,
+                  height: 1,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
