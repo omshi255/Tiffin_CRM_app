@@ -22,6 +22,7 @@ const createItemSchema = Joi.object({
     .valid("piece", "bowl", "plate", "glass", "other")
     .optional(),
   category: Joi.string().trim().allow("").optional(),
+  dietType: Joi.string().valid("veg", "non_veg").optional(),
   isActive: Joi.boolean().optional(),
 });
 
@@ -32,6 +33,7 @@ const updateItemSchema = Joi.object({
     .valid("piece", "bowl", "plate", "glass", "other")
     .optional(),
   category: Joi.string().trim().allow("").optional(),
+  dietType: Joi.string().valid("veg", "non_veg").optional(),
   isActive: Joi.boolean().optional(),
 }).min(1);
 
@@ -40,6 +42,7 @@ const listQuerySchema = Joi.object({
   limit: Joi.number().integer().min(1).max(MAX_LIMIT).optional(),
   isActive: Joi.boolean().optional(),
   category: Joi.string().trim().optional(),
+  dietType: Joi.string().valid("veg", "non_veg").optional(),
 });
 
 /**
@@ -62,6 +65,7 @@ export const listItems = asyncHandler(async (req, res) => {
   const filter = { ownerId };
   if (value.isActive !== undefined) filter.isActive = value.isActive;
   if (value.category) filter.category = value.category;
+  if (value.dietType) filter.dietType = value.dietType;
 
   const [data, total] = await Promise.all([
     Item.find(filter).sort({ name: 1 }).skip(skip).limit(limit).lean(),

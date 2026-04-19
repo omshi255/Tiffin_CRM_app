@@ -103,6 +103,17 @@ const userSchema = new mongoose.Schema(
         type: Number,
         default: 100,
       },
+      /** Shown to customers on the portal (e.g. imeals.in). */
+      portalAnnouncementText: {
+        type: String,
+        trim: true,
+        default: "",
+        maxlength: 5000,
+      },
+      portalAnnouncementUpdatedAt: {
+        type: Date,
+        default: null,
+      },
     },
     lastLoginAt: {
       type: Date,
