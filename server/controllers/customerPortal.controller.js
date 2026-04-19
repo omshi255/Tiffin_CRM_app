@@ -46,7 +46,9 @@ const ordersQuerySchema = Joi.object({
 const vendorPublicForCustomer = async (ownerId) => {
   if (!ownerId) return null;
   const v = await User.findById(ownerId)
-    .select("businessName ownerName phone upiId")
+    .select(
+      "businessName ownerName phone upiId settings.portalAnnouncementText settings.portalAnnouncementUpdatedAt"
+    )
     .lean();
   if (!v) return null;
   return {
@@ -54,6 +56,10 @@ const vendorPublicForCustomer = async (ownerId) => {
     ownerName: (v.ownerName || "").trim(),
     phone: (v.phone || "").trim(),
     upiId: (v.upiId || "").trim(),
+    announcement: {
+      text: (v.settings?.portalAnnouncementText ?? "").trim(),
+      updatedAt: v.settings?.portalAnnouncementUpdatedAt ?? null,
+    },
   };
 };
 

@@ -11,4 +11,6 @@ export const NOTIFICATION_TYPES = {
   TASK_ACCEPTED: "task_accepted",
   TASK_REJECTED: "task_rejected",
   LOW_BALANCE: "low_balance",
+  /** Vendor broadcast to all portal customers */
+  VENDOR_ANNOUNCEMENT: "vendor_announcement",
 };
