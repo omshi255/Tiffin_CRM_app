@@ -207,7 +207,7 @@ export const getMyActivePlan = asyncHandler(async (req, res) => {
         "planName price planType mealSlots includesBreakfast includesLunch includesDinner",
       populate: {
         path: "mealSlots.items.itemId",
-        select: "name unitPrice unit",
+        select: "name unitPrice unit dietType",
       },
     })
     .populate("ownerId", "businessName ownerName phone upiId")
@@ -252,6 +252,7 @@ export const getMyOrders = asyncHandler(async (req, res) => {
       .populate("planId", "planName price")
       // Expose name + phone only — enough for the customer to contact/identify the rider.
       .populate("deliveryStaffId", "name phone")
+      .populate("resolvedItems.itemId", "name unitPrice unit dietType")
       .sort({ orderDate: -1 })
       .skip(skip)
       .limit(limit)

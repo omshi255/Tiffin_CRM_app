@@ -27,6 +27,12 @@ const itemSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    /** Vegetarian vs non-vegetarian — used for order filtering and kitchen prep. */
+    dietType: {
+      type: String,
+      enum: ["veg", "non_veg"],
+      default: "veg",
+    },
     isActive: {
       type: Boolean,
       default: true,

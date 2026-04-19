@@ -28,10 +28,17 @@ const dailyOrderSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    /** Which meal(s) this order covers — breakfast / lunch / dinner / snack, or both/all for multi-slot plans. */
     mealType: {
       type: String,
       enum: ["breakfast", "lunch", "dinner", "snack", "both", "all"],
       required: true,
+    },
+    /** Aggregated from plan items: all veg, all non-veg, or mixed. */
+    dietType: {
+      type: String,
+      enum: ["veg", "non_veg", "mixed"],
+      default: "veg",
     },
     deliverySlot: {
       type: String,
@@ -131,6 +138,7 @@ const dailyOrderSchema = new mongoose.Schema(
 );
 
 dailyOrderSchema.index({ ownerId: 1, orderDate: 1, status: 1 });
+dailyOrderSchema.index({ ownerId: 1, orderDate: 1, mealType: 1, dietType: 1 });
 dailyOrderSchema.index({ customerId: 1, orderDate: -1 });
 dailyOrderSchema.index({ ownerId: 1, orderDate: 1, deliveryStaffId: 1 });
 dailyOrderSchema.index({ subscriptionId: 1, orderDate: 1 }, { unique: true, sparse: true });
