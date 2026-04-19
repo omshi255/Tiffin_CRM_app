@@ -10,6 +10,15 @@ abstract final class ApiEndpoints {
 
   /// Dedicated FCM token sync (also supported via PUT /auth/me).
   static const String usersFcmToken = '/users/fcm-token';
+
+  /// Vendor portal announcement (GET/PUT).
+  static const String usersPortalAnnouncement = '/users/portal-announcement';
+
+  /// Monthly finance overview (vendor).
+  static const String vendorFinanceMonthly = '/vendor/finance/monthly';
+
+  /// Aggregated menu items to prepare for a day (vendor dashboard).
+  static const String vendorDashboardDailyItems = '/vendor/dashboard/daily-items';
   static const String vendorOnboarding = '/auth/vendor/onboarding';
   static const String changePassword = '/auth/change-password';
   static String subscriptionUpdate(String id) => '/subscriptions/$id'; // ✅ ADD
@@ -21,8 +30,19 @@ abstract final class ApiEndpoints {
       '/customers/$id/wallet/credit';
   static String customerPlans(String id) => '/customers/$id/plans';
 
+  /// Vendor-only: tiffin box count + ledger (see `CustomerTiffinApi`).
+  static String vendorCustomerTiffin(String customerId) =>
+      '/vendor/customers/$customerId/tiffin';
+  static String vendorCustomerTiffinIncrement(String customerId) =>
+      '/vendor/customers/$customerId/tiffin/increment';
+  static String vendorCustomerTiffinDecrement(String customerId) =>
+      '/vendor/customers/$customerId/tiffin/decrement';
+
   // Customer portal (self-service)
   static const String customerMe = '/customer/me';
+  /// Public (no auth): vendor portal announcement — `ownerId` is vendor User id.
+  static String publicVendorPortalAnnouncement(String ownerId) =>
+      '/public/vendor/$ownerId/portal-announcement';
   static const String customerMeBalance = '/customer/me/balance';
   static const String customerMePlan = '/customer/me/plan';
   static const String customerMeOrders = '/customer/me/orders';

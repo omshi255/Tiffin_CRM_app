@@ -208,4 +208,54 @@ abstract final class CustomerPortalApi {
       '${ApiEndpoints.customerMeNotifications}/read-all',
     );
   }
+
+  /// Public endpoint (no `success` wrapper). Returns `null` on any failure.
+  static Future<PublicPortalAnnouncement?> getPublicPortalAnnouncement(
+    String ownerId,
+  ) async {
+    final trimmed = ownerId.trim();
+    if (trimmed.isEmpty) return null;
+    try {
+      final response = await DioClient.instance.get(
+        ApiEndpoints.publicVendorPortalAnnouncement(trimmed),
+      );
+      if (response.statusCode == null ||
+          response.statusCode! < 200 ||
+          response.statusCode! >= 300) {
+        return null;
+      }
+      final data = response.data;
+      if (data is! Map<String, dynamic>) return null;
+      return PublicPortalAnnouncement.fromJson(data);
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+/// Response from [GET /public/vendor/:ownerId/portal-announcement].
+final class PublicPortalAnnouncement {
+  const PublicPortalAnnouncement({
+    required this.businessName,
+    required this.ownerName,
+    required this.text,
+    this.updatedAt,
+  });
+
+  final String businessName;
+  final String ownerName;
+  final String text;
+  final DateTime? updatedAt;
+
+  factory PublicPortalAnnouncement.fromJson(Map<String, dynamic> json) {
+    DateTime? u;
+    final raw = json['updatedAt'];
+    if (raw is String) u = DateTime.tryParse(raw);
+    return PublicPortalAnnouncement(
+      businessName: json['businessName']?.toString() ?? '',
+      ownerName: json['ownerName']?.toString() ?? '',
+      text: json['text']?.toString() ?? '',
+      updatedAt: u,
+    );
+  }
 }

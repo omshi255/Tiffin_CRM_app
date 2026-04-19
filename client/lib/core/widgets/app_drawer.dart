@@ -10,6 +10,7 @@ import '../../features/auth/data/auth_api.dart';
 import '../../features/profile/data/profile_api.dart';
 import '../../features/support/screens/support_screen.dart';
 import '../../features/support/screens/learn_more_screen.dart';
+import '../../features/portal/presentation/screens/portal_announcement_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key, this.fallbackUserName = 'Guest'});
@@ -153,6 +154,22 @@ class _AppDrawerState extends State<AppDrawer> {
                     icon: Icons.edit_note_rounded,
                     label: 'Standard Meal Plans',
                     onTap: () => _go(AppRoutes.mealPlans),
+                  ),
+
+                  _Divider(color: _dividerColor),
+
+                  _label('Announcement Portal'),
+                  _Item(
+                    icon: Icons.campaign_rounded,
+                    label: 'Portal Announcement',
+                    onTap: () {
+                      _close();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PortalAnnouncementScreen(),
+                        ),
+                      );
+                    },
                   ),
 
                   _Divider(color: _dividerColor),

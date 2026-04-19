@@ -10,7 +10,8 @@ import '../core/router/app_router.dart';
 import '../core/router/app_routes.dart';
 import '../core/storage/secure_storage.dart';
 
-/// Push delivery via OneSignal. Backend targets [external_id] = MongoDB User or Customer _id.
+/// Push delivery via OneSignal (not raw FCM). Backend targets [external_id] = MongoDB User or Customer [_id].
+/// Customer devices: [registerTokenAfterLogin] → [OneSignal.login] after OTP / splash.
 final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -62,6 +63,19 @@ class NotificationService {
     await OneSignal.Notifications.requestPermission(true);
 
     OneSignal.Notifications.addForegroundWillDisplayListener((event) {
+      final raw = event.notification.additionalData;
+      final map = <String, dynamic>{};
+      if (raw != null) {
+        raw.forEach((k, v) => map[k.toString()] = v);
+      }
+      if (_isVendorAnnouncementPayload(map)) {
+        event.preventDefault();
+        final body = event.notification.body ??
+            event.notification.title ??
+            'New announcement from your vendor';
+        _showAnnouncementForegroundSnack(body);
+        return;
+      }
       event.notification.display();
     });
 
@@ -69,7 +83,9 @@ class NotificationService {
       final data = event.notification.additionalData;
       debugPrint('[OneSignal] click additionalData: $data');
       if (data == null) return;
-      final map = Map<String, dynamic>.from(data);
+      if (data is! Map) return;
+      final map = <String, dynamic>{};
+      data.forEach((k, v) => map[k.toString()] = v);
       _navigateFromPayload(map);
     });
 
@@ -77,11 +93,52 @@ class NotificationService {
     debugPrint('[OneSignal] initialized');
   }
 
+  /// Backend [sendNotification] sets `type: vendor_announcement` and `data.screen: announcement`.
+  static bool _isVendorAnnouncementPayload(Map<String, dynamic> data) {
+    final type = data['type']?.toString();
+    final screen = data['screen']?.toString();
+    return type == 'vendor_announcement' || screen == 'announcement';
+  }
+
+  void _showAnnouncementForegroundSnack(String message) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = AppRouter.navigatorKey.currentContext;
+      if (ctx == null) return;
+      final messenger = ScaffoldMessenger.maybeOf(ctx);
+      if (messenger == null) return;
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            maxLines: 5,
+            overflow: TextOverflow.ellipsis,
+          ),
+          action: SnackBarAction(
+            label: 'View',
+            onPressed: () {
+              try {
+                GoRouter.of(ctx).go(AppRoutes.customerHome);
+              } catch (_) {}
+            },
+          ),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 6),
+        ),
+      );
+    });
+  }
+
   void _navigateFromPayload(Map<String, dynamic> data) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = AppRouter.navigatorKey.currentContext;
       if (ctx == null) return;
       final router = GoRouter.of(ctx);
+      if (_isVendorAnnouncementPayload(data)) {
+        router.go(AppRoutes.customerHome);
+        return;
+      }
       final screen = data['screen']?.toString();
       switch (screen) {
         case 'orderDetail':

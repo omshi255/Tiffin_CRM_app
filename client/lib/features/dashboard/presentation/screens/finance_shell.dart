@@ -3,9 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../expenses/screens/expenses_screen.dart';
 import '../../../income/screens/income_screen.dart';
+import 'monthly_finance_screen.dart';
 import 'payments_screen.dart';
 
-/// Finance section with Payments, Expenses, and Income (internal bottom nav only).
+/// Finance section with Payments, Expenses, Income, and Monthly overview (internal bottom nav only).
 class FinanceShell extends StatefulWidget {
   const FinanceShell({super.key});
 
@@ -40,6 +41,9 @@ class _FinanceShellState extends State<FinanceShell> {
                   RepaintBoundary(
                     child: IncomeScreen(embeddedInFinanceShell: true),
                   ),
+                  RepaintBoundary(
+                    child: MonthlyFinanceScreen(embeddedInFinanceShell: true),
+                  ),
                 ],
               ),
             ),
@@ -70,6 +74,10 @@ class _FinanceShellState extends State<FinanceShell> {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.trending_up_rounded),
                   label: 'Income',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.calendar_month_rounded),
+                  label: 'Monthly',
                 ),
               ],
             ),

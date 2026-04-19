@@ -42,6 +42,7 @@ class CustomerModel {
     this.walletBalance,
     this.location,
     this.vendorId,
+    this.ownerId,
     this.vendor,
     this.createdAt,
   });
@@ -61,6 +62,8 @@ class CustomerModel {
   final double? walletBalance;
   final GeoPoint? location;
   final String? vendorId;
+  /// Vendor (User) id — used for public portal announcement API.
+  final String? ownerId;
   final CustomerVendorInfo? vendor;
   final DateTime? createdAt;
 
@@ -119,6 +122,7 @@ class CustomerModel {
           : null,
       location: location,
       vendorId: json['vendorId']?.toString(),
+      ownerId: json['ownerId']?.toString(),
       vendor: json['vendor'] is Map<String, dynamic>
           ? CustomerVendorInfo.fromJson(json['vendor'] as Map<String, dynamic>)
           : null,

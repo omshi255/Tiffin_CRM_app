@@ -11,6 +11,8 @@ import '../../../../core/widgets/bottom_sheet_handle.dart';
 import '../../../../models/customer_model.dart';
 import '../../../../services/customer_detail_service.dart';
 import '../../data/customer_api.dart';
+import 'tiffin_collection_history_screen.dart';
+import '../widgets/customer_tiffin_nav_row.dart';
 import '../../../subscriptions/data/subscription_api.dart';
 import '../../../subscriptions/models/subscription_model.dart';
 import '../../../payments/presentation/widgets/daily_receipt_sheet.dart';
@@ -171,6 +173,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   List<SubscriptionModel> _subscriptions = [];
   bool _isLoading = true;
   bool _sendingWalletReminder = false;
+  int _tiffinRowGeneration = 0;
 
   @override
   void initState() {
@@ -205,6 +208,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         setState(() {
           _customer = c;
           _subscriptions = parsedSubs;
+          _tiffinRowGeneration++;
         });
       }
     } catch (e) {
@@ -671,6 +675,50 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         ),
                       ],
                     ),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                _sectionLabel('Tiffin boxes to collect'),
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      CustomerTiffinNavRow(
+                        key: ValueKey<String>(
+                          'tiffin-row-${c.id}-$_tiffinRowGeneration',
+                        ),
+                        customerId: c.id,
+                        customerName: c.name,
+                        margin: EdgeInsets.zero,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push<void>(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    TiffinCollectionHistoryScreen(
+                                  customerId: c.id,
+                                  customerName: c.name,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.calendar_month_rounded,
+                              size: 18),
+                          label: const Text('History & calendar'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: _P.v600,
+                            padding: const EdgeInsets.only(top: 2, bottom: 0),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 

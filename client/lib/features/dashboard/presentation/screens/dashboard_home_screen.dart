@@ -406,15 +406,22 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../customers/data/customer_api.dart';
 import '../../../delivery/data/delivery_api.dart';
+import '../../data/daily_items_api.dart';
 import '../../../orders/data/order_api.dart';
 import '../../../payments/data/payment_api.dart';
 import '../../../payments/models/payment_model.dart';
+
+enum _DailyItemsChip { all, veg, nonVeg }
+
+enum _MealSlot { all, breakfast, lunch, dinner }
 
 class DashboardHomeScreen extends StatefulWidget {
   const DashboardHomeScreen({super.key, this.adminName = 'Vendor'});
@@ -429,8 +436,16 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   int _customersCount = 0;
   int _ordersCount = 0;
   int _deliveryStaffCount = 0;
-  double _revenue = 0;
   List<PaymentModel> _recentPayments = [];
+
+  bool _itemsListLoading = true;
+  Object? _itemsError;
+  List<DailyItemRow> _dailyItems = [];
+  int? _dailyItemsCustomerCount;
+  /// Calendar day for daily-items API (local). Initialized in [initState] for web safety.
+  late DateTime _itemsDay;
+  _DailyItemsChip _itemsChip = _DailyItemsChip.all;
+  _MealSlot _mealSlot = _MealSlot.all;
 
   static String _greeting() {
     final hour = DateTime.now().hour;
@@ -446,10 +461,236 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     return '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}';
   }
 
+  /// Avoids web/runtime issues when [DateTime] fields are invalid.
+  static String _formatPaymentDate(DateTime? pd) {
+    if (pd == null) return '—';
+    try {
+      return '${pd.day}/${pd.month}/${pd.year}';
+    } catch (_) {
+      return '—';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    final n = DateTime.now();
+    _itemsDay = DateTime(n.year, n.month, n.day);
     _loadStats();
+    _loadDailyItems();
+  }
+
+  static String? _mealSlotQueryParam(_MealSlot slot) {
+    switch (slot) {
+      case _MealSlot.all:
+        return null;
+      case _MealSlot.breakfast:
+        return 'breakfast';
+      case _MealSlot.lunch:
+        return 'lunch';
+      case _MealSlot.dinner:
+        return 'dinner';
+    }
+  }
+
+  Future<void> _loadDailyItems() async {
+    if (!mounted) return;
+    setState(() {
+      _itemsListLoading = true;
+      _itemsError = null;
+    });
+    try {
+      final d = DateTime(_itemsDay.year, _itemsDay.month, _itemsDay.day);
+      final result = await DailyItemsApi.fetch(
+        forDay: d,
+        slot: _mealSlotQueryParam(_mealSlot),
+      );
+      if (!mounted) return;
+      setState(() {
+        _dailyItems = result.items;
+        _dailyItemsCustomerCount = result.customerCount;
+        _itemsListLoading = false;
+        _itemsError = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _itemsError = e;
+        _itemsListLoading = false;
+      });
+    }
+  }
+
+  Future<void> _onMealSlotSelected(_MealSlot slot) async {
+    if (_mealSlot == slot || _itemsListLoading) return;
+    setState(() => _mealSlot = slot);
+    await _loadDailyItems();
+  }
+
+  String _itemsPrepareTitle() {
+    final suffix = switch (_mealSlot) {
+      _MealSlot.all => '',
+      _MealSlot.breakfast => ' — Breakfast',
+      _MealSlot.lunch => ' — Lunch',
+      _MealSlot.dinner => ' — Dinner',
+    };
+    return 'Items to Prepare$suffix';
+  }
+
+  String _slotChipLabel(_MealSlot slot) {
+    final name = switch (slot) {
+      _MealSlot.all => 'All',
+      _MealSlot.breakfast => 'Breakfast',
+      _MealSlot.lunch => 'Lunch',
+      _MealSlot.dinner => 'Dinner',
+    };
+    if (_mealSlot == slot && _dailyItemsCustomerCount != null) {
+      return '$name (${_dailyItemsCustomerCount})';
+    }
+    return name;
+  }
+
+  String _emptyDailyItemsMessage() {
+    final isToday = _isItemsDayToday();
+    final slot = _mealSlot;
+    if (slot == _MealSlot.all) {
+      return isToday ? 'No items for today' : 'No items for this date';
+    }
+    final label = switch (slot) {
+      _MealSlot.breakfast => 'Breakfast',
+      _MealSlot.lunch => 'Lunch',
+      _MealSlot.dinner => 'Dinner',
+      _MealSlot.all => '',
+    };
+    return isToday
+        ? 'No items for $label today'
+        : 'No items for $label on this date';
+  }
+
+  bool _isItemsDayToday() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final d = DateTime(_itemsDay.year, _itemsDay.month, _itemsDay.day);
+    return d == today;
+  }
+
+  Future<void> _pickItemsDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _itemsDay,
+      firstDate: DateTime.now().subtract(const Duration(days: 500)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked == null || !mounted) return;
+    // Normalize web date-picker result so intl / DateTime fields are always valid Dart dates.
+    final normalized = DateTime.fromMillisecondsSinceEpoch(
+      picked.millisecondsSinceEpoch,
+      isUtc: picked.isUtc,
+    );
+    setState(() {
+      _itemsDay = DateTime(normalized.year, normalized.month, normalized.day);
+    });
+    await _loadDailyItems();
+  }
+
+  String _itemsPrepareSubtitle() {
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final d = DateTime(_itemsDay.year, _itemsDay.month, _itemsDay.day);
+      if (d == today) return 'Today';
+      return DateFormat('EEE, d MMM yyyy', 'en').format(d);
+    } catch (_) {
+      return 'Today';
+    }
+  }
+
+  int get _vegItemsCount =>
+      _dailyItems.where((e) => matchesVegItemName(e.name)).length;
+
+  int get _nonVegItemsCount => _dailyItems.length - _vegItemsCount;
+
+  List<DailyItemRow> get _filteredDailyItems {
+    switch (_itemsChip) {
+      case _DailyItemsChip.all:
+        return _dailyItems;
+      case _DailyItemsChip.veg:
+        return _dailyItems.where((e) => matchesVegItemName(e.name)).toList();
+      case _DailyItemsChip.nonVeg:
+        return _dailyItems.where((e) => !matchesVegItemName(e.name)).toList();
+    }
+  }
+
+  Widget _filterChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.primary.withValues(alpha: 0.1)
+                : AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? AppColors.primary : AppColors.border,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: selected ? AppColors.primary : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dailyItemsListShimmer() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBase,
+      highlightColor: AppColors.shimmerHighlight,
+      period: const Duration(milliseconds: 1200),
+      child: Column(
+        children: List.generate(
+          6,
+          (i) => Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 72,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _loadStats() async {
@@ -457,7 +698,6 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     int customersCount = 0;
     int ordersCount = 0;
     int deliveryCount = 0;
-    double revenue = 0;
 
     try {
       final res = await CustomerApi.list(page: 1, limit: 1);
@@ -496,30 +736,12 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     }
     if (mounted) setState(() => _deliveryStaffCount = deliveryCount);
 
-    try {
-      var page = 1;
-      while (page <= 40) {
-        final result = await PaymentApi.list(page: page, limit: 100);
-        for (final p in result.items) {
-          revenue += p.amount;
-        }
-        if (page >= result.totalPages || result.items.isEmpty) break;
-        page++;
-      }
-    } catch (_) {}
-    if (mounted) setState(() { _revenue = revenue; _loading = false; });
+    if (mounted) setState(() => _loading = false);
 
     try {
       final payments = await PaymentApi.list(page: 1, limit: 5);
       if (mounted) setState(() => _recentPayments = payments.items);
     } catch (_) {}
-  }
-
-  String _formatRevenue(int value) {
-    if (value >= 10000000) return '₹${(value / 10000000).toStringAsFixed(1)}Cr';
-    if (value >= 100000)   return '₹${(value / 100000).toStringAsFixed(1)}L';
-    if (value >= 1000)     return '₹${(value / 1000).toStringAsFixed(1)}k';
-    return '₹$value';
   }
 
   @override
@@ -528,7 +750,12 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
 
     return RefreshIndicator(
       color: AppColors.primary,
-      onRefresh: _loadStats,
+      onRefresh: () async {
+        await Future.wait<void>([
+          _loadStats(),
+          _loadDailyItems(),
+        ]);
+      },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(
@@ -601,90 +828,216 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
 
             const SizedBox(height: 20),
 
-            // ── Revenue Hero Card ────────────────────────────
+            // ── Items to Prepare ───────────────────────────────
             Container(
-              padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF5B2D8E), Color(0xFF3B1578)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.35),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                color: AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
               ),
-              child: Stack(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Positioned(
-                    top: -50, right: -50,
-                    child: Container(width: 150, height: 150,
-                      decoration: BoxDecoration(shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.07), width: 2)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _itemsPrepareTitle(),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _itemsListLoading
+                                    ? _itemsPrepareSubtitle()
+                                    : '${_itemsPrepareSubtitle()} · ${_filteredDailyItems.length} items',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'Refresh',
+                          onPressed: _itemsListLoading ? null : _loadDailyItems,
+                          icon: _itemsListLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              : const Icon(Icons.refresh_rounded),
+                          color: AppColors.primary,
+                        ),
+                        IconButton(
+                          tooltip: 'Pick date',
+                          onPressed: _itemsListLoading ? null : _pickItemsDate,
+                          icon: const Icon(Icons.calendar_month_rounded),
+                          color: AppColors.primary,
+                        ),
+                      ],
                     ),
                   ),
-                  Positioned(
-                    top: -20, right: -20,
-                    child: Container(width: 90, height: 90,
-                      decoration: BoxDecoration(shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.05), width: 2)),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -30, left: 20,
-                    child: Container(width: 90, height: 90,
-                      decoration: BoxDecoration(shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.04), width: 2)),
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
                         children: [
-                          Text('TOTAL REVENUE',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.55), letterSpacing: 0.8)),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF34D399).withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.25)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Icon(Icons.arrow_upward_rounded, color: Color(0xFF6EE7B7), size: 10),
-                                SizedBox(width: 3),
-                                Text('+12%', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6EE7B7))),
-                              ],
-                            ),
+                          _filterChip(
+                            label: 'All (${_dailyItems.length})',
+                            selected: _itemsChip == _DailyItemsChip.all,
+                            onTap: () => setState(() => _itemsChip = _DailyItemsChip.all),
+                          ),
+                          const SizedBox(width: 8),
+                          _filterChip(
+                            label: 'Veg ($_vegItemsCount)',
+                            selected: _itemsChip == _DailyItemsChip.veg,
+                            onTap: () => setState(() => _itemsChip = _DailyItemsChip.veg),
+                          ),
+                          const SizedBox(width: 8),
+                          _filterChip(
+                            label: 'Non-Veg ($_nonVegItemsCount)',
+                            selected: _itemsChip == _DailyItemsChip.nonVeg,
+                            onTap: () => setState(() => _itemsChip = _DailyItemsChip.nonVeg),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      if (_loading)
-                        Container(width: 140, height: 48,
-                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)))
-                      else
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(_formatRevenue(_revenue.toInt()),
-                            style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w800, color: Colors.white, height: 1)),
-                        ),
-                      const SizedBox(height: 8),
-                      Text('Updated just now',
-                        style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.4))),
-                    ],
+                    ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _filterChip(
+                            label: _slotChipLabel(_MealSlot.all),
+                            selected: _mealSlot == _MealSlot.all,
+                            onTap: () => _onMealSlotSelected(_MealSlot.all),
+                          ),
+                          const SizedBox(width: 8),
+                          _filterChip(
+                            label: _slotChipLabel(_MealSlot.breakfast),
+                            selected: _mealSlot == _MealSlot.breakfast,
+                            onTap: () => _onMealSlotSelected(_MealSlot.breakfast),
+                          ),
+                          const SizedBox(width: 8),
+                          _filterChip(
+                            label: _slotChipLabel(_MealSlot.lunch),
+                            selected: _mealSlot == _MealSlot.lunch,
+                            onTap: () => _onMealSlotSelected(_MealSlot.lunch),
+                          ),
+                          const SizedBox(width: 8),
+                          _filterChip(
+                            label: _slotChipLabel(_MealSlot.dinner),
+                            selected: _mealSlot == _MealSlot.dinner,
+                            onTap: () => _onMealSlotSelected(_MealSlot.dinner),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (_itemsListLoading)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                      child: _dailyItemsListShimmer(),
+                    )
+                  else if (_itemsError != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Could not load items.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          OutlinedButton.icon(
+                            onPressed: _loadDailyItems,
+                            icon: const Icon(Icons.refresh_rounded, size: 18),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (_filteredDailyItems.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      child: Center(
+                        child: Text(
+                          _emptyDailyItemsMessage(),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _filteredDailyItems.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: AppColors.border,
+                      ),
+                      itemBuilder: (context, index) {
+                        final row = _filteredDailyItems[index];
+                        final qtyLabel =
+                            'x ${row.totalQuantity} ${row.unit}'.trim();
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  row.name.isNotEmpty ? row.name : '—',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                qtyLabel,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),
@@ -781,9 +1134,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                     final initials = name.isNotEmpty
                         ? name.trim().split(' ').map((w) => w[0]).take(2).join().toUpperCase()
                         : '?';
-                    final date = p.paymentDate != null
-                        ? '${p.paymentDate!.day}/${p.paymentDate!.month}/${p.paymentDate!.year}'
-                        : '—';
+                    final date = _formatPaymentDate(p.paymentDate);
                     final method = p.paymentMethod.replaceAll('_', ' ').split(' ')
                         .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '').join(' ');
                     return Padding(

@@ -22,9 +22,15 @@ class PaymentModel {
   factory PaymentModel.fromJson(Map<String, dynamic> json) {
     final id = json['_id']?.toString() ?? json['id']?.toString() ?? '';
     DateTime? pd;
-    if (json['paymentDate'] != null) {
-      if (json['paymentDate'] is String) {
-        pd = DateTime.tryParse(json['paymentDate'] as String);
+    final rawPd = json['paymentDate'];
+    if (rawPd != null) {
+      if (rawPd is String) {
+        pd = DateTime.tryParse(rawPd);
+      } else if (rawPd is num) {
+        var ms = rawPd.toInt();
+        // Heuristic: Unix seconds vs milliseconds.
+        if (ms > 0 && ms < 100000000000) ms *= 1000;
+        pd = DateTime.fromMillisecondsSinceEpoch(ms);
       }
     }
     return PaymentModel(

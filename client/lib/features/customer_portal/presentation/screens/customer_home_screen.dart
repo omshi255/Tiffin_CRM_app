@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:tiffin_crm/features/orders/models/order_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -410,8 +411,13 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
   OrderModel? _todayOrder;
   CustomerModel? _profile;
   CustomerBalanceModel? _balance;
+  PublicPortalAnnouncement? _portalAnnouncement;
+  /// Banner hidden until text changes (same session).
+  String? _dismissedAnnouncementText;
   bool _loading = true;
   Timer? _refreshTimer;
+
+  static final _announcementDateFmt = DateFormat('MMM d, h:mm a');
 
   @override
   void initState() {
@@ -439,11 +445,17 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
       final order = results[0] as OrderModel?;
       final profile = results[1] as CustomerModel;
       final balance = results[2] as CustomerBalanceModel;
+      final oid = profile.ownerId?.trim();
+      final PublicPortalAnnouncement? announcement =
+          (oid != null && oid.isNotEmpty)
+              ? await CustomerPortalApi.getPublicPortalAnnouncement(oid)
+              : null;
       if (mounted) {
         setState(() {
           _todayOrder = order;
           _profile = profile;
           _balance = balance;
+          _portalAnnouncement = announcement;
         });
       }
     } catch (e) {
@@ -505,6 +517,25 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
     return _dailyThoughts[idx];
   }
 
+  bool get _hasActivePortalAnnouncement =>
+      (_portalAnnouncement?.text.trim().isNotEmpty ?? false);
+
+  bool get _showAnnouncementBanner {
+    final ann = _portalAnnouncement;
+    if (ann == null) return false;
+    final t = ann.text.trim();
+    if (t.isEmpty) return false;
+    return _dismissedAnnouncementText != t;
+  }
+
+  String _portalAnnouncementHeading(PublicPortalAnnouncement a) {
+    final biz = a.businessName.trim();
+    if (biz.isNotEmpty) return 'Announcement from $biz';
+    final owner = a.ownerName.trim();
+    if (owner.isNotEmpty) return 'Announcement from $owner';
+    return 'Announcement from your vendor';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading && _todayOrder == null && _profile == null && _balance == null) {
@@ -512,6 +543,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
     }
     final walletBalance = _balance?.walletBalance ?? _profile?.balance ?? 0.0;
     final subscriptionBalance = _balance?.subscriptionBalance ?? 0.0;
+    final showNoChargeHint = _hasActivePortalAnnouncement;
     final lowBalance = walletBalance < 100;
     final firstName = (_profile?.name ?? 'there').split(' ').first;
     final (thoughtIcon, thoughtText) = _todaysThought;
@@ -527,6 +559,10 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
           MediaQuery.of(context).padding.bottom + 32,
         ),
         children: [
+          if (_showAnnouncementBanner && _portalAnnouncement != null) ...[
+            _portalAnnouncementBanner(_portalAnnouncement!),
+            const SizedBox(height: 14),
+          ],
           // ── Greeting ──────────────────────────────────────────────────────
           Row(
             children: [
@@ -622,7 +658,11 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
           // ── Wallet card ───────────────────────────────────────────────────
           _sectionLabel('Wallet'),
           const SizedBox(height: 8),
-          _walletCard(walletBalance, subscriptionBalance),
+          _walletCard(
+            walletBalance,
+            subscriptionBalance,
+            showNoChargeHint: showNoChargeHint,
+          ),
 
           // ── Low balance warning ───────────────────────────────────────────
           if (lowBalance && walletBalance >= 0) ...[
@@ -796,7 +836,136 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
     ),
   );
 
-  Widget _walletCard(double walletBalance, double subscriptionBalance) => Container(
+  Widget _portalAnnouncementBanner(PublicPortalAnnouncement a) {
+    final updated = a.updatedAt;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFFFFC107).withValues(alpha: 0.55),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFFA000).withValues(alpha: 0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFECB3),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.campaign_rounded,
+                  color: Color(0xFFF57C00),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _portalAnnouncementHeading(a),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFFE65100),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      a.text.trim(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.4,
+                        color: _text1,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (updated != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Updated: ${_announcementDateFmt.format(updated.toLocal())}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: _text2,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _warnSoft,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _warning.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.payments_rounded, size: 15, color: _warning),
+                          const SizedBox(width: 6),
+                          const Text(
+                            'No charge today',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: _warning,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _dismissedAnnouncementText = a.text.trim();
+                  });
+                },
+                icon: const Icon(Icons.close_rounded, size: 20, color: _text2),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 32,
+                  minHeight: 32,
+                ),
+                tooltip: 'Dismiss',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _walletCard(
+    double walletBalance,
+    double subscriptionBalance, {
+    required bool showNoChargeHint,
+  }) =>
+      Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: _surface,
@@ -804,6 +973,7 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
       border: Border.all(color: _border),
     ),
     child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           width: 44,
@@ -819,31 +989,62 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
           ),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Rs.${walletBalance.toStringAsFixed(0)}',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: _violet700,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Rs.${walletBalance.toStringAsFixed(0)}',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: _violet700,
+                ),
               ),
-            ),
-            const Text(
-              'Available balance',
-              style: TextStyle(fontSize: 12, color: _text2),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Subscription: Rs.${subscriptionBalance.toStringAsFixed(0)}',
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: _text2,
+              const Text(
+                'Available balance',
+                style: TextStyle(fontSize: 12, color: _text2),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  Text(
+                    'Subscription: Rs.${subscriptionBalance.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: _text2,
+                    ),
+                  ),
+                  if (showNoChargeHint)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _warnSoft,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _warning.withValues(alpha: 0.35),
+                        ),
+                      ),
+                      child: const Text(
+                        'No charge today',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _warning,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     ),

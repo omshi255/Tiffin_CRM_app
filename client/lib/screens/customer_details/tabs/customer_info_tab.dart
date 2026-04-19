@@ -415,6 +415,8 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/utils/error_handler.dart';
 import '../../../core/utils/whatsapp_helper.dart';
+import '../../../features/customers/presentation/screens/tiffin_collection_history_screen.dart';
+import '../../../features/customers/presentation/widgets/customer_tiffin_nav_row.dart';
 import '../../../features/payments/presentation/widgets/daily_receipt_sheet.dart';
 import '../../../models/customer_detail_model.dart';
 import '../../../services/customer_detail_service.dart';
@@ -473,6 +475,7 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
   String? _error;
   bool _sendingLink = false;
   bool _sendingWalletReminder = false;
+  int _tiffinRowGeneration = 0;
 
   @override
   void initState() {
@@ -488,6 +491,7 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
         setState(() {
           _info = data;
           _loading = false;
+          _tiffinRowGeneration++;
         });
       }
     } catch (e) {
@@ -728,6 +732,41 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
                   isLast: true,
                 ),
               ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Tiffin boxes to collect (inline count; below subscription) ─────
+          _SectionLabel('Tiffin boxes to collect'),
+          const SizedBox(height: 6),
+          CustomerTiffinNavRow(
+            key: ValueKey<String>(
+              'tiffin-row-${widget.customerId}-$_tiffinRowGeneration',
+            ),
+            customerId: widget.customerId,
+            customerName: i.name,
+            margin: EdgeInsets.zero,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () {
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => TiffinCollectionHistoryScreen(
+                      customerId: widget.customerId,
+                      customerName: i.name,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.calendar_month_rounded, size: 18),
+              label: const Text('History & calendar'),
+              style: TextButton.styleFrom(
+                foregroundColor: _P.primary,
+                padding: const EdgeInsets.only(top: 2, bottom: 0),
+              ),
             ),
           ),
 
