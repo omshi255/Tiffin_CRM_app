@@ -17,6 +17,22 @@ import {
 import { sendNotification } from "../services/inAppNotification.service.js";
 import { NOTIFICATION_TYPES } from "../utils/notificationTypes.js";
 
+const todayOrdersQuerySchema = Joi.object({
+  mealPeriod: Joi.string()
+    .valid("breakfast", "lunch", "dinner", "snack")
+    .optional()
+    .messages({
+      "any.only":
+        "mealPeriod must be one of: breakfast, lunch, dinner, snack",
+    }),
+  dietType: Joi.string()
+    .valid("veg", "non_veg", "mixed")
+    .optional()
+    .messages({
+      "any.only": "dietType must be one of: veg, non_veg, mixed",
+    }),
+});
+
 const parseUTC = (d) => {
   const [y, m, day] = d.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, day));
@@ -42,9 +58,9 @@ const deductBalanceForOrder = async (order, _vendorSettings, session) => {
     throw new ApiError(400, "Order has no subscription for deduction");
   }
 
-  const subscription = await Subscription.findById(order.subscriptionId).session(
-    session
-  );
+  const subscription = await Subscription.findById(
+    order.subscriptionId
+  ).session(session);
   if (!subscription) throw new ApiError(404, "Subscription not found");
 
   const current = Number(
@@ -72,12 +88,25 @@ const deductBalanceForOrder = async (order, _vendorSettings, session) => {
  */
 export const getToday = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
-  const orders = await getTodayDailyOrders(ownerId);
+
+  const { error, value } = todayOrdersQuerySchema.validate(req.query, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
+  const orders = await getTodayDailyOrders(ownerId, value);
 
   res.status(200).json(
     new ApiResponse(200, "Today's orders fetched", {
       data: orders,
       total: orders.length,
+      filters: {
+        mealPeriod: value.mealPeriod ?? null,
+        dietType: value.dietType ?? null,
+      },
     })
   );
 });
@@ -139,9 +168,9 @@ export const processToday = asyncHandler(async (req, res) => {
       });
   }
 
-  res.status(200).json(
-    new ApiResponse(200, "Orders processed", { processedCount })
-  );
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Orders processed", { processedCount }));
 });
 
 /**
@@ -252,9 +281,9 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       ),
     ]);
 
-    return res.status(200).json(
-      new ApiResponse(200, "Order marked out for delivery", { order })
-    );
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Order marked out for delivery", { order }));
   }
 
   // ── delivered ─────────────────────────────────────────────────────
@@ -383,9 +412,11 @@ export const markDelivered = asyncHandler(async (req, res) => {
     .lean();
 
   if (!orders.length) {
-    return res.status(200).json(
-      new ApiResponse(200, "No orders to deliver", { deliveredCount: 0 })
-    );
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, "No orders to deliver", { deliveredCount: 0 })
+      );
   }
 
   // Aggregate total deduction per subscription
@@ -469,7 +500,8 @@ export const markDelivered = asyncHandler(async (req, res) => {
   await Promise.all(
     lowBalanceCustomers.flatMap(([sid, { newBalance }]) => [
       sendNotification({
-        customerId: orders.find((o) => o.subscriptionId?.toString() === sid)?.customerId,
+        customerId: orders.find((o) => o.subscriptionId?.toString() === sid)
+          ?.customerId,
         ownerId,
         type: NOTIFICATION_TYPES.LOW_BALANCE,
         title: "Low subscription balance ⚠️",
@@ -510,7 +542,11 @@ export const generateOrders = asyncHandler(async (req, res) => {
   );
 
   res.status(200).json(
-    new ApiResponse(200, "Orders generated", { generatedCount, existingCount, date })
+    new ApiResponse(200, "Orders generated", {
+      generatedCount,
+      existingCount,
+      date,
+    })
   );
 });
 
@@ -521,9 +557,11 @@ export const generateNextWeekOrders = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
   const results = await generateOrdersForNextDays(ownerId, 7);
 
-  res.status(200).json(
-    new ApiResponse(200, "Orders generated for next 7 days", { results })
-  );
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Orders generated for next 7 days", { results })
+    );
 });
 
 /**
@@ -538,7 +576,10 @@ export const debugSubscriptions = asyncHandler(async (req, res) => {
     .lean();
 
   res.status(200).json(
-    new ApiResponse(200, "Debug subscriptions", { data: subs, total: subs.length })
+    new ApiResponse(200, "Debug subscriptions", {
+      data: subs,
+      total: subs.length,
+    })
   );
 });
 
@@ -588,7 +629,10 @@ export const assignDeliveryStaff = asyncHandler(async (req, res) => {
   if (!staff) throw new ApiError(404, "Delivery staff not found or inactive");
 
   if (["delivered", "cancelled", "failed"].includes(order.status)) {
-    throw new ApiError(400, `Cannot assign staff to an order with status "${order.status}"`);
+    throw new ApiError(
+      400,
+      `Cannot assign staff to an order with status "${order.status}"`
+    );
   }
 
   order.deliveryStaffId = deliveryStaffId;
@@ -618,7 +662,9 @@ export const assignDeliveryStaff = asyncHandler(async (req, res) => {
     .populate("deliveryStaffId", "name phone")
     .lean();
 
-  res.status(200).json(new ApiResponse(200, "Delivery staff assigned", updated));
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Delivery staff assigned", updated));
 });
 
 /**
@@ -704,7 +750,10 @@ export const acceptTask = asyncHandler(async (req, res) => {
   }
 
   if (["delivered", "cancelled", "failed"].includes(order.status)) {
-    throw new ApiError(400, `Cannot accept an order with status "${order.status}"`);
+    throw new ApiError(
+      400,
+      `Cannot accept an order with status "${order.status}"`
+    );
   }
 
   await DailyOrder.findByIdAndUpdate(id, { $set: { acceptedAt: new Date() } });
@@ -745,7 +794,10 @@ export const rejectTask = asyncHandler(async (req, res) => {
   }
 
   if (["delivered", "cancelled", "failed"].includes(order.status)) {
-    throw new ApiError(400, `Cannot reject an order with status "${order.status}"`);
+    throw new ApiError(
+      400,
+      `Cannot reject an order with status "${order.status}"`
+    );
   }
 
   // Look up staff name for notification
@@ -767,9 +819,11 @@ export const rejectTask = asyncHandler(async (req, res) => {
     data: { orderId: id, action: "rejected", reason: reason || "" },
   });
 
-  res.status(200).json(
-    new ApiResponse(200, "Task rejected — please reassign", { orderId: id })
-  );
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Task rejected — please reassign", { orderId: id })
+    );
 });
 
 /**
@@ -831,7 +885,9 @@ export const updateOrderQuantities = asyncHandler(async (req, res) => {
   }
 
   // Build qty map and apply
-  const qtyMap = Object.fromEntries(value.map(({ itemId, quantity }) => [itemId, quantity]));
+  const qtyMap = Object.fromEntries(
+    value.map(({ itemId, quantity }) => [itemId, quantity])
+  );
 
   let newAmount = 0;
   const updatedItems = order.resolvedItems.map((item) => {

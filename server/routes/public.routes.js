@@ -1,6 +1,8 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import Invoice from "../models/Invoice.model.js";
 import Customer from "../models/Customer.model.js";
+import User from "../models/User.model.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -25,6 +27,34 @@ router.get(
       throw new ApiError(410, "TOKEN_EXPIRED");
     }
     res.json(invoice);
+  })
+);
+
+/**
+ * Public: vendor portal announcement for imeals.in / marketing pages (no auth).
+ * GET /api/v1/public/vendor/:ownerId/portal-announcement
+ */
+router.get(
+  "/vendor/:ownerId/portal-announcement",
+  asyncHandler(async (req, res) => {
+    const { ownerId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+      throw new ApiError(400, "Invalid vendor id");
+    }
+    const user = await User.findById(ownerId)
+      .select(
+        "role businessName ownerName settings.portalAnnouncementText settings.portalAnnouncementUpdatedAt"
+      )
+      .lean();
+    if (!user || user.role !== "vendor") {
+      throw new ApiError(404, "Vendor not found");
+    }
+    res.json({
+      businessName: (user.businessName || "").trim(),
+      ownerName: (user.ownerName || "").trim(),
+      text: (user.settings?.portalAnnouncementText ?? "").trim(),
+      updatedAt: user.settings?.portalAnnouncementUpdatedAt ?? null,
+    });
   })
 );
 

@@ -48,13 +48,62 @@ const resolveMealType = (plan) => {
 };
 
 /**
+ * Map filter values to stored DailyOrder.mealType values.
+ * "both" = lunch+dinner; "all" = multiple slots (may include breakfast/snack).
+ */
+export const MEAL_PERIOD_TO_MEALTYPES = {
+  breakfast: ["breakfast", "all"],
+  lunch: ["lunch", "both", "all"],
+  dinner: ["dinner", "both", "all"],
+  snack: ["snack", "all"],
+};
+
+/**
+ * Mutates `filter` (Mongo query object) with mealPeriod + dietType constraints.
+ */
+export function applyMealDietToFilter(filter, { mealPeriod, dietType } = {}) {
+  if (mealPeriod) {
+    const allowed = MEAL_PERIOD_TO_MEALTYPES[mealPeriod];
+    if (allowed?.length) {
+      filter.mealType = { $in: allowed };
+    }
+  }
+
+  if (dietType === "veg") {
+    filter.$or = [
+      { dietType: "veg" },
+      { dietType: { $exists: false } },
+    ];
+  } else if (dietType === "non_veg") {
+    filter.dietType = { $in: ["non_veg", "mixed"] };
+  } else if (dietType === "mixed") {
+    filter.dietType = "mixed";
+  }
+}
+
+function computeOrderDietType(plan, itemMap) {
+  const kinds = new Set();
+  for (const slot of plan.mealSlots || []) {
+    for (const slotItem of slot.items || []) {
+      const id = slotItem.itemId?.toString();
+      const doc = id ? itemMap[id] : null;
+      if (doc) kinds.add(doc.dietType || "veg");
+    }
+  }
+  if (kinds.size === 0) return "veg";
+  if (kinds.size === 1) return [...kinds][0];
+  if (kinds.has("veg") && kinds.has("non_veg")) return "mixed";
+  return [...kinds][0];
+}
+
+/**
  * Build resolvedItems array and compute total amount from plan mealSlots.
  * Fetches item prices from DB in a single query.
- * Returns { resolvedItems, amount }
+ * Returns { resolvedItems, amount, orderDietType }
  */
 const buildResolvedItems = async (plan) => {
   if (!plan.mealSlots || plan.mealSlots.length === 0) {
-    return { resolvedItems: [], amount: plan.price || 0 };
+    return { resolvedItems: [], amount: plan.price || 0, orderDietType: "veg" };
   }
 
   // Collect unique itemIds from all slots
@@ -67,12 +116,12 @@ const buildResolvedItems = async (plan) => {
   ];
 
   if (allItemIds.length === 0) {
-    return { resolvedItems: [], amount: 0 };
+    return { resolvedItems: [], amount: 0, orderDietType: "veg" };
   }
 
   // Fetch item prices in one query
   const itemDocs = await Item.find({ _id: { $in: allItemIds } })
-    .select("name unitPrice")
+    .select("name unitPrice dietType")
     .lean();
 
   const itemMap = {};
@@ -100,7 +149,9 @@ const buildResolvedItems = async (plan) => {
     }
   }
 
-  return { resolvedItems, amount };
+  const orderDietType = computeOrderDietType(plan, itemMap);
+
+  return { resolvedItems, amount, orderDietType };
 };
 
 /**
@@ -180,7 +231,9 @@ export const generateDailyOrdersForDate = async (ownerId, date) => {
       continue;
     }
 
-    const { resolvedItems, amount } = await buildResolvedItems(plan);
+    const { resolvedItems, amount, orderDietType } = await buildResolvedItems(
+      plan
+    );
     const mealType = resolveMealType(plan);
 
     toInsert.push({
@@ -190,6 +243,7 @@ export const generateDailyOrdersForDate = async (ownerId, date) => {
       planId: sub.planId,
       orderDate: day,
       mealType,
+      dietType: orderDietType,
       deliverySlot: sub.deliverySlot,
       resolvedItems,
       amount,
@@ -208,17 +262,26 @@ export const generateDailyOrdersForDate = async (ownerId, date) => {
   return { generatedCount: toInsert.length, existingCount: existing.length };
 };
 
-export const getTodayDailyOrders = async (ownerId) => {
+/**
+ * @param {object} [filters]
+ * @param {string} [filters.mealPeriod] - breakfast | lunch | dinner | snack (filters mealType)
+ * @param {string} [filters.dietType] - veg | non_veg | mixed
+ */
+export const getTodayDailyOrders = async (ownerId, filters = {}) => {
   const today = parseUTC(new Date());
-  return DailyOrder.find({
+  const base = {
     ownerId,
     orderDate: today,
     status: { $ne: "cancelled" },
-  })
+  };
+
+  applyMealDietToFilter(base, filters);
+
+  return DailyOrder.find(base)
     .populate("customerId", "name phone address area")
     .populate("planId", "planName price")
     .populate("deliveryStaffId", "name phone")
-    .populate("resolvedItems.itemId", "name unitPrice unit")
+    .populate("resolvedItems.itemId", "name unitPrice unit dietType")
     .sort({ createdAt: 1 })
     .lean();
 };

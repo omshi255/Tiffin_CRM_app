@@ -1,7 +1,16 @@
+import Joi from "joi";
 import DailyOrder from "../models/DailyOrder.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
+import { applyMealDietToFilter } from "../services/dailyOrder.service.js";
+
+const deliveryOrdersQuerySchema = Joi.object({
+  mealPeriod: Joi.string()
+    .valid("breakfast", "lunch", "dinner", "snack")
+    .optional(),
+  dietType: Joi.string().valid("veg", "non_veg", "mixed").optional(),
+});
 
 const parseUTC = (d) => {
   const date = new Date(d);
@@ -23,19 +32,30 @@ export const getMyDeliveries = asyncHandler(async (req, res) => {
     );
   }
 
+  const { error, value } = deliveryOrdersQuerySchema.validate(req.query, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
   const today = parseUTC(new Date());
 
-  const orders = await DailyOrder.find({
+  const filter = {
     deliveryStaffId: staffId,
     orderDate: today,
     status: { $nin: ["cancelled", "failed", "skipped"] },
-  })
+  };
+  applyMealDietToFilter(filter, value);
+
+  const orders = await DailyOrder.find(filter)
     .populate(
       "customerId",
       "name phone address area landmark location fcmToken"
     )
     .populate("planId", "planName price")
-    .populate("resolvedItems.itemId", "name unitPrice unit")
+    .populate("resolvedItems.itemId", "name unitPrice unit dietType")
     .sort({ "customerId.area": 1 })
     .lean();
 
@@ -61,6 +81,10 @@ export const getMyDeliveries = asyncHandler(async (req, res) => {
       data: enriched,
       total: enriched.length,
       date: today.toISOString().slice(0, 10),
+      filters: {
+        mealPeriod: value.mealPeriod ?? null,
+        dietType: value.dietType ?? null,
+      },
     })
   );
 });

@@ -10,7 +10,8 @@ import { sendPushToUser } from "./onesignal.service.js";
  * @param {string} [opts.ownerId]    - Explicit vendor ownerId for scoping the Notification doc
  * @param {string} [opts.type]       - Notification type constant (from notificationTypes.js)
  * @param {string}  opts.title       - Notification title
- * @param {string}  opts.message     - Notification body
+ * @param {string}  opts.message     - Notification body (stored in DB; full text for in-app list)
+ * @param {string} [opts.pushBody]   - Shorter body for mobile push only (defaults to message)
  * @param {object} [opts.data]       - Extra payload
  */
 export const sendNotification = async ({
@@ -20,14 +21,17 @@ export const sendNotification = async ({
   type = "system",
   title,
   message,
+  pushBody,
   data = {},
 }) => {
   const targetId = userId || customerId || null;
+  const pushText =
+    pushBody != null && String(pushBody).length > 0 ? pushBody : message;
 
   let pushResult = null;
   if (targetId) {
     try {
-      pushResult = await sendPushToUser(String(targetId), title, message, {
+      pushResult = await sendPushToUser(String(targetId), title, pushText, {
         ...data,
         type: type || "system",
       });

@@ -46,7 +46,9 @@ const ordersQuerySchema = Joi.object({
 const vendorPublicForCustomer = async (ownerId) => {
   if (!ownerId) return null;
   const v = await User.findById(ownerId)
-    .select("businessName ownerName phone upiId")
+    .select(
+      "businessName ownerName phone upiId settings.portalAnnouncementText settings.portalAnnouncementUpdatedAt"
+    )
     .lean();
   if (!v) return null;
   return {
@@ -54,6 +56,10 @@ const vendorPublicForCustomer = async (ownerId) => {
     ownerName: (v.ownerName || "").trim(),
     phone: (v.phone || "").trim(),
     upiId: (v.upiId || "").trim(),
+    announcement: {
+      text: (v.settings?.portalAnnouncementText ?? "").trim(),
+      updatedAt: v.settings?.portalAnnouncementUpdatedAt ?? null,
+    },
   };
 };
 
@@ -207,7 +213,7 @@ export const getMyActivePlan = asyncHandler(async (req, res) => {
         "planName price planType mealSlots includesBreakfast includesLunch includesDinner",
       populate: {
         path: "mealSlots.items.itemId",
-        select: "name unitPrice unit",
+        select: "name unitPrice unit dietType",
       },
     })
     .populate("ownerId", "businessName ownerName phone upiId")
@@ -252,6 +258,7 @@ export const getMyOrders = asyncHandler(async (req, res) => {
       .populate("planId", "planName price")
       // Expose name + phone only — enough for the customer to contact/identify the rider.
       .populate("deliveryStaffId", "name phone")
+      .populate("resolvedItems.itemId", "name unitPrice unit dietType")
       .sort({ orderDate: -1 })
       .skip(skip)
       .limit(limit)
