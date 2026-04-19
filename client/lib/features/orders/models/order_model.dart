@@ -1,3 +1,9 @@
+String _normalizeOrderStatus(String raw) {
+  final s = raw.toLowerCase().trim();
+  if (s == 'cooking') return 'processing';
+  return s;
+}
+
 class OrderModel {
   const OrderModel({
     required this.id,
@@ -61,7 +67,7 @@ class OrderModel {
           ? json['customerId'] as String
           : (json['customerId'] as Map?)?['_id']?.toString() ?? '',
       date: orderDate,
-      status: json['status']?.toString() ?? 'pending',
+      status: _normalizeOrderStatus(json['status']?.toString() ?? 'pending'),
       customerName: json['customerName']?.toString() ??
           (json['customerId'] is Map
               ? (json['customerId'] as Map)['name']?.toString()

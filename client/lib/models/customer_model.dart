@@ -66,10 +66,10 @@ class CustomerModel {
 
   String get fullName => name;
 
-  /// Canonical wallet (walletBalance, else legacy balance), never negative for display.
+  /// Spendable wallet: max of canonical + legacy fields (migration drift), floored at 0.
   double get effectiveWalletBalance => math.max(
         0,
-        walletBalance ?? balance ?? 0,
+        math.max(walletBalance ?? 0, balance ?? 0),
       );
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {

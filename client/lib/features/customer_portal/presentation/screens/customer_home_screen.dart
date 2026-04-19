@@ -19,6 +19,7 @@ import '../../data/customer_portal_api.dart';
 import '../../../dashboard/data/notification_api.dart';
 import '../../../auth/data/auth_api.dart';
 import '../../../orders/data/order_api.dart';
+import '../../../orders/models/order_status.dart';
 
 // ── iMeals Green + Violet palette ────────────────────────────────────────────
 const _green900 = Color(0xFF064E3B);
@@ -452,15 +453,8 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
     }
   }
 
-  static String _statusLabel(String status) {
-    final s = status.toLowerCase();
-    if (s == 'processing' || s == 'cooking' || s == 'to_process') {
-      return 'Cooking';
-    }
-    if (s == 'out_for_delivery' || s == 'in_transit') return 'On the way';
-    if (s == 'delivered') return 'Delivered';
-    return status;
-  }
+  static String _statusLabel(String status) =>
+      OrderStatus.fromApi(status).label;
 
   static (Color, Color) _statusColors(String status) {
     final s = status.toLowerCase();
@@ -1288,15 +1282,17 @@ class _CustomerOrdersTabState extends State<_CustomerOrdersTab> {
   }
 
   static (Color, Color, String) _statusMeta(String status) {
-    final s = status.toLowerCase();
-    if (s == 'delivered') return (_violet600, _violet50, 'Delivered');
-    if (s == 'out_for_delivery' || s == 'in_transit') {
-      return (_violet600, _violet50, 'On the way');
+    final o = OrderStatus.fromApi(status);
+    if (o == OrderStatus.delivered) {
+      return (_violet600, _violet50, o.label);
     }
-    if (s == 'processing' || s == 'cooking') {
-      return (_warning, _warnSoft, 'Cooking');
+    if (o == OrderStatus.outForDelivery) {
+      return (_violet600, _violet50, o.label);
     }
-    return (_text2, _divider, status);
+    if (o == OrderStatus.processing) {
+      return (_warning, _warnSoft, o.label);
+    }
+    return (_text2, _divider, o.label);
   }
 
   @override
@@ -1513,9 +1509,9 @@ class _OrderStatusSheetState extends State<_OrderStatusSheet> {
   DateTime? _liveAt;
 
   static const List<String> _steps = [
-    'Order Placed',
-    'Cooking',
-    'On the Way',
+    'Order placed',
+    'Processing',
+    'Out for delivery',
     'Delivered',
   ];
   static const List<IconData> _icons = [

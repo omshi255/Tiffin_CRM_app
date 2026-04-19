@@ -18,6 +18,7 @@ import '../../data/delivery_api.dart';
 import '../../../auth/data/auth_api.dart';
 import '../../../orders/data/order_api.dart';
 import '../../../orders/models/order_model.dart';
+import '../../../orders/models/order_status.dart';
 import 'delivery_map_screen.dart';
 import '../models/delivery_map_session.dart';
 import 'delivery_profile_screen.dart';
@@ -83,8 +84,8 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   static const List<String> _filterLabels = [
     'All',
     'Pending',
-    'Cooking',
-    'On the way',
+    'Processing',
+    'Out for delivery',
     'Delivered',
   ];
 
@@ -840,22 +841,18 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   }
 
   (Color, Color, String) _statusMeta(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-      case 'assigned':
-        return (_amber600, _amber100, 'PENDING');
-      case 'processing':
-      case 'cooking':
-        return (_amber700, _amber50, 'COOKING');
-      case 'out_for_delivery':
-      case 'in_transit':
-        return (_violet600, _violet100, 'ON THE WAY');
-      case 'delivered':
-        return (_success, _successSoft, 'DELIVERED');
-      case 'cancelled':
-        return (_danger, _dangerSoft, 'CANCELLED');
-      default:
-        return (_textSecondary, const Color(0xFFEEEBFA), status.toUpperCase());
+    final o = OrderStatus.fromApi(status);
+    switch (o) {
+      case OrderStatus.pending:
+        return (_amber600, _amber100, o.label);
+      case OrderStatus.processing:
+        return (_amber700, _amber50, o.label);
+      case OrderStatus.outForDelivery:
+        return (_violet600, _violet100, o.label);
+      case OrderStatus.delivered:
+        return (_success, _successSoft, o.label);
+      case OrderStatus.cancelled:
+        return (_danger, _dangerSoft, o.label);
     }
   }
 }

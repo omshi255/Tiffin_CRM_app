@@ -88,7 +88,7 @@ _StatusStyle _ss(String status) {
         bdr: _P.amberBdr,
         accent: Color(0xFFF59E0B),
         dot: Color(0xFFD97706),
-        label: 'Cooking',
+        label: 'Processing',
       );
     default: // pending
       return const _StatusStyle(
@@ -137,8 +137,8 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   static const List<String> _filterLabels = [
     'All',
     'Pending',
-    'Cooking',
-    'On the way',
+    'Processing',
+    'Out for delivery',
     'Delivered',
   ];
   static const List<String?> _filterValues = [
@@ -368,7 +368,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
         children: [
           _summaryTile('${_count(null)}', 'Total'),
           const SizedBox(width: 8),
-          _summaryTile('${_count("out_for_delivery")}', 'On way'),
+          _summaryTile('${_count("out_for_delivery")}', 'Out for delivery'),
           const SizedBox(width: 8),
           _summaryTile('${_count("pending")}', 'Pending'),
           const SizedBox(width: 8),
