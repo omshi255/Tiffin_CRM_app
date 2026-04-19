@@ -132,6 +132,12 @@ const customerSchema = new mongoose.Schema(
     deletedAt: {
       type: Date,
     },
+    /** Number of tiffin boxes currently held by the customer (vendor-adjusted). */
+    tiffinCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
