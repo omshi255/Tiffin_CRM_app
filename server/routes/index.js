@@ -20,6 +20,7 @@ import sendNotificationRoutes from "./sendNotification.routes.js";
 import userRoutes from "./user.routes.js";
 import vendorCustomerTiffinRoutes from "./vendorCustomerTiffin.routes.js";
 import vendorDashboardRoutes from "./vendorDashboard.routes.js";
+import vendorFinanceRoutes from "./vendorFinance.routes.js";
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.use("/users", userRoutes);
 router.use("/customers", customerRoutes);
 router.use("/vendor/customers", vendorCustomerTiffinRoutes);
 router.use("/vendor/dashboard", vendorDashboardRoutes);
+router.use("/vendor/finance", vendorFinanceRoutes);
 router.use("/customer", customerPortalRoutes);   // customer self-service portal
 router.use("/items", itemRoutes);
 router.use("/delivery-staff", deliveryStaffRoutes);
