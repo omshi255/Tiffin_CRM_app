@@ -40,8 +40,10 @@ const parseUTC = (d) => {
 
 /**
  * Valid forward-only status transitions for an order.
+ * `processing` is vendor/admin only (see updateOrderStatus).
  */
 const VALID_TRANSITIONS = {
+  processing: ["pending"],
   out_for_delivery: ["pending", "processing"],
   delivered: ["pending", "processing", "out_for_delivery"],
 };
@@ -175,14 +177,15 @@ export const processToday = asyncHandler(async (req, res) => {
 
 /**
  * PATCH /api/v1/daily-orders/:id/status
- * Body: { status: 'out_for_delivery' | 'delivered' }
+ * Body: { status: 'processing' | 'out_for_delivery' | 'delivered' }
  *
  * Drives the order lifecycle:
+ *   pending → processing  (vendor/admin; notifies customer — same as bulk process)
  *   pending/processing → out_for_delivery  (notifies customer + vendor)
  *   pending/processing/out_for_delivery → delivered  (deducts balance + notifies)
  *
  * Vendor can update any of their orders.
- * Delivery staff (Day 3) will be restricted to their assigned orders.
+ * Delivery staff: only out_for_delivery / delivered on assigned orders (not processing).
  */
 export const updateOrderStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -234,6 +237,46 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     throw new ApiError(
       400,
       `Cannot move order from "${order.status}" to "${status}"`
+    );
+  }
+
+  // ── processing (single order — mirrors POST /daily-orders/process for one row) ──
+  if (status === "processing") {
+    if (role === "delivery_staff") {
+      throw new ApiError(
+        403,
+        "Delivery staff cannot mark an order as processing"
+      );
+    }
+    order.status = "processing";
+    order.processedAt = new Date();
+    await order.save();
+
+    await sendNotification({
+      customerId: order.customerId,
+      ownerId,
+      type: NOTIFICATION_TYPES.ORDER_PROCESSING,
+      title: "Tiffin Ready 🍱",
+      message: "Your tiffin is ready!",
+      data: { screen: "orderDetail", status: "processing", orderId: id },
+    });
+
+    const io = req.app.get("io");
+    if (io && order.orderDate) {
+      const d =
+        order.orderDate instanceof Date
+          ? order.orderDate
+          : new Date(order.orderDate);
+      io.of("/delivery")
+        .to(`admin:${ownerId}`)
+        .emit("orders_processed", {
+          count: 1,
+          date: d.toISOString().slice(0, 10),
+        });
+    }
+
+    return res.status(200).json(
+      new ApiResponse(200, "Order marked as processing", { order })
     );
   }
 

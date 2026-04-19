@@ -6,7 +6,9 @@ import Subscription, {
 import Customer from "../models/Customer.model.js";
 import MealPlan from "../models/Plan.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { effectiveWallet } from "../utils/customerWallet.js";
+import {
+  readSpendableWalletFromDb,
+} from "../utils/customerWallet.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import { generateDailyOrdersForDate } from "../services/dailyOrder.service.js";
@@ -190,7 +192,7 @@ export const createSubscription = asyncHandler(async (req, res) => {
       _id: customerId,
       ownerId,
       isDeleted: { $ne: true },
-    }),
+    }).lean(),
     MealPlan.findOne({
       _id: planId,
       ownerId,
@@ -258,9 +260,9 @@ export const createSubscription = asyncHandler(async (req, res) => {
   console.log("📅 Total Days:", totalDays);
   console.log("💰 Total Amount:", totalAmount);
 
-  const walletBalance = effectiveWallet(customer);
-  if (walletBalance < totalAmount) {
-    const shown = Math.max(0, walletBalance);
+  const available = await readSpendableWalletFromDb(Customer, customerId, ownerId);
+  if (available < totalAmount) {
+    const shown = Math.max(0, available);
     throw new ApiError(
       400,
       `Insufficient wallet balance. Available: ₹${shown}, Required: ₹${totalAmount}`
@@ -293,9 +295,10 @@ export const createSubscription = asyncHandler(async (req, res) => {
       { session }
     );
 
+    const newWallet = available - totalAmount;
     await Customer.findByIdAndUpdate(
       customerId,
-      { $inc: { walletBalance: -totalAmount, balance: -totalAmount } },
+      { $set: { walletBalance: newWallet, balance: newWallet } },
       { session }
     );
 
@@ -395,9 +398,13 @@ export const renewSubscription = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Customer not found");
   }
 
-  const walletBalance = effectiveWallet(customer);
-  if (walletBalance < totalAmount) {
-    const shown = Math.max(0, walletBalance);
+  const available = await readSpendableWalletFromDb(
+    Customer,
+    subscription.customerId,
+    ownerId
+  );
+  if (available < totalAmount) {
+    const shown = Math.max(0, available);
     throw new ApiError(
       400,
       `Insufficient wallet balance. Available: ₹${shown}, Required: ₹${totalAmount}`
@@ -428,9 +435,10 @@ export const renewSubscription = asyncHandler(async (req, res) => {
       .populate("customerId", "name phone address")
       .populate("planId", "planName price planType");
 
+    const newWallet = available - totalAmount;
     await Customer.findByIdAndUpdate(
       subscription.customerId,
-      { $inc: { walletBalance: -totalAmount, balance: -totalAmount } },
+      { $set: { walletBalance: newWallet, balance: newWallet } },
       { session }
     );
 
