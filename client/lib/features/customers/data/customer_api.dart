@@ -60,6 +60,24 @@ abstract final class CustomerApi {
     await DioClient.instance.delete(ApiEndpoints.customerById(id));
   }
 
+  static int _readInt(Map<String, dynamic> data, String key) {
+    final v = data[key];
+    if (v is num) return v.toInt();
+    return 0;
+  }
+
+  static List<CustomerModel> _readCustomerList(Map<String, dynamic> data) {
+    final raw = data['data'];
+    if (raw is! List) return [];
+    final out = <CustomerModel>[];
+    for (final item in raw) {
+      if (item is Map<String, dynamic>) {
+        out.add(CustomerModel.fromJson(item));
+      }
+    }
+    return out;
+  }
+
   static Future<Map<String, dynamic>> bulkImport(
     List<Map<String, dynamic>> customers,
   ) async {
@@ -68,14 +86,41 @@ abstract final class CustomerApi {
       data: {'customers': customers},
     );
     final data = parseData(response);
-    if (data is! Map<String, dynamic>) return {'imported': 0, 'skipped': 0};
-    final imported = (data['imported'] is num)
-        ? (data['imported'] as num).toInt()
-        : 0;
-    final skipped = (data['skipped'] is num)
-        ? (data['skipped'] as num).toInt()
-        : 0;
-    return {'imported': imported, 'skipped': skipped};
+    if (data is! Map<String, dynamic>) {
+      return {'imported': 0, 'skipped': 0, 'customers': <CustomerModel>[]};
+    }
+    final importedCount = _readInt(data, 'imported') != 0
+        ? _readInt(data, 'imported')
+        : _readInt(data, 'created');
+    return {
+      'imported': importedCount,
+      'skipped': _readInt(data, 'skipped'),
+      'customers': _readCustomerList(data),
+      'errors': data['errors'],
+      'warnings': data['warnings'],
+    };
+  }
+
+  /// Raw CSV as pasted in the bulk import screen (`name,phone,address,zone` …).
+  static Future<Map<String, dynamic>> bulkImportCsv(String csv) async {
+    final response = await DioClient.instance.post(
+      ApiEndpoints.customersBulk,
+      data: {'csv': csv},
+    );
+    final data = parseData(response);
+    if (data is! Map<String, dynamic>) {
+      return {'imported': 0, 'skipped': 0, 'customers': <CustomerModel>[]};
+    }
+    final importedCount = _readInt(data, 'imported') != 0
+        ? _readInt(data, 'imported')
+        : _readInt(data, 'created');
+    return {
+      'imported': importedCount,
+      'skipped': _readInt(data, 'skipped'),
+      'customers': _readCustomerList(data),
+      'errors': data['errors'],
+      'warnings': data['warnings'],
+    };
   }
 
   static Future<void> creditWallet(

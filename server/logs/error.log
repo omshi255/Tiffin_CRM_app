@@ -7700,3 +7700,53 @@ Error: "limit" must be less than or equal to 100
     at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
     at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
+[20/04/2026, 11:05:38 pm] Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+Error: Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:266:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[20/04/2026, 11:06:04 pm] Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+Error: Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:266:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[20/04/2026, 11:06:09 pm] Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+Error: Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:266:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[20/04/2026, 11:06:17 pm] Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+Error: Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:266:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+[20/04/2026, 11:08:37 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+[20/04/2026, 11:08:38 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+

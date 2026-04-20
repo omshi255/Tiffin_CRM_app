@@ -26,8 +26,10 @@ class PlanModel {
     List<MealSlotModel> slots = [];
     if (json['mealSlots'] is List) {
       for (final e in json['mealSlots'] as List) {
-        if (e is Map<String, dynamic>) {
-          slots.add(MealSlotModel.fromJson(e));
+        if (e is Map) {
+          slots.add(
+            MealSlotModel.fromJson(Map<String, dynamic>.from(e)),
+          );
         }
       }
     }
@@ -70,8 +72,10 @@ class MealSlotModel {
     List<MealSlotItemModel> itemList = [];
     if (json['items'] is List) {
       for (final e in json['items'] as List) {
-        if (e is Map<String, dynamic>) {
-          itemList.add(MealSlotItemModel.fromJson(e));
+        if (e is Map) {
+          itemList.add(
+            MealSlotItemModel.fromJson(Map<String, dynamic>.from(e)),
+          );
         }
       }
     }
@@ -103,13 +107,30 @@ class MealSlotItemModel {
   final double? unitPrice;
 
   factory MealSlotItemModel.fromJson(Map<String, dynamic> json) {
+    // API often returns populated `itemId` as a full Item object, not a string.
+    final dynamic itemIdRaw = json['itemId'] ?? json['item'];
+    String itemId = '';
+    String? itemName = json['itemName']?.toString();
+    double? unitPrice = (json['unitPrice'] is num)
+        ? (json['unitPrice'] as num).toDouble()
+        : null;
+
+    if (itemIdRaw is Map) {
+      final m = Map<String, dynamic>.from(itemIdRaw);
+      itemId = m['_id']?.toString() ?? m['id']?.toString() ?? '';
+      itemName ??= m['name']?.toString();
+      if (unitPrice == null && m['unitPrice'] is num) {
+        unitPrice = (m['unitPrice'] as num).toDouble();
+      }
+    } else {
+      itemId = itemIdRaw?.toString() ?? '';
+    }
+
     return MealSlotItemModel(
-      itemId: json['itemId']?.toString() ?? json['item']?.toString() ?? '',
-      itemName: json['itemName']?.toString(),
+      itemId: itemId,
+      itemName: itemName,
       quantity: (json['quantity'] is num) ? (json['quantity'] as num).toInt() : 1,
-      unitPrice: (json['unitPrice'] is num)
-          ? (json['unitPrice'] as num).toDouble()
-          : null,
+      unitPrice: unitPrice,
     );
   }
 

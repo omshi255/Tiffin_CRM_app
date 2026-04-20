@@ -3,6 +3,12 @@ import mongoose from "mongoose";
 import Customer, { CUSTOMER_STATUSES } from "../models/Customer.model.js";
 import Payment, { PAYMENT_METHODS } from "../models/Payment.model.js";
 import User from "../models/User.model.js";
+import Zone from "../models/Zone.model.js";
+import { parseCustomerCsv } from "../utils/parseCustomerCsv.js";
+import {
+  normalizeCustomerPhone,
+  isValidIndianMobile,
+} from "../utils/normalizeCustomerPhone.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
   displayWalletBalance,
@@ -80,13 +86,28 @@ const listQuerySchema = Joi.object({
   lowBalance: Joi.boolean().truthy("true").falsy("false").optional(),
 });
 
+const bulkPhoneSchema = Joi.string()
+  .trim()
+  .required()
+  .custom((value, helpers) => {
+    const n = normalizeCustomerPhone(value);
+    if (!isValidIndianMobile(n)) {
+      return helpers.error("any.invalid");
+    }
+    return n;
+  })
+  .messages({
+    "any.invalid": "Phone must be a valid 10-digit Indian mobile number",
+  });
+
 const bulkCustomerItemSchema = Joi.object({
   name: Joi.string()
     .trim()
     .required()
     .messages({ "string.empty": "Name is required" }),
-  phone: phoneSchema,
+  phone: bulkPhoneSchema,
   address: Joi.string().trim().allow("").optional(),
+  zone: Joi.string().trim().allow("").optional(),
   status: Joi.string()
     .valid(...CUSTOMER_STATUSES)
     .optional(),
@@ -100,6 +121,17 @@ const bulkCreateSchema = Joi.object({
     .max(100)
     .required(),
 });
+
+const bulkCsvSchema = Joi.object({
+  csv: Joi.string().trim().min(1).max(200_000).required(),
+});
+
+const bulkBodySchema = Joi.alternatives()
+  .try(bulkCreateSchema, bulkCsvSchema)
+  .required()
+  .messages({
+    "alternatives.match": "Provide either customers (array) or csv (string)",
+  });
 
 /**
  * GET /api/v1/customers
@@ -327,12 +359,12 @@ export const updateCustomer = asyncHandler(async (req, res) => {
 
 /**
  * POST /api/v1/customers/bulk
- * Body: { customers: [{ name, phone, address?, ... }] }
+ * Body: { customers: [{ name, phone, address?, zone? }] } or { csv: "name,phone,address,zone\\n..." }
  * Rate limited: 5 req/15 min
  */
 export const bulkCreateCustomers = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
-  const { error, value } = bulkCreateSchema.validate(req.body, {
+  const { error, value } = bulkBodySchema.validate(req.body, {
     stripUnknown: true,
     abortEarly: false,
   });
@@ -340,11 +372,75 @@ export const bulkCreateCustomers = asyncHandler(async (req, res) => {
     throw new ApiError(400, error.details.map((d) => d.message).join("; "));
   }
 
-  const phones = value.customers.map((c) =>
-    String(c.phone)
-      .trim()
-      .replace(/^\+?91/, "")
-  );
+  let sourceRows;
+  let totalRows;
+
+  if (value.csv) {
+    const parsed = parseCustomerCsv(value.csv);
+    if (parsed.errors.length) {
+      throw new ApiError(400, parsed.errors.join("; "));
+    }
+    if (parsed.rows.length > 100) {
+      throw new ApiError(400, "CSV cannot contain more than 100 data rows");
+    }
+    totalRows = parsed.rows.length;
+    sourceRows = parsed.rows.map((r) => ({
+      lineNumber: r.lineNumber,
+      name: r.name,
+      phone: normalizeCustomerPhone(r.phone),
+      address: r.address,
+      zoneName: (r.zone || "").trim(),
+    }));
+  } else {
+    totalRows = value.customers.length;
+    sourceRows = value.customers.map((c, idx) => ({
+      lineNumber: idx + 1,
+      name: c.name,
+      phone: c.phone,
+      address: c.address || "",
+      zoneName: (c.zone || "").trim(),
+    }));
+  }
+
+  const zones = await Zone.find({ ownerId }).select("name").lean();
+  const zoneByName = new Map();
+  for (const z of zones) {
+    zoneByName.set(String(z.name).trim().toLowerCase(), z._id);
+  }
+
+  const rowErrors = [];
+  const validated = [];
+  for (const r of sourceRows) {
+    if (!r.name?.trim()) {
+      rowErrors.push({ line: r.lineNumber, message: "Name is required" });
+      continue;
+    }
+    if (!isValidIndianMobile(r.phone)) {
+      rowErrors.push({ line: r.lineNumber, message: "Invalid phone number" });
+      continue;
+    }
+    if (value.csv && !String(r.address || "").trim()) {
+      rowErrors.push({ line: r.lineNumber, message: "Address is required" });
+      continue;
+    }
+    let zoneId = null;
+    let zoneWarning = null;
+    if (r.zoneName) {
+      const id = zoneByName.get(r.zoneName.toLowerCase());
+      if (id) zoneId = id;
+      else zoneWarning = `Unknown zone "${r.zoneName}"`;
+    }
+    validated.push({
+      lineNumber: r.lineNumber,
+      name: r.name.trim(),
+      phone: r.phone,
+      address: String(r.address).trim(),
+      zoneId,
+      zoneWarning,
+    });
+  }
+
+  const phones = validated.map((c) => c.phone);
   const existingCustomers = await Customer.find({
     ownerId,
     phone: { $in: phones },
@@ -355,37 +451,59 @@ export const bulkCreateCustomers = asyncHandler(async (req, res) => {
 
   const existingPhones = new Set(existingCustomers.map((c) => c.phone));
 
-  const toInsert = [];
-  for (const c of value.customers) {
-    const phone = String(c.phone)
-      .trim()
-      .replace(/^\+?91/, "");
-    if (existingPhones.has(phone)) continue;
-    existingPhones.add(phone); // avoid duplicates within batch
-    toInsert.push({
-      ownerId,
-      name: c.name.trim(),
-      phone,
-      address: c.address || "",
-      area: c.area || "",
-      landmark: c.landmark || "",
-      status: c.status || "active",
-      whatsapp: c.whatsapp || null,
-      notes: c.notes || "",
-      tags: c.tags || [],
+  const duplicateErrors = [];
+  const pendingDocs = [];
+  for (const c of validated) {
+    if (existingPhones.has(c.phone)) {
+      duplicateErrors.push({
+        line: c.lineNumber,
+        message: "Phone already registered",
+      });
+      continue;
+    }
+    existingPhones.add(c.phone);
+    pendingDocs.push({
+      lineNumber: c.lineNumber,
+      zoneWarning: c.zoneWarning,
+      doc: {
+        ownerId,
+        name: c.name,
+        phone: c.phone,
+        address: c.address,
+        area: "",
+        landmark: "",
+        status: "active",
+        whatsapp: null,
+        notes: "",
+        tags: [],
+        zoneId: c.zoneId,
+      },
     });
   }
 
-  if (toInsert.length === 0) {
-    throw new ApiError(400, "All phones already exist or duplicates in batch");
+  if (pendingDocs.length === 0) {
+    const detail = [...rowErrors, ...duplicateErrors]
+      .map((e) => `Line ${e.line}: ${e.message}`)
+      .join("; ");
+    throw new ApiError(
+      400,
+      detail || "All phones already exist or no valid rows to import"
+    );
   }
 
-  const inserted = await Customer.insertMany(toInsert);
-  const skipped = value.customers.length - toInsert.length;
+  const inserted = await Customer.insertMany(pendingDocs.map((p) => p.doc));
+  const created = inserted.length;
+  const skipped = totalRows - created;
+  const warnings = pendingDocs
+    .filter((p) => p.zoneWarning)
+    .map((p) => ({ line: p.lineNumber, message: p.zoneWarning }));
 
   const response = new ApiResponse(201, "Bulk import completed", {
-    created: inserted.length,
+    created,
+    imported: created,
     skipped,
+    errors: [...rowErrors, ...duplicateErrors],
+    warnings,
     data: inserted.map((c) => c.toObject()),
   });
 

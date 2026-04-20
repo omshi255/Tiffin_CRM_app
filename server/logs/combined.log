@@ -9067,3 +9067,72 @@ Error: "limit" must be less than or equal to 100
     at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
 
+2026-04-20T17:26:02.385Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-20T17:26:08.618Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-20T17:26:49.363Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-20T17:26:55.826Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-20T17:27:17.495Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-20T17:27:27.282Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-20T17:27:43.101Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-20T17:35:38.751Z [info] : 20/04/2026, 11:05:38 pm
+2026-04-20T17:35:38.759Z [error] : [20/04/2026, 11:05:38 pm] Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+Error: Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:266:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-20T17:36:04.178Z [info] : 20/04/2026, 11:06:04 pm
+2026-04-20T17:36:04.182Z [error] : [20/04/2026, 11:06:04 pm] Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+Error: Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:266:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-20T17:36:09.303Z [info] : 20/04/2026, 11:06:09 pm
+2026-04-20T17:36:09.305Z [error] : [20/04/2026, 11:06:09 pm] Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+Error: Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:266:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-20T17:36:17.679Z [info] : 20/04/2026, 11:06:17 pm
+2026-04-20T17:36:17.689Z [error] : [20/04/2026, 11:06:17 pm] Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+Error: Insufficient wallet balance. Available: ₹4000, Required: ₹6200
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:266:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-20T17:38:37.779Z [info] : 20/04/2026, 11:08:37 pm
+2026-04-20T17:38:37.781Z [error] : [20/04/2026, 11:08:37 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-20T17:38:38.087Z [info] : 20/04/2026, 11:08:38 pm
+2026-04-20T17:38:38.088Z [error] : [20/04/2026, 11:08:38 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+

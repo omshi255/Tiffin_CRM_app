@@ -1016,8 +1016,6 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                         builder: (_) => _ImportCustomersScreen(
                           onImported: (items) {
                             setState(() => _customers = [...items, ..._customers]);
-                            AppSnackbar.success(
-                                context, 'Imported ${items.length} customers');
                           },
                         ),
                       ),
@@ -2238,6 +2236,7 @@ final class _ImportCustomersScreen extends StatefulWidget {
 final class _ImportCustomersScreenState extends State<_ImportCustomersScreen> {
   final _ctrl = TextEditingController();
   List<Map<String, String>> _preview = const [];
+  bool _importing = false;
 
   @override
   void dispose() {
@@ -2290,27 +2289,35 @@ final class _ImportCustomersScreenState extends State<_ImportCustomersScreen> {
     setState(() => _preview = _parseCsv(_ctrl.text));
   }
 
-  void _import() {
-    final items = <CustomerModel>[];
-    for (final r in _preview) {
-      final name = (r['name'] ?? '').trim();
-      final phone = (r['phone'] ?? r['mobile'] ?? '').trim();
-      if (name.isEmpty || phone.isEmpty) continue;
-      items.add(
-        CustomerModel(
-          id: 'local_${DateTime.now().microsecondsSinceEpoch}_$phone',
-          name: name,
-          phone: phone,
-          email: null,
-          address: r['address'],
-          area: r['zone'] ?? r['area'],
-          status: 'active',
-          createdAt: DateTime.now(),
-        ),
-      );
+  Future<void> _import() async {
+    if (_preview.isEmpty || _importing) return;
+    setState(() => _importing = true);
+    try {
+      final result = await CustomerApi.bulkImportCsv(_ctrl.text.trim());
+      final rawCustomers = result['customers'];
+      final items = <CustomerModel>[];
+      if (rawCustomers is List) {
+        for (final e in rawCustomers) {
+          if (e is CustomerModel) items.add(e);
+        }
+      }
+      final imported = (result['imported'] as int?) ?? 0;
+      final skipped = (result['skipped'] as int?) ?? 0;
+      final warnings = result['warnings'];
+      if (!mounted) return;
+      widget.onImported(items);
+      var msg = 'Imported $imported customer${imported == 1 ? '' : 's'}';
+      if (skipped > 0) msg += ' ($skipped skipped)';
+      if (warnings is List && warnings.isNotEmpty) {
+        msg += '. ${warnings.length} zone name(s) did not match — customers were added without a zone.';
+      }
+      AppSnackbar.success(context, msg);
+      Navigator.pop(context);
+    } catch (e) {
+      if (mounted) ErrorHandler.show(context, e);
+    } finally {
+      if (mounted) setState(() => _importing = false);
     }
-    widget.onImported(items);
-    Navigator.pop(context);
   }
 
   @override
@@ -2389,15 +2396,26 @@ final class _ImportCustomersScreenState extends State<_ImportCustomersScreen> {
                 ),
           const SizedBox(height: 12),
           FilledButton(
-            onPressed: _preview.isEmpty ? null : _import,
+            onPressed: (_preview.isEmpty || _importing) ? null : _import,
             style: FilledButton.styleFrom(
               backgroundColor: _P.g1,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
-            child: const Text('Confirm Import',
-                style: TextStyle(fontWeight: FontWeight.w800)),
+            child: _importing
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text(
+                    'Confirm Import',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
           ),
         ],
       ),
