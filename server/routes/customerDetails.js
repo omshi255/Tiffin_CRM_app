@@ -403,6 +403,7 @@ router.get(
       amount: Number(t.amount) || 0,
       type: t.type,
       paymentMode: t.paymentMode || "cash",
+      source: t.source || "manual",
       items: (t.items || []).map((it) => ({
         name: it.name,
         quantity: it.quantity,

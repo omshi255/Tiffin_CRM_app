@@ -17,6 +17,11 @@ import {
 } from "../services/dailyOrder.service.js";
 import { sendNotification } from "../services/inAppNotification.service.js";
 import { NOTIFICATION_TYPES } from "../utils/notificationTypes.js";
+import {
+  buildDeliveredDescription,
+  planNamesByIds,
+  resolvedToLineItems,
+} from "../utils/deliveryLedger.js";
 
 const todayOrdersQuerySchema = Joi.object({
   mealPeriod: Joi.string()
@@ -353,18 +358,28 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
         { session }
       );
 
+      const planMap = await planNamesByIds([order.planId]);
+      const planLabel =
+        planMap[order.planId?.toString()] || "Meal plan";
+      const description = buildDeliveredDescription({
+        planName: planLabel,
+        mealType: order.mealType,
+        orderDate: order.orderDate,
+      });
+      const items = resolvedToLineItems(order.resolvedItems);
+
       await Transaction.create(
         [
           {
             ownerId,
             customerId: order.customerId,
             date: new Date(),
-            description: "Order delivered",
+            description,
             amount: deducted,
             type: "debit",
             paymentMode: "wallet",
             source: "order_delivered",
-            items: [],
+            items,
           },
         ],
         { session }
@@ -479,7 +494,9 @@ export const markDelivered = asyncHandler(async (req, res) => {
   if (customerId) filter.customerId = customerId;
 
   const orders = await DailyOrder.find(filter)
-    .select("_id customerId subscriptionId amount status")
+    .select(
+      "_id customerId subscriptionId amount status planId mealType orderDate resolvedItems"
+    )
     .lean();
 
   if (!orders.length) {
@@ -512,6 +529,8 @@ export const markDelivered = asyncHandler(async (req, res) => {
       { session }
     );
 
+    const planNameMap = await planNamesByIds(orders.map((o) => o.planId));
+
     // Record debit ledger entries per delivered order for customer history.
     const debitDocs = orders
       .filter((o) => (o.amount || 0) > 0 && o.customerId)
@@ -519,12 +538,16 @@ export const markDelivered = asyncHandler(async (req, res) => {
         ownerId,
         customerId: o.customerId,
         date: new Date(),
-        description: "Order delivered",
+        description: buildDeliveredDescription({
+          planName: planNameMap[o.planId?.toString()] || "Meal plan",
+          mealType: o.mealType,
+          orderDate: o.orderDate,
+        }),
         amount: Number(o.amount) || 0,
         type: "debit",
         paymentMode: "wallet",
         source: "order_delivered",
-        items: [],
+        items: resolvedToLineItems(o.resolvedItems),
       }));
     if (debitDocs.length) {
       await Transaction.create(debitDocs, { session });

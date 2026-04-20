@@ -225,7 +225,7 @@ class _TransactionsTabState extends State<TransactionsTab>
                     itemCount: _all.length,
                     itemBuilder: (context, i) {
                       final t = _all[i];
-                      final credit = t.type == 'credit';
+                      final credit = t.isCredit;
                       final amtColor = credit ? _P.green : _P.red;
                       // Keep same logic; only adjust debit visual to match requirement:
                       // debit should also show a downward arrow, but in red.
@@ -234,12 +234,7 @@ class _TransactionsTabState extends State<TransactionsTab>
                       final dateStr = dt != null
                           ? DateFormat.yMMMd().add_jm().format(dt.toLocal())
                           : t.date;
-                      final desc = (!credit &&
-                              (t.description.toLowerCase() == 'order delivered' ||
-                                  t.description.toLowerCase() ==
-                                      'order marked delivered'))
-                          ? 'Meal deducted'
-                          : t.description;
+                      final desc = t.description;
                       return RepaintBoundary(
                         child: Card(
                           margin: const EdgeInsets.only(bottom: 8),
@@ -272,7 +267,7 @@ class _TransactionsTabState extends State<TransactionsTab>
                               Row(
                                 children: [
                                   Text(
-                                    '${credit ? '+' : '-'}₹${t.amount.toStringAsFixed(0)}',
+                                    '${credit ? '+' : '-'}₹${t.displayAmount.toStringAsFixed(0)}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w800,
                                       color: amtColor,
@@ -290,7 +285,7 @@ class _TransactionsTabState extends State<TransactionsTab>
                                       border: Border.all(color: _P.s200),
                                     ),
                                     child: Text(
-                                      credit ? 'Credit' : 'Debit',
+                                      t.typeLabel,
                                       style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
@@ -459,10 +454,12 @@ class _TransactionsTabState extends State<TransactionsTab>
 
     await _withLoading(() async {
       final now = DateTime.now();
-      final credits =
-          _all.where((t) => t.type == 'credit').fold<double>(0, (s, t) => s + t.amount);
-      final debits =
-          _all.where((t) => t.type != 'credit').fold<double>(0, (s, t) => s + t.amount);
+      final credits = _all
+          .where((t) => t.isCredit)
+          .fold<double>(0, (s, t) => s + t.displayAmount);
+      final debits = _all
+          .where((t) => !t.isCredit)
+          .fold<double>(0, (s, t) => s + t.displayAmount);
       final net = credits - debits;
 
       final doc = pw.Document();
@@ -541,11 +538,11 @@ class _TransactionsTabState extends State<TransactionsTab>
                               : t.date;
                         }()),
                         bodyCell(t.description),
-                        bodyCell(t.type, align: pw.Alignment.center),
+                        bodyCell(t.typeLabel, align: pw.Alignment.center),
                         bodyCell(
-                          '${t.type == 'credit' ? '+' : '-'}₹${t.amount.toStringAsFixed(2)}',
+                          '${t.isCredit ? '+' : '-'}₹${t.displayAmount.toStringAsFixed(2)}',
                           align: pw.Alignment.centerRight,
-                          color: t.type == 'credit' ? PdfColors.green : PdfColors.red,
+                          color: t.isCredit ? PdfColors.green : PdfColors.red,
                         ),
                         bodyCell(t.paymentMode, align: pw.Alignment.center),
                       ],
@@ -598,8 +595,12 @@ class _TransactionsTabState extends State<TransactionsTab>
         return '"$s"';
       }
 
-      final credits = _all.where((t) => t.type == 'credit').fold<double>(0, (s, t) => s + t.amount);
-      final debits = _all.where((t) => t.type != 'credit').fold<double>(0, (s, t) => s + t.amount);
+      final credits = _all
+          .where((t) => t.isCredit)
+          .fold<double>(0, (s, t) => s + t.displayAmount);
+      final debits = _all
+          .where((t) => !t.isCredit)
+          .fold<double>(0, (s, t) => s + t.displayAmount);
       final net = credits - debits;
 
       final lines = <String>[header.map(esc).join(',')];
@@ -607,11 +608,11 @@ class _TransactionsTabState extends State<TransactionsTab>
         final dt = DateTime.tryParse(t.date);
         final dateStr = dt != null ? dt.toLocal().toIso8601String() : t.date;
         final amountStr =
-            '${t.type == 'credit' ? '+₹' : '-₹'}${t.amount.toStringAsFixed(2)}';
+            '${t.isCredit ? '+₹' : '-₹'}${t.displayAmount.toStringAsFixed(2)}';
         lines.add([
           dateStr,
           t.description,
-          t.type,
+          t.typeLabel,
           amountStr,
           t.paymentMode,
         ].map((e) => esc('$e')).join(','));
