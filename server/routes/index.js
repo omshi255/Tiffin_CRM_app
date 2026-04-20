@@ -21,6 +21,7 @@ import userRoutes from "./user.routes.js";
 import vendorCustomerTiffinRoutes from "./vendorCustomerTiffin.routes.js";
 import vendorDashboardRoutes from "./vendorDashboard.routes.js";
 import vendorFinanceRoutes from "./vendorFinance.routes.js";
+import financeRoutes from "./finance.js";
 
 const router = Router();
 
@@ -46,5 +47,6 @@ router.use("/zones", zoneRoutes);
 router.use("/expenses", expenseRoutes);
 router.use("/incomes", incomeRoutes);
 router.use("/send-notification", sendNotificationRoutes);
+router.use("/", financeRoutes);
 
 export default router;

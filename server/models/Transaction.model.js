@@ -57,6 +57,38 @@ const transactionSchema = new mongoose.Schema(
       default: "manual",
       trim: true,
     },
+    /**
+     * Additional context for finance reporting.
+     * Legacy records remain compatible via default 'manual'.
+     */
+    financeType: {
+      type: String,
+      enum: ["processed", "income", "deposit", "expense", "refund", "manual"],
+      default: "manual",
+    },
+    /**
+     * NEVER delete transactions. Use 'voided' plus a reverse entry.
+     */
+    status: {
+      type: String,
+      enum: ["completed", "voided"],
+      default: "completed",
+    },
+    /**
+     * Used when financeType='expense': raw_material | delivery | packaging | other
+     */
+    category: {
+      type: String,
+      default: null,
+    },
+    /**
+     * Used when financeType='processed' or 'refund' to link an Order.
+     */
+    orderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      default: null,
+    },
     items: {
       type: [lineItemSchema],
       default: [],
@@ -69,6 +101,8 @@ const transactionSchema = new mongoose.Schema(
 
 transactionSchema.index({ customerId: 1, date: -1 });
 transactionSchema.index({ ownerId: 1, createdAt: -1 });
+transactionSchema.index({ ownerId: 1, date: -1, financeType: 1 });
+transactionSchema.index({ status: 1, financeType: 1 });
 
 const Transaction = mongoose.model("Transaction", transactionSchema);
 
