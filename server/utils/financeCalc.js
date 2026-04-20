@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Income from "../models/Income.model.js";
 import Expense from "../models/Expense.model.js";
+import DailyOrder from "../models/DailyOrder.model.js";
 import Transaction from "../models/Transaction.model.js";
 
 function asObjectId(id) {
@@ -30,8 +31,9 @@ export async function getFinanceSummary(ownerId, startDate, endDate) {
 
   const dateFilter = { date: { $gte: start, $lte: end } };
   const ownerFilter = { ownerId: ownerOid };
+  const orderDateFilter = { orderDate: { $gte: start, $lte: end } };
 
-  const [incomes, expenses, transactions] = await Promise.all([
+  const [incomes, expenses, transactions, deliveredOrders] = await Promise.all([
     Income.find({ ...ownerFilter, ...dateFilter }).lean(),
     Expense.find({ ...ownerFilter, ...dateFilter }).lean(),
     Transaction.find({
@@ -39,6 +41,13 @@ export async function getFinanceSummary(ownerId, startDate, endDate) {
       ...dateFilter,
       status: "completed",
     }).lean(),
+    DailyOrder.find({
+      ...ownerFilter,
+      ...orderDateFilter,
+      status: "delivered",
+    })
+      .select("amount orderDate")
+      .lean(),
   ]);
 
   const sum = (arr) =>
@@ -51,7 +60,13 @@ export async function getFinanceSummary(ownerId, startDate, endDate) {
 
   const totalIncome = sum(incomes);
   const totalExpense = sum(expenses);
-  const totalProcessed = byFinanceType("processed");
+  const deliveredProcessed = deliveredOrders.reduce(
+    (s, o) => s + (parseFloat(o.amount) || 0),
+    0
+  );
+  // "processed" must represent delivered/completed orders.
+  // We add delivered DailyOrder amounts (primary source) + any explicit processed Transactions (if you also create them elsewhere).
+  const totalProcessed = byFinanceType("processed") + deliveredProcessed;
   const totalDeposit = byFinanceType("deposit");
   const totalRefund = byFinanceType("refund");
   const totalManual = byFinanceType("manual");
@@ -97,8 +112,9 @@ export async function getDailyBreakdown(ownerId, startDate, endDate) {
 
   const dateFilter = { date: { $gte: start, $lte: end } };
   const ownerFilter = { ownerId: ownerOid };
+  const orderDateFilter = { orderDate: { $gte: start, $lte: end } };
 
-  const [incomes, expenses, transactions] = await Promise.all([
+  const [incomes, expenses, transactions, deliveredOrders] = await Promise.all([
     Income.find({ ...ownerFilter, ...dateFilter }).lean(),
     Expense.find({ ...ownerFilter, ...dateFilter }).lean(),
     Transaction.find({
@@ -106,6 +122,13 @@ export async function getDailyBreakdown(ownerId, startDate, endDate) {
       ...dateFilter,
       status: "completed",
     }).lean(),
+    DailyOrder.find({
+      ...ownerFilter,
+      ...orderDateFilter,
+      status: "delivered",
+    })
+      .select("amount orderDate")
+      .lean(),
   ]);
 
   const dailyMap = {};
@@ -142,6 +165,13 @@ export async function getDailyBreakdown(ownerId, startDate, endDate) {
     if (t && dailyMap[key][t] !== undefined) {
       dailyMap[key][t] += parseFloat(r.amount) || 0;
     }
+  }
+
+  // Delivered orders -> processed (grouped by orderDate, which is the delivery day).
+  for (const o of deliveredOrders) {
+    const key = keyDdMm(o.orderDate);
+    ensure(key);
+    dailyMap[key].processed += parseFloat(o.amount) || 0;
   }
 
   // Ensure ALL days in the requested month are present (frontend calendar/table)
