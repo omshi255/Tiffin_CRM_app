@@ -565,6 +565,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'dart:typed_data';
+import 'package:file_saver/file_saver.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/app_snackbar.dart';
@@ -597,18 +601,24 @@ class _P {
 
 /// Full subscription window: info card + past / today / upcoming sections.
 class DeliveriesTab extends StatefulWidget {
-  const DeliveriesTab({super.key, required this.customerId});
+  const DeliveriesTab({super.key, required this.customerId, required this.customerName});
 
   final String customerId;
+  final String customerName;
 
   @override
   State<DeliveriesTab> createState() => _DeliveriesTabState();
 }
 
-class _DeliveriesTabState extends State<DeliveriesTab> {
+class _DeliveriesTabState extends State<DeliveriesTab>
+    with AutomaticKeepAliveClientMixin {
   CustomerDetailDeliveriesBundle? _bundle;
   bool _loading = true;
   String? _error;
+  bool _downloading = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -719,6 +729,7 @@ class _DeliveriesTabState extends State<DeliveriesTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_loading) {
       return Shimmer.fromColors(
         baseColor: _P.s200,
@@ -808,6 +819,30 @@ class _DeliveriesTabState extends State<DeliveriesTab> {
       onRefresh: _load,
       child: CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Deliveries',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: _P.s900,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _downloading ? null : _downloadMonthPdf,
+                    icon: const Icon(Icons.download_rounded, color: _P.g1),
+                    tooltip: 'Download',
+                  ),
+                ],
+              ),
+            ),
+          ),
           // Subscription info card
           SliverToBoxAdapter(child: _SubscriptionCard(sub: sub)),
 
@@ -847,13 +882,15 @@ class _DeliveriesTabState extends State<DeliveriesTab> {
           else
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, i) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _DeliveryRowCard(
-                    row: upcoming[i],
-                    todayYmd: today,
-                    isTodayHighlight: false,
-                    onCancel: _confirmCancel,
+                (context, i) => RepaintBoundary(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _DeliveryRowCard(
+                      row: upcoming[i],
+                      todayYmd: today,
+                      isTodayHighlight: false,
+                      onCancel: _confirmCancel,
+                    ),
                   ),
                 ),
                 childCount: upcoming.length,
@@ -873,13 +910,15 @@ class _DeliveriesTabState extends State<DeliveriesTab> {
           else
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, i) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _DeliveryRowCard(
-                    row: past[i],
-                    todayYmd: today,
-                    isTodayHighlight: false,
-                    onCancel: _confirmCancel,
+                (context, i) => RepaintBoundary(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _DeliveryRowCard(
+                      row: past[i],
+                      todayYmd: today,
+                      isTodayHighlight: false,
+                      onCancel: _confirmCancel,
+                    ),
                   ),
                 ),
                 childCount: past.length,
@@ -890,6 +929,122 @@ class _DeliveriesTabState extends State<DeliveriesTab> {
         ],
       ),
     );
+  }
+
+  String _safeBusinessName() => 'tiffincrm';
+
+  String _fileBase(String suffix) {
+    final biz = _safeBusinessName().trim().toLowerCase().replaceAll(RegExp(r'\s+'), '_');
+    return '${biz}_${suffix}_${widget.customerId}'.toLowerCase();
+  }
+
+  Future<void> _withLoading(Future<void> Function() task) async {
+    if (!mounted) return;
+    setState(() => _downloading = true);
+    try {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(color: _P.g1),
+        ),
+      );
+      await task();
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+      if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _downloadMonthPdf() async {
+    final bundle = _bundle;
+    if (bundle == null || bundle.deliveries.isEmpty) {
+      AppSnackbar.error(context, 'No data to download');
+      return;
+    }
+
+    final now = DateTime.now();
+    final monthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+    final monthRows = bundle.deliveries.where((r) => r.date.startsWith(monthKey)).toList();
+    if (monthRows.isEmpty) {
+      AppSnackbar.error(context, 'No data to download');
+      return;
+    }
+
+    await _withLoading(() async {
+      final monthLabel = DateFormat('MMMM').format(now);
+      final yearLabel = '${now.year}';
+
+      final totalDelivered = monthRows.where((r) => r.status == 'delivered').length;
+      const totalAmount = 0.0; // amount is not part of the loaded deliveries payload
+
+      final doc = pw.Document();
+      doc.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          build: (ctx) {
+            return [
+              pw.Text(
+                _safeBusinessName(),
+                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 2),
+              pw.Text('Customer: ${widget.customerName}', style: const pw.TextStyle(fontSize: 10)),
+              pw.Text('Month: $monthLabel $yearLabel', style: const pw.TextStyle(fontSize: 10)),
+              pw.SizedBox(height: 10),
+              pw.TableHelper.fromTextArray(
+                headers: const ['Date', 'Order Items', 'Amount', 'Status', 'Delivered At'],
+                data: [
+                  for (final r in monthRows)
+                    [
+                      r.date,
+                      r.items,
+                      '₹0.00',
+                      r.status,
+                      r.status == 'delivered' ? r.date : '',
+                    ]
+                ],
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                cellStyle: const pw.TextStyle(fontSize: 9),
+                headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+                cellAlignments: {
+                  0: pw.Alignment.centerLeft,
+                  1: pw.Alignment.centerLeft,
+                  2: pw.Alignment.centerRight,
+                  3: pw.Alignment.center,
+                  4: pw.Alignment.centerLeft,
+                },
+              ),
+              pw.SizedBox(height: 12),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.end,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text('Total delivered: $totalDelivered'),
+                      pw.Text(
+                        'Total amount: ₹${totalAmount.toStringAsFixed(2)}',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ];
+          },
+        ),
+      );
+
+      final bytes = await doc.save();
+      await FileSaver.instance.saveFile(
+        name: _fileBase('deliveries'),
+        bytes: Uint8List.fromList(bytes),
+        fileExtension: 'pdf',
+        mimeType: MimeType.pdf,
+      );
+      if (mounted) AppSnackbar.success(context, 'Downloaded successfully');
+    });
   }
 }
 

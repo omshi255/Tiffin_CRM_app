@@ -33,6 +33,11 @@ class CustomerModel {
     this.email,
     this.address,
     this.status = 'active',
+    this.dietType,
+    this.timeSlots,
+    this.tiffinCount,
+    this.hasInactiveMeals,
+    this.hasCustomizedMeals,
     this.whatsapp,
     this.area,
     this.landmark,
@@ -53,6 +58,16 @@ class CustomerModel {
   final String? email;
   final String? address;
   final String status;
+  /// Optional diet type hint used by list filters: veg | non_veg | mixed.
+  final String? dietType;
+  /// Optional time slots associated with customer (from meal plans/subscription), e.g. morning/afternoon/evening or breakfast/lunch/dinner.
+  final List<String>? timeSlots;
+  /// Optional aggregate tiffin count, if backend provides it.
+  final int? tiffinCount;
+  /// Optional: whether customer currently has inactive meals in plan.
+  final bool? hasInactiveMeals;
+  /// Optional: whether customer currently uses customized meals.
+  final bool? hasCustomizedMeals;
   final String? whatsapp;
   final String? area;
   final String? landmark;
@@ -86,6 +101,29 @@ class CustomerModel {
             .toList();
       }
     }
+
+    List<String>? timeSlots;
+    dynamic rawSlots = json['timeSlots'] ??
+        json['time_slots'] ??
+        json['slots'] ??
+        json['mealSlots'] ??
+        json['meal_slots'] ??
+        json['deliverySlots'] ??
+        json['delivery_slots'] ??
+        json['deliverySlot'] ??
+        json['delivery_slot'];
+    if (rawSlots is String) {
+      final s = rawSlots.trim();
+      if (s.isNotEmpty) timeSlots = [s];
+    } else if (rawSlots is List) {
+      final list = rawSlots.map((e) => e?.toString() ?? '').where((s) => s.trim().isNotEmpty).toList();
+      if (list.isNotEmpty) timeSlots = list;
+    }
+
+    final dietType = (json['dietType'] ?? json['diet_type'] ?? json['diet'])?.toString();
+    final tiffinCount = (json['tiffinCount'] ?? json['tiffin_count'] ?? json['tiffinCounts'] ?? json['tiffin_counts']);
+    final hasInactiveMeals = json['hasInactiveMeals'] ?? json['inactiveMeals'] ?? json['inactive_meals'];
+    final hasCustomizedMeals = json['hasCustomizedMeals'] ?? json['customizedMeals'] ?? json['customized_meals'];
     GeoPoint? location;
     if (json['location'] is Map<String, dynamic>) {
       final loc = json['location'] as Map<String, dynamic>;
@@ -109,6 +147,11 @@ class CustomerModel {
       email: json['email']?.toString(),
       address: json['address']?.toString(),
       status: json['status']?.toString() ?? 'active',
+      dietType: dietType,
+      timeSlots: timeSlots,
+      tiffinCount: (tiffinCount is num) ? tiffinCount.toInt() : int.tryParse('$tiffinCount'),
+      hasInactiveMeals: (hasInactiveMeals is bool) ? hasInactiveMeals : null,
+      hasCustomizedMeals: (hasCustomizedMeals is bool) ? hasCustomizedMeals : null,
       whatsapp: json['whatsapp']?.toString(),
       area: json['area']?.toString(),
       landmark: json['landmark']?.toString(),

@@ -10,6 +10,7 @@ class OrderModel {
     required this.customerId,
     required this.date,
     required this.status,
+    this.mealTime,
     this.customerName,
     this.customerPhone,
     this.customerAddress,
@@ -27,6 +28,9 @@ class OrderModel {
   final String customerId;
   final DateTime date;
   final String status;
+  /// Meal time tag used by Daily Orders screen: breakfast | lunch | dinner.
+  /// Optional to keep backward compatibility with older API payloads.
+  final String? mealTime;
   final String? customerName;
   final String? customerPhone;
   final String? customerAddress;
@@ -68,6 +72,12 @@ class OrderModel {
           : (json['customerId'] as Map?)?['_id']?.toString() ?? '',
       date: orderDate,
       status: _normalizeOrderStatus(json['status']?.toString() ?? 'pending'),
+      mealTime: (json['mealTime'] ??
+              json['mealType'] ??
+              json['mealPeriod'] ??
+              json['meal_type'] ??
+              json['meal_time'])
+          ?.toString(),
       customerName: json['customerName']?.toString() ??
           (json['customerId'] is Map
               ? (json['customerId'] as Map)['name']?.toString()

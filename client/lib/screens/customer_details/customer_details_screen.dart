@@ -110,9 +110,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         children: [
           CustomerInfoTab(customerId: widget.customerId),
           MealPlanTab(customerId: widget.customerId),
-          TransactionsTab(customerId: widget.customerId),
+          TransactionsTab(customerId: widget.customerId, customerName: widget.customerName),
           BalanceTab(customerId: widget.customerId),
-          DeliveriesTab(customerId: widget.customerId),
+          DeliveriesTab(customerId: widget.customerId, customerName: widget.customerName),
         ],
       ),
     );

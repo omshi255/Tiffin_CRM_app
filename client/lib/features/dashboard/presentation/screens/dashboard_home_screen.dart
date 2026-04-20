@@ -531,7 +531,10 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   Future<void> _onMealSlotSelected(_MealSlot slot) async {
     if (_mealSlot == slot || _itemsListLoading) return;
     setState(() => _mealSlot = slot);
-    await _loadDailyItems();
+    await Future.wait<void>([
+      _loadDailyItems(),
+      _loadStats(),
+    ]);
   }
 
   String _itemsPrepareTitle() {
@@ -723,7 +726,9 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     var ordDelivered = 0;
     var ordCancelled = 0;
     try {
-      final orders = await OrderApi.getToday();
+      final orders = await OrderApi.getToday(
+        mealPeriod: _mealSlotQueryParam(_mealSlot),
+      );
       ordersCount = orders.length;
       for (final order in orders) {
         switch (OrderStatus.fromApi(order.status)) {
@@ -1212,7 +1217,7 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _filteredDailyItems.length,
-                      separatorBuilder: (_, __) => Divider(
+                      separatorBuilder: (context, index) => Divider(
                         height: 1,
                         thickness: 1,
                         color: AppColors.border,

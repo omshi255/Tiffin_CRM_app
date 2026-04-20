@@ -11,6 +11,10 @@ import '../../features/profile/data/profile_api.dart';
 import '../../features/support/screens/support_screen.dart';
 import '../../features/support/screens/learn_more_screen.dart';
 import '../../features/portal/presentation/screens/portal_announcement_screen.dart';
+import '../../features/expenses/screens/expenses_screen.dart';
+import '../../features/income/screens/income_screen.dart';
+import '../../features/dashboard/presentation/screens/monthly_finance_screen.dart';
+import '../../screens/finance/finance_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key, this.fallbackUserName = 'Guest'});
@@ -122,8 +126,14 @@ class _AppDrawerState extends State<AppDrawer> {
                   ),
                   _Item(
                     icon: Icons.login_rounded,
-                    label: 'iMeals (Customer Login)',
-                    onTap: () => _go(AppRoutes.login),
+                    label: 'My Meals',
+                    onTap: () {
+                      _close();
+                      context.push(
+                        AppRoutes.login,
+                        extra: const <String, dynamic>{'selectedRole': 'customer'},
+                      );
+                    },
                   ),
 
                   _Divider(color: _dividerColor),
@@ -154,6 +164,58 @@ class _AppDrawerState extends State<AppDrawer> {
                     icon: Icons.edit_note_rounded,
                     label: 'Standard Meal Plans',
                     onTap: () => _go(AppRoutes.mealPlans),
+                  ),
+
+                  _Divider(color: _dividerColor),
+
+                  _label('Finance'),
+                  _Item(
+                    icon: Icons.bar_chart_rounded,
+                    label: 'Overview',
+                    onTap: () {
+                      _close();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const FinanceScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _Item(
+                    icon: Icons.add_circle_outline_rounded,
+                    label: 'Add Income',
+                    onTap: () {
+                      _close();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const IncomeScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _Item(
+                    icon: Icons.remove_circle_outline_rounded,
+                    label: 'Add Expense',
+                    onTap: () {
+                      _close();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ExpensesScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _Item(
+                    icon: Icons.calendar_month_outlined,
+                    label: 'Monthly View',
+                    onTap: () {
+                      _close();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const MonthlyFinanceScreen(),
+                        ),
+                      );
+                    },
                   ),
 
                   _Divider(color: _dividerColor),

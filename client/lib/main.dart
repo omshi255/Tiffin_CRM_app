@@ -18,19 +18,19 @@ void main() async {
   try {
     await dotenv.load(fileName: 'assets/config/onesignal.env');
   } catch (e, st) {
-    debugPrint('dotenv load onesignal.env: $e\n$st');
+    if (kDebugMode) debugPrint('dotenv load onesignal.env: $e\n$st');
   }
   final prefs = await SharedPreferences.getInstance();
   AppRouter.onboardingSeen = prefs.getBool('onboarding_seen') ?? false;
 
   try {
     if (kIsWeb) {
-      debugPrint('[OneSignal] Push not initialized on web.');
+      if (kDebugMode) debugPrint('[OneSignal] Push not initialized on web.');
     } else {
       await NotificationService().initOneSignal();
     }
   } catch (e, st) {
-    debugPrint('OneSignal init: $e\n$st');
+    if (kDebugMode) debugPrint('OneSignal init: $e\n$st');
   }
 
   SystemChrome.setPreferredOrientations([

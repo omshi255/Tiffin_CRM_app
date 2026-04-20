@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 abstract final class AppTheme {
-  static const double cardRadius = 16;
+  static const double cardRadius = 12;
   static const double inputRadius = 12;
   static const double buttonRadius = 12;
 
@@ -60,21 +60,32 @@ abstract final class AppTheme {
         foregroundColor: AppColors.onPrimary,
       ),
       textTheme: textTheme.copyWith(
-        displayLarge: textTheme.displayLarge?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-        displayMedium: textTheme.displayMedium?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-        displaySmall: textTheme.displaySmall?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-        headlineLarge: textTheme.headlineLarge?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-        headlineMedium: textTheme.headlineMedium?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-        headlineSmall: textTheme.headlineSmall?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-        titleLarge: textTheme.titleLarge?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-        titleMedium: textTheme.titleMedium?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
-        titleSmall: textTheme.titleSmall?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
-        bodyLarge: textTheme.bodyLarge?.copyWith(color: AppColors.textPrimary),
-        bodyMedium: textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
-        bodySmall: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-        labelLarge: textTheme.labelLarge?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w500),
-        labelMedium: textTheme.labelMedium?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-        labelSmall: textTheme.labelSmall?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+        // Typography spec
+        titleLarge: textTheme.titleLarge?.copyWith(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
+        titleMedium: textTheme.titleMedium?.copyWith(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        bodyMedium: textTheme.bodyMedium?.copyWith(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textPrimary,
+        ),
+        bodySmall: textTheme.bodySmall?.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textSecondary,
+        ),
+        labelSmall: textTheme.labelSmall?.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textHint,
+        ),
       ),
       appBarTheme: AppBarTheme(
         centerTitle: true,
@@ -88,8 +99,8 @@ abstract final class AppTheme {
         actionsIconTheme: const IconThemeData(color: AppColors.onPrimary, size: 24),
       ),
       cardTheme: CardThemeData(
-        elevation: 0,
-        shadowColor: AppColors.shadow.withValues(alpha: 0.04),
+        elevation: 2,
+        shadowColor: AppColors.shadow.withValues(alpha: 0.06),
         color: AppColors.cardBackground,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
@@ -99,7 +110,7 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: AppColors.surfaceContainer, // light grey fields
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(inputRadius)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(inputRadius),
@@ -157,6 +168,13 @@ abstract final class AppTheme {
         selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
         unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
       ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+      ),
       dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
@@ -177,13 +195,13 @@ abstract final class AppTheme {
         trackOutlineColor: WidgetStateProperty.all(AppColors.border),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.surfaceContainer,
+        backgroundColor: AppColors.surface,
         selectedColor: AppColors.primary,
         disabledColor: AppColors.surfaceContainerHighest,
-        labelStyle: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500),
+        labelStyle: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500, fontSize: 12),
         secondaryLabelStyle: const TextStyle(color: AppColors.textSecondary),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         side: const BorderSide(color: AppColors.border),
         showCheckmark: false,
       ),

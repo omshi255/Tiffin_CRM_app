@@ -3,8 +3,20 @@ import '../../../core/network/dio_client.dart';
 import '../models/order_model.dart';
 
 abstract final class OrderApi {
-  static Future<List<OrderModel>> getToday() async {
-    final response = await DioClient.instance.get(ApiEndpoints.dailyOrdersToday);
+  /// [mealPeriod] is one of: breakfast | lunch | dinner | snack.
+  static Future<List<OrderModel>> getToday({String? mealPeriod}) async {
+    final mp = mealPeriod?.trim().toLowerCase();
+    final query = <String, dynamic>{};
+    if (mp != null &&
+        mp.isNotEmpty &&
+        (mp == 'breakfast' || mp == 'lunch' || mp == 'dinner' || mp == 'snack')) {
+      query['mealPeriod'] = mp;
+    }
+
+    final response = await DioClient.instance.get(
+      ApiEndpoints.dailyOrdersToday,
+      queryParameters: query.isEmpty ? null : query,
+    );
     final data = parseData(response);
     if (data is List) {
       return data

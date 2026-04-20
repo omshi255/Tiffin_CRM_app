@@ -290,10 +290,14 @@ class MealPlanTab extends StatefulWidget {
   State<MealPlanTab> createState() => _MealPlanTabState();
 }
 
-class _MealPlanTabState extends State<MealPlanTab> {
+class _MealPlanTabState extends State<MealPlanTab>
+    with AutomaticKeepAliveClientMixin {
   CustomerDetailSubscriptionsBundle? _data;
   bool _loading = true;
   String? _error;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -333,6 +337,7 @@ class _MealPlanTabState extends State<MealPlanTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_loading) return const _Skeleton();
     if (_error != null) {
       return CustomerDetailNetworkError(message: _error!, onRetry: _load);

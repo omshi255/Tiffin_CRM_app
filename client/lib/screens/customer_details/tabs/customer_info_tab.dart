@@ -469,13 +469,17 @@ class CustomerInfoTab extends StatefulWidget {
   State<CustomerInfoTab> createState() => _CustomerInfoTabState();
 }
 
-class _CustomerInfoTabState extends State<CustomerInfoTab> {
+class _CustomerInfoTabState extends State<CustomerInfoTab>
+    with AutomaticKeepAliveClientMixin {
   CustomerDetailInfo? _info;
   bool _loading = true;
   String? _error;
   bool _sendingLink = false;
   bool _sendingWalletReminder = false;
   int _tiffinRowGeneration = 0;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -585,6 +589,7 @@ class _CustomerInfoTabState extends State<CustomerInfoTab> {
   // ── BUILD ──────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_loading) return _buildShimmer();
     if (_error != null) return CustomerDetailNetworkError(message: _error!, onRetry: _load);
 

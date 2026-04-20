@@ -532,7 +532,8 @@ class BalanceTab extends StatefulWidget {
   State<BalanceTab> createState() => _BalanceTabState();
 }
 
-class _BalanceTabState extends State<BalanceTab> {
+class _BalanceTabState extends State<BalanceTab>
+    with AutomaticKeepAliveClientMixin {
   CustomerDetailBalance? _balance;
   bool _loading = true;
   String? _error;
@@ -546,6 +547,9 @@ class _BalanceTabState extends State<BalanceTab> {
 
   final _addForm = GlobalKey<FormState>();
   final _extraForm = GlobalKey<FormState>();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -677,6 +681,7 @@ class _BalanceTabState extends State<BalanceTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_loading) {
       return Shimmer.fromColors(
         baseColor: _P.s200,

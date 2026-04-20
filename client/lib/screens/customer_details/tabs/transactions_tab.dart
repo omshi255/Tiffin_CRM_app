@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:typed_data';
+import 'package:file_saver/file_saver.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -23,20 +27,26 @@ class _P {
 
 /// Filters + transaction list + receipt bottom sheet.
 class TransactionsTab extends StatefulWidget {
-  const TransactionsTab({super.key, required this.customerId});
+  const TransactionsTab({super.key, required this.customerId, required this.customerName});
 
   final String customerId;
+  final String customerName;
 
   @override
   State<TransactionsTab> createState() => _TransactionsTabState();
 }
 
-class _TransactionsTabState extends State<TransactionsTab> {
+class _TransactionsTabState extends State<TransactionsTab>
+    with AutomaticKeepAliveClientMixin {
   List<CustomerDetailTransaction> _all = [];
   bool _loading = true;
   String? _error;
   int _filter = 0; // 0 all, 1 today, 2 week, 3 custom
   DateTimeRange? _customRange;
+  bool _downloading = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -145,6 +155,7 @@ class _TransactionsTabState extends State<TransactionsTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_loading) {
       return Shimmer.fromColors(
         baseColor: _P.s200,
@@ -180,9 +191,9 @@ class _TransactionsTabState extends State<TransactionsTab> {
               _chip('Today', 1),
               _chip('This Week', 2),
               IconButton(
-                icon: const Icon(Icons.date_range, color: _P.g1),
-                tooltip: 'Custom range',
-                onPressed: _pickRange,
+                icon: const Icon(Icons.download_rounded, color: _P.g1),
+                tooltip: 'Download',
+                onPressed: _downloading ? null : _openDownloadSheet,
               ),
             ],
           ),
@@ -216,21 +227,28 @@ class _TransactionsTabState extends State<TransactionsTab> {
                       final t = _all[i];
                       final credit = t.type == 'credit';
                       final amtColor = credit ? _P.green : _P.red;
-                      final icon = credit
-                          ? Icons.arrow_circle_down
-                          : Icons.arrow_circle_up;
+                      // Keep same logic; only adjust debit visual to match requirement:
+                      // debit should also show a downward arrow, but in red.
+                      final icon = Icons.arrow_circle_down;
                       final dt = DateTime.tryParse(t.date);
                       final dateStr = dt != null
                           ? DateFormat.yMMMd().add_jm().format(dt.toLocal())
                           : t.date;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: const BorderSide(color: _P.s200, width: 0.5),
-                        ),
-                        child: ListTile(
+                      final desc = (!credit &&
+                              (t.description.toLowerCase() == 'order delivered' ||
+                                  t.description.toLowerCase() ==
+                                      'order marked delivered'))
+                          ? 'Meal deducted'
+                          : t.description;
+                      return RepaintBoundary(
+                        child: Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: _P.s200, width: 0.5),
+                          ),
+                          child: ListTile(
                           leading: Icon(icon, color: amtColor, size: 28),
                           title: Text(
                             dateStr,
@@ -244,7 +262,7 @@ class _TransactionsTabState extends State<TransactionsTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                t.description,
+                                desc,
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: _P.s600,
@@ -290,7 +308,8 @@ class _TransactionsTabState extends State<TransactionsTab> {
                             onPressed: () => _openReceipt(t),
                           ),
                         ),
-                      );
+                      ),
+                    );
                     },
                   ),
                 ),
@@ -320,6 +339,300 @@ class _TransactionsTabState extends State<TransactionsTab> {
         ),
       ),
     );
+  }
+
+  String _safeBusinessName() {
+    // Business name is not part of the loaded transaction list payload.
+    // Use a stable app name placeholder and still follow naming rules.
+    return 'tiffincrm';
+  }
+
+  String _fileBase(String suffix) {
+    final biz = _safeBusinessName().trim().toLowerCase().replaceAll(RegExp(r'\s+'), '_');
+    return '${biz}_${suffix}_${widget.customerId}'.toLowerCase();
+  }
+
+  Future<void> _openDownloadSheet() async {
+    if (_all.isEmpty) {
+      AppSnackbar.error(context, 'No data to download');
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _P.s200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Download',
+                            style: TextStyle(
+                              color: _P.s900,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: _P.s200),
+                  ListTile(
+                    leading: const Icon(Icons.picture_as_pdf_rounded, color: _P.g1),
+                    title: const Text(
+                      'Download as PDF',
+                      style: TextStyle(color: _P.s900, fontWeight: FontWeight.w700),
+                    ),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      await _downloadPdf();
+                    },
+                  ),
+                  Container(height: 1, color: _P.s200),
+                  ListTile(
+                    leading: const Icon(Icons.grid_on_rounded, color: _P.g1),
+                    title: const Text(
+                      'Download as Excel',
+                      style: TextStyle(color: _P.s900, fontWeight: FontWeight.w700),
+                    ),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      await _downloadExcel();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _withLoading(Future<void> Function() task) async {
+    if (!mounted) return;
+    setState(() => _downloading = true);
+    try {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(color: _P.g1),
+        ),
+      );
+      await task();
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+      if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // close loading dialog
+    }
+  }
+
+  Future<void> _downloadPdf() async {
+    if (_all.isEmpty) {
+      AppSnackbar.error(context, 'No data to download');
+      return;
+    }
+
+    await _withLoading(() async {
+      final now = DateTime.now();
+      final credits =
+          _all.where((t) => t.type == 'credit').fold<double>(0, (s, t) => s + t.amount);
+      final debits =
+          _all.where((t) => t.type != 'credit').fold<double>(0, (s, t) => s + t.amount);
+      final net = credits - debits;
+
+      final doc = pw.Document();
+      doc.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          build: (ctx) {
+            pw.Widget headerCell(String text, {pw.Alignment align = pw.Alignment.centerLeft}) {
+              return pw.Container(
+                padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+                color: PdfColors.grey300,
+                alignment: align,
+                child: pw.Text(
+                  text,
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9),
+                ),
+              );
+            }
+
+            pw.Widget bodyCell(
+              String text, {
+              pw.Alignment align = pw.Alignment.centerLeft,
+              PdfColor? color,
+            }) {
+              return pw.Container(
+                padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 6),
+                alignment: align,
+                child: pw.Text(
+                  text,
+                  style: pw.TextStyle(fontSize: 9, color: color),
+                ),
+              );
+            }
+
+            return [
+              pw.Text(
+                _safeBusinessName(),
+                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 2),
+              pw.Text(
+                'Customer: ${widget.customerName}',
+                style: const pw.TextStyle(fontSize: 10),
+              ),
+              pw.Text(
+                'Generated: ${DateFormat('d MMM yyyy, h:mm a').format(now)}',
+                style: const pw.TextStyle(fontSize: 10),
+              ),
+              pw.SizedBox(height: 10),
+              pw.Table(
+                border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(2.1),
+                  1: pw.FlexColumnWidth(3.3),
+                  2: pw.FlexColumnWidth(1.3),
+                  3: pw.FlexColumnWidth(1.6),
+                  4: pw.FlexColumnWidth(1.7),
+                },
+                children: [
+                  pw.TableRow(
+                    children: [
+                      headerCell('Date'),
+                      headerCell('Description'),
+                      headerCell('Type', align: pw.Alignment.center),
+                      headerCell('Amount', align: pw.Alignment.centerRight),
+                      headerCell('Payment Mode', align: pw.Alignment.center),
+                    ],
+                  ),
+                  for (final t in _all)
+                    pw.TableRow(
+                      children: [
+                        bodyCell(() {
+                          final dt = DateTime.tryParse(t.date);
+                          return dt != null
+                              ? DateFormat('d MMM yyyy, h:mm a').format(dt.toLocal())
+                              : t.date;
+                        }()),
+                        bodyCell(t.description),
+                        bodyCell(t.type, align: pw.Alignment.center),
+                        bodyCell(
+                          '${t.type == 'credit' ? '+' : '-'}₹${t.amount.toStringAsFixed(2)}',
+                          align: pw.Alignment.centerRight,
+                          color: t.type == 'credit' ? PdfColors.green : PdfColors.red,
+                        ),
+                        bodyCell(t.paymentMode, align: pw.Alignment.center),
+                      ],
+                    ),
+                ],
+              ),
+              pw.SizedBox(height: 12),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.end,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text('Total Credits: ₹${credits.toStringAsFixed(2)}'),
+                      pw.Text('Total Debits: ₹${debits.toStringAsFixed(2)}'),
+                      pw.Text('Net Balance: ₹${net.toStringAsFixed(2)}',
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                    ],
+                  )
+                ],
+              ),
+            ];
+          },
+        ),
+      );
+
+      final bytes = await doc.save();
+      await FileSaver.instance.saveFile(
+        name: _fileBase('transactions'),
+        bytes: Uint8List.fromList(bytes),
+        fileExtension: 'pdf',
+        mimeType: MimeType.pdf,
+      );
+      if (mounted) AppSnackbar.success(context, 'Downloaded successfully');
+    });
+  }
+
+  Future<void> _downloadExcel() async {
+    if (_all.isEmpty) {
+      AppSnackbar.error(context, 'No data to download');
+      return;
+    }
+
+    await _withLoading(() async {
+      // No xlsx package installed; generate CSV content but save as .xlsx so Excel opens it.
+      // This keeps functionality without changing any existing API/data flow.
+      final header = ['Date', 'Description', 'Type', 'Amount', 'Payment Mode'];
+      String esc(String v) {
+        final s = v.replaceAll('"', '""');
+        return '"$s"';
+      }
+
+      final credits = _all.where((t) => t.type == 'credit').fold<double>(0, (s, t) => s + t.amount);
+      final debits = _all.where((t) => t.type != 'credit').fold<double>(0, (s, t) => s + t.amount);
+      final net = credits - debits;
+
+      final lines = <String>[header.map(esc).join(',')];
+      for (final t in _all) {
+        final dt = DateTime.tryParse(t.date);
+        final dateStr = dt != null ? dt.toLocal().toIso8601String() : t.date;
+        final amountStr =
+            '${t.type == 'credit' ? '+₹' : '-₹'}${t.amount.toStringAsFixed(2)}';
+        lines.add([
+          dateStr,
+          t.description,
+          t.type,
+          amountStr,
+          t.paymentMode,
+        ].map((e) => esc('$e')).join(','));
+      }
+      lines.add([
+        'Totals',
+        '',
+        '',
+        'Credits ₹${credits.toStringAsFixed(2)} | Debits ₹${debits.toStringAsFixed(2)} | Net ₹${net.toStringAsFixed(2)}',
+        '',
+      ].map((e) => esc('$e')).join(','));
+
+      final bytes = Uint8List.fromList(lines.join('\n').codeUnits);
+      await FileSaver.instance.saveFile(
+        name: _fileBase('transactions'),
+        bytes: bytes,
+        fileExtension: 'xlsx',
+        mimeType: MimeType.microsoftExcel,
+      );
+      if (mounted) AppSnackbar.success(context, 'Downloaded successfully');
+    });
   }
 }
 

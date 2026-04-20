@@ -61,6 +61,8 @@ class _StatusStyle {
   });
 }
 
+enum _MealTimeFilter { all, breakfast, lunch, dinner }
+
 _StatusStyle _ss(String status) {
   switch (status.toLowerCase()) {
     case 'out_for_delivery':
@@ -130,6 +132,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   List<OrderModel> _orders = [];
   bool _loading = true;
   String? _statusFilter;
+  _MealTimeFilter _mealTimeFilter = _MealTimeFilter.all;
   final Set<String> _selectedIds = {};
   bool _bulkMode = false;
   StreamSubscription<void>? _dailyOrdersSocketSub;
@@ -147,6 +150,20 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
     'processing',
     'out_for_delivery',
     'delivered',
+  ];
+
+  static const List<String> _mealTimeLabels = [
+    'All',
+    'Breakfast',
+    'Lunch',
+    'Dinner',
+  ];
+
+  static const List<_MealTimeFilter> _mealTimeValues = [
+    _MealTimeFilter.all,
+    _MealTimeFilter.breakfast,
+    _MealTimeFilter.lunch,
+    _MealTimeFilter.dinner,
   ];
 
   @override
@@ -189,6 +206,27 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   List<OrderModel> get _filteredOrders {
     if (_statusFilter == null) return _orders;
     return _orders.where((o) => o.status == _statusFilter).toList();
+  }
+
+  static String? _normalizeMealTime(String? raw) {
+    final s = raw?.toString().trim().toLowerCase();
+    if (s == null || s.isEmpty) return null;
+    if (s.startsWith('break')) return 'breakfast';
+    if (s.startsWith('lunch')) return 'lunch';
+    if (s.startsWith('dinner')) return 'dinner';
+    return s;
+  }
+
+  List<OrderModel> get _timeFilteredOrders {
+    final base = _filteredOrders;
+    if (_mealTimeFilter == _MealTimeFilter.all) return base;
+    final wanted = switch (_mealTimeFilter) {
+      _MealTimeFilter.breakfast => 'breakfast',
+      _MealTimeFilter.lunch => 'lunch',
+      _MealTimeFilter.dinner => 'dinner',
+      _MealTimeFilter.all => null,
+    };
+    return base.where((o) => _normalizeMealTime(o.mealTime) == wanted).toList();
   }
 
   static String _todayDateStr() {
@@ -473,46 +511,230 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
 
   // Filter chips
   Widget _filterChips() {
+    final currentIndex = _filterValues.indexOf(_statusFilter);
+    final currentLabel =
+        (currentIndex >= 0) ? _filterLabels[currentIndex] : _filterLabels.first;
+
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Row(
-          children: List.generate(_filterLabels.length, (i) {
-            final active = _statusFilter == _filterValues[i];
-            return Padding(
-              padding: const EdgeInsets.only(right: 7),
-              child: GestureDetector(
-                onTap: () => setState(() => _statusFilter = _filterValues[i]),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 6),
+      child: Row(
+        children: [
+          const Text(
+            'Status',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _P.s600),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _P.s200, width: 1),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String?>(
+                  value: _statusFilter,
+                  isExpanded: true,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: _P.s600),
+                  hint: Text(
+                    currentLabel,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _P.s900),
                   ),
-                  decoration: BoxDecoration(
-                    color: active ? _P.g1 : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: active ? _P.g1 : _P.s300,
-                      width: 0.5,
-                    ),
-                  ),
-                  child: Text(
-                    _filterLabels[i],
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: active ? Colors.white : _P.s600,
-                    ),
-                  ),
+                  items: List.generate(_filterLabels.length, (i) {
+                    return DropdownMenuItem<String?>(
+                      value: _filterValues[i],
+                      child: Text(
+                        _filterLabels[i],
+                        style: const TextStyle(fontSize: 13, color: _P.s900),
+                      ),
+                    );
+                  }),
+                  onChanged: (v) => setState(() => _statusFilter = v),
                 ),
               ),
-            );
-          }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Meal time filter chips (All / Breakfast / Lunch / Dinner)
+  Widget _mealTimeChips() {
+    final currentIndex = _mealTimeValues.indexOf(_mealTimeFilter);
+    final currentLabel =
+        (currentIndex >= 0) ? _mealTimeLabels[currentIndex] : _mealTimeLabels.first;
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(14, 6, 14, 12),
+      child: Row(
+        children: [
+          const Text(
+            'Meal',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _P.s600),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _P.s200, width: 1),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<_MealTimeFilter>(
+                  value: _mealTimeFilter,
+                  isExpanded: true,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: _P.s600),
+                  hint: Text(
+                    currentLabel,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _P.s900),
+                  ),
+                  items: List.generate(_mealTimeLabels.length, (i) {
+                    return DropdownMenuItem<_MealTimeFilter>(
+                      value: _mealTimeValues[i],
+                      child: Text(
+                        _mealTimeLabels[i],
+                        style: const TextStyle(fontSize: 13, color: _P.s900),
+                      ),
+                    );
+                  }),
+                  onChanged: (v) {
+                    if (v == null) return;
+                    setState(() => _mealTimeFilter = v);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _filtersRow() {
+    final currentStatusIndex = _filterValues.indexOf(_statusFilter);
+    final currentStatusLabel = (currentStatusIndex >= 0)
+        ? _filterLabels[currentStatusIndex]
+        : _filterLabels.first;
+
+    final currentMealIndex = _mealTimeValues.indexOf(_mealTimeFilter);
+    final currentMealLabel = (currentMealIndex >= 0)
+        ? _mealTimeLabels[currentMealIndex]
+        : _mealTimeLabels.first;
+
+    Widget dropdownBox({
+      required Widget child,
+    }) {
+      return Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _P.s200, width: 1),
         ),
+        child: DropdownButtonHideUnderline(child: child),
+      );
+    }
+
+    Widget field({
+      required String label,
+      required Widget dropdown,
+    }) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: _P.s600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          dropdown,
+        ],
+      );
+    }
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: field(
+              label: 'Status',
+              dropdown: dropdownBox(
+                child: DropdownButton<String?>(
+                  value: _statusFilter,
+                  isExpanded: true,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: _P.s600),
+                  hint: Text(
+                    currentStatusLabel,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _P.s900,
+                    ),
+                  ),
+                  items: List.generate(_filterLabels.length, (i) {
+                    return DropdownMenuItem<String?>(
+                      value: _filterValues[i],
+                      child: Text(
+                        _filterLabels[i],
+                        style: const TextStyle(fontSize: 13, color: _P.s900),
+                      ),
+                    );
+                  }),
+                  onChanged: (v) => setState(() => _statusFilter = v),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: field(
+              label: 'Meal',
+              dropdown: dropdownBox(
+                child: DropdownButton<_MealTimeFilter>(
+                  value: _mealTimeFilter,
+                  isExpanded: true,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: _P.s600),
+                  hint: Text(
+                    currentMealLabel,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _P.s900,
+                    ),
+                  ),
+                  items: List.generate(_mealTimeLabels.length, (i) {
+                    return DropdownMenuItem<_MealTimeFilter>(
+                      value: _mealTimeValues[i],
+                      child: Text(
+                        _mealTimeLabels[i],
+                        style: const TextStyle(fontSize: 13, color: _P.s900),
+                      ),
+                    );
+                  }),
+                  onChanged: (v) {
+                    if (v == null) return;
+                    setState(() => _mealTimeFilter = v);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -553,7 +775,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
                       ),
                       const SizedBox(height: 14),
                       const Text(
-                        'No orders for today',
+                        'No orders found',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -1002,7 +1224,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   // ── BUILD ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final filtered = _filteredOrders;
+    final filtered = _timeFilteredOrders;
 
     // ── Embedded in shell (dashboard tab) ──
     if (widget.embeddedInShell) {
@@ -1034,7 +1256,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
                     ],
                   ),
                 ),
-                _filterChips(),
+                _filtersRow(),
                 Expanded(child: _bodyContent(filtered)),
               ],
             ),
@@ -1054,7 +1276,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
         children: [
           _buildHeader(context),
           _buildSummaryRow(),
-          _filterChips(),
+          _filtersRow(),
           Expanded(child: _bodyContent(filtered)),
         ],
         ),
