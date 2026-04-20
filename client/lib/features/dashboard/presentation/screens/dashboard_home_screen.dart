@@ -560,6 +560,67 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     return name;
   }
 
+  String _dietFilterLabel(_DailyItemsChip chip) {
+    return switch (chip) {
+      _DailyItemsChip.all => 'All (${_dailyItems.length})',
+      _DailyItemsChip.veg => 'Veg ($_vegItemsCount)',
+      _DailyItemsChip.nonVeg => 'Non-Veg ($_nonVegItemsCount)',
+    };
+  }
+
+  static const TextStyle _itemsFilterLabelStyle = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textSecondary,
+  );
+
+  static const TextStyle _itemsDropdownTextStyle = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
+  Widget _itemsFilterDropdown<T>({
+    required T value,
+    required List<T> values,
+    required String Function(T) labelFor,
+    required ValueChanged<T?> onChanged,
+    required bool enabled,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          isExpanded: true,
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: enabled ? AppColors.primary : AppColors.textHint,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          style: _itemsDropdownTextStyle,
+          items: values
+              .map(
+                (v) => DropdownMenuItem<T>(
+                  value: v,
+                  child: Text(
+                    labelFor(v),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: enabled ? onChanged : null,
+        ),
+      ),
+    );
+  }
+
   String _emptyDailyItemsMessage() {
     final isToday = _isItemsDayToday();
     final slot = _mealSlot;
@@ -629,40 +690,6 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
       case _DailyItemsChip.nonVeg:
         return _dailyItems.where((e) => !matchesVegItemName(e.name)).toList();
     }
-  }
-
-  Widget _filterChip({
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColors.primary.withValues(alpha: 0.1)
-                : AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: selected ? AppColors.primary : AppColors.border,
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: selected ? AppColors.primary : AppColors.textSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _dailyItemsListShimmer() {
@@ -1114,62 +1141,51 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _filterChip(
-                            label: 'All (${_dailyItems.length})',
-                            selected: _itemsChip == _DailyItemsChip.all,
-                            onTap: () => setState(() => _itemsChip = _DailyItemsChip.all),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Meal', style: _itemsFilterLabelStyle),
+                              const SizedBox(height: 6),
+                              _itemsFilterDropdown<_MealSlot>(
+                                value: _mealSlot,
+                                values: _MealSlot.values.toList(),
+                                labelFor: _slotChipLabel,
+                                enabled: !_itemsListLoading,
+                                onChanged: (slot) {
+                                  if (slot != null) {
+                                    _onMealSlotSelected(slot);
+                                  }
+                                },
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          _filterChip(
-                            label: 'Veg ($_vegItemsCount)',
-                            selected: _itemsChip == _DailyItemsChip.veg,
-                            onTap: () => setState(() => _itemsChip = _DailyItemsChip.veg),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Diet', style: _itemsFilterLabelStyle),
+                              const SizedBox(height: 6),
+                              _itemsFilterDropdown<_DailyItemsChip>(
+                                value: _itemsChip,
+                                values: _DailyItemsChip.values.toList(),
+                                labelFor: _dietFilterLabel,
+                                enabled: true,
+                                onChanged: (chip) {
+                                  if (chip != null) {
+                                    setState(() => _itemsChip = chip);
+                                  }
+                                },
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          _filterChip(
-                            label: 'Non-Veg ($_nonVegItemsCount)',
-                            selected: _itemsChip == _DailyItemsChip.nonVeg,
-                            onTap: () => setState(() => _itemsChip = _DailyItemsChip.nonVeg),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _filterChip(
-                            label: _slotChipLabel(_MealSlot.all),
-                            selected: _mealSlot == _MealSlot.all,
-                            onTap: () => _onMealSlotSelected(_MealSlot.all),
-                          ),
-                          const SizedBox(width: 8),
-                          _filterChip(
-                            label: _slotChipLabel(_MealSlot.breakfast),
-                            selected: _mealSlot == _MealSlot.breakfast,
-                            onTap: () => _onMealSlotSelected(_MealSlot.breakfast),
-                          ),
-                          const SizedBox(width: 8),
-                          _filterChip(
-                            label: _slotChipLabel(_MealSlot.lunch),
-                            selected: _mealSlot == _MealSlot.lunch,
-                            onTap: () => _onMealSlotSelected(_MealSlot.lunch),
-                          ),
-                          const SizedBox(width: 8),
-                          _filterChip(
-                            label: _slotChipLabel(_MealSlot.dinner),
-                            selected: _mealSlot == _MealSlot.dinner,
-                            onTap: () => _onMealSlotSelected(_MealSlot.dinner),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   if (_itemsListLoading)

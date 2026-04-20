@@ -99,8 +99,7 @@ final class DailyItemsResult {
 abstract final class DailyItemsApi {
   /// [slot] is one of `breakfast`, `lunch`, `dinner`, or null / empty for all slots combined.
   ///
-  /// Backend supports `mealPeriod` on some endpoints; we send both `slot` and `mealPeriod`
-  /// for compatibility so the filter actually applies.
+  /// Sent to the server as `mealPeriod` (see vendor dashboard daily-items).
   ///
   /// When [forDay] is null or equals **today** (local), the `date` query param is omitted.
   static Future<DailyItemsResult> fetch({
@@ -120,8 +119,6 @@ abstract final class DailyItemsApi {
     if (s != null &&
         s.isNotEmpty &&
         (s == 'breakfast' || s == 'lunch' || s == 'dinner')) {
-      // Support both possible backend param names.
-      query['slot'] = s;
       query['mealPeriod'] = s;
     }
 

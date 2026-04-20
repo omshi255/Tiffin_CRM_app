@@ -9,10 +9,12 @@ import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
 
 const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
+const MEAL_PERIOD_VALUES = ["breakfast", "lunch", "dinner", "snack", "early_morning"];
 
 /**
  * GET /api/v1/vendor/dashboard/daily-items
  * Optional query: date=YYYY-MM-DD (defaults to today in Asia/Kolkata)
+ * Optional query: mealPeriod=breakfast|lunch|dinner|snack|early_morning
  *
  * Aggregates quantities from all active subscriptions that deliver on that date,
  * using each plan's mealSlots → items (linked Item docs for name/unit).
@@ -21,6 +23,19 @@ export const getDailyItems = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
 
   const rawDate = req.query.date;
+  const rawMealPeriod = req.query.mealPeriod;
+  let mealPeriod;
+  if (rawMealPeriod != null && String(rawMealPeriod).trim() !== "") {
+    const s = String(rawMealPeriod).trim();
+    if (!MEAL_PERIOD_VALUES.includes(s)) {
+      throw new ApiError(
+        400,
+        `Invalid mealPeriod; must be one of: ${MEAL_PERIOD_VALUES.join(", ")}`
+      );
+    }
+    mealPeriod = s;
+  }
+
   let dateStr;
   if (rawDate != null && String(rawDate).trim() !== "") {
     const s = String(rawDate).trim();
@@ -50,6 +65,10 @@ export const getDailyItems = asyncHandler(async (req, res) => {
   if (!subscriptions.length) {
     const response = new ApiResponse(200, "Daily items aggregated", {
       date: dateStr,
+      customerCount: 0,
+      filters: {
+        mealPeriod: mealPeriod ?? null,
+      },
       items: [],
     });
     return res.status(response.statusCode).json({
@@ -74,6 +93,7 @@ export const getDailyItems = asyncHandler(async (req, res) => {
     const plan = planById[sub.planId.toString()];
     if (!plan?.mealSlots?.length) continue;
     for (const slot of plan.mealSlots) {
+      if (mealPeriod && slot?.slot !== mealPeriod) continue;
       for (const row of slot.items || []) {
         if (row.itemId) itemIdsNeeded.add(row.itemId.toString());
       }
@@ -83,6 +103,10 @@ export const getDailyItems = asyncHandler(async (req, res) => {
   if (itemIdsNeeded.size === 0) {
     const response = new ApiResponse(200, "Daily items aggregated", {
       date: dateStr,
+      customerCount: 0,
+      filters: {
+        mealPeriod: mealPeriod ?? null,
+      },
       items: [],
     });
     return res.status(response.statusCode).json({
@@ -106,18 +130,22 @@ export const getDailyItems = asyncHandler(async (req, res) => {
 
   /** itemId -> total quantity */
   const totals = new Map();
+  /** Customers who contribute at least one line item for this date + meal filter. */
+  const contributingCustomerIds = new Set();
 
   for (const sub of subscriptions) {
     const plan = planById[sub.planId.toString()];
     if (!plan?.mealSlots?.length) continue;
 
     for (const slot of plan.mealSlots) {
+      if (mealPeriod && slot?.slot !== mealPeriod) continue;
       for (const row of slot.items || []) {
         const idStr = row.itemId?.toString();
         if (!idStr || !itemById[idStr]) continue;
         const q = Number(row.quantity);
         if (!Number.isFinite(q) || q <= 0) continue;
         totals.set(idStr, (totals.get(idStr) || 0) + q);
+        contributingCustomerIds.add(sub.customerId.toString());
       }
     }
   }
@@ -135,6 +163,10 @@ export const getDailyItems = asyncHandler(async (req, res) => {
 
   const response = new ApiResponse(200, "Daily items aggregated", {
     date: dateStr,
+    customerCount: contributingCustomerIds.size,
+    filters: {
+      mealPeriod: mealPeriod ?? null,
+    },
     items,
   });
 
