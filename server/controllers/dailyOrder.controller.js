@@ -346,6 +346,13 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
     // Record a debit ledger entry so it appears in customer transaction history.
     if (deducted > 0) {
+      // Deduct from customer wallet balance as well (walletBalance + legacy balance).
+      await Customer.findByIdAndUpdate(
+        order.customerId,
+        { $inc: { walletBalance: -deducted, balance: -deducted } },
+        { session }
+      );
+
       await Transaction.create(
         [
           {
@@ -355,7 +362,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
             description: "Order delivered",
             amount: deducted,
             type: "debit",
-            paymentMode: "subscription",
+            paymentMode: "wallet",
             source: "order_delivered",
             items: [],
           },
@@ -515,13 +522,30 @@ export const markDelivered = asyncHandler(async (req, res) => {
         description: "Order delivered",
         amount: Number(o.amount) || 0,
         type: "debit",
-        paymentMode: "subscription",
+        paymentMode: "wallet",
         source: "order_delivered",
         items: [],
       }));
     if (debitDocs.length) {
       await Transaction.create(debitDocs, { session });
     }
+
+    // Deduct total delivered amount from each customer's wallet (walletBalance + legacy balance).
+    const byCustomer = {};
+    for (const o of orders) {
+      const amt = Number(o.amount) || 0;
+      if (!o.customerId || amt <= 0) continue;
+      const cid = o.customerId.toString();
+      byCustomer[cid] = (byCustomer[cid] || 0) + amt;
+    }
+    const customerUpdates = Object.entries(byCustomer).map(([cid, total]) =>
+      Customer.findByIdAndUpdate(
+        cid,
+        { $inc: { walletBalance: -total, balance: -total } },
+        { session }
+      )
+    );
+    if (customerUpdates.length) await Promise.all(customerUpdates);
 
     // Deduct balance per subscription
     for (const [sid, totalDeduction] of Object.entries(deductionMap)) {
