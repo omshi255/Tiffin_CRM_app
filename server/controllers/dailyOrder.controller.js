@@ -5,6 +5,7 @@ import Subscription from "../models/Subscription.model.js";
 import Customer from "../models/Customer.model.js";
 import User from "../models/User.model.js";
 import DeliveryStaff from "../models/DeliveryStaff.model.js";
+import Transaction from "../models/Transaction.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
@@ -343,6 +344,26 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       session
     );
 
+    // Record a debit ledger entry so it appears in customer transaction history.
+    if (deducted > 0) {
+      await Transaction.create(
+        [
+          {
+            ownerId,
+            customerId: order.customerId,
+            date: new Date(),
+            description: "Order delivered",
+            amount: deducted,
+            type: "debit",
+            paymentMode: "subscription",
+            source: "order_delivered",
+            items: [],
+          },
+        ],
+        { session }
+      );
+    }
+
     order.status = "delivered";
     order.deliveredAt = new Date();
     await order.save({ session });
@@ -483,6 +504,24 @@ export const markDelivered = asyncHandler(async (req, res) => {
       { $set: { status: "delivered", deliveredAt: new Date() } },
       { session }
     );
+
+    // Record debit ledger entries per delivered order for customer history.
+    const debitDocs = orders
+      .filter((o) => (o.amount || 0) > 0 && o.customerId)
+      .map((o) => ({
+        ownerId,
+        customerId: o.customerId,
+        date: new Date(),
+        description: "Order delivered",
+        amount: Number(o.amount) || 0,
+        type: "debit",
+        paymentMode: "subscription",
+        source: "order_delivered",
+        items: [],
+      }));
+    if (debitDocs.length) {
+      await Transaction.create(debitDocs, { session });
+    }
 
     // Deduct balance per subscription
     for (const [sid, totalDeduction] of Object.entries(deductionMap)) {
