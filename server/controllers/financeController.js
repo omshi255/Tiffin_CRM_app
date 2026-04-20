@@ -5,7 +5,7 @@ import Customer from "../models/Customer.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../class/apiErrorClass.js";
 import { parseUTC } from "../services/dailyOrder.service.js";
-import { getFinanceSummary, normalizeFinanceSummary } from "../utils/financeCalc.js";
+import { getFinanceSummary, getDailyBreakdown } from "../utils/financeCalc.js";
 
 const FINANCE_TYPES = ["processed", "income", "deposit", "expense", "refund", "manual"];
 const STATUSES = ["completed", "voided"];
@@ -280,11 +280,17 @@ export const getDailyFinance = asyncHandler(async (req, res) => {
   const endExclusive = new Date(start);
   endExclusive.setUTCDate(endExclusive.getUTCDate() + 1);
 
-  const agg = await Transaction.aggregate(
-    getFinanceSummary(ownerId, { date: { $gte: start, $lt: endExclusive } })
-  );
-  const summary = normalizeFinanceSummary(agg[0]);
-  success(res, summary);
+  // Backward compatibility: this endpoint isn't used by the new Finance screen.
+  success(res, {
+    revenue: 0,
+    incomes: 0,
+    deposits: 0,
+    expenses: 0,
+    refunds: 0,
+    gross_income: 0,
+    net_profit: 0,
+    pending_cash: 0,
+  });
 });
 
 /**
@@ -392,135 +398,55 @@ export const getFinanceCalendar = asyncHandler(async (req, res) => {
  * -> { ...totals, expenses_by_category[], income_by_source[] }
  */
 export const getMonthlySummary = asyncHandler(async (req, res) => {
-  const schema = Joi.object({ month: monthSchema });
-  const { error, value } = schema.validate(req.query, { stripUnknown: true, abortEarly: false });
+  // Unified endpoint:
+  // - supports month=YYYY-MM (legacy)
+  // - supports month=4&year=2026 (new)
+  const schema = Joi.object({
+    month: Joi.alternatives().try(monthSchema, Joi.number().integer().min(1).max(12)),
+    year: Joi.number().integer().min(2000).max(2100).optional(),
+  });
+  const { error, value } = schema.validate(req.query, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
   if (error) throw new ApiError(400, error.details.map((d) => d.message).join("; "));
 
   const ownerId = req.user.userId;
-  const ownerOid = oid(ownerId, "ownerId");
-  const { start, endExclusive } = monthRangeUtc(value.month);
 
-  const agg = await Transaction.aggregate([
-    {
-      $match: {
-        ownerId: ownerOid,
-        status: "completed",
-        date: { $gte: start, $lt: endExclusive },
-      },
-    },
-    {
-      $facet: {
-        totals: [
-          {
-            $group: {
-              _id: null,
-              revenue: {
-                $sum: {
-                  $cond: [
-                    { $and: [{ $eq: ["$financeType", "processed"] }, { $eq: ["$type", "credit"] }] },
-                    { $ifNull: ["$amount", 0] },
-                    0,
-                  ],
-                },
-              },
-              incomes: {
-                $sum: {
-                  $cond: [
-                    { $and: [{ $eq: ["$financeType", "income"] }, { $eq: ["$type", "credit"] }] },
-                    { $ifNull: ["$amount", 0] },
-                    0,
-                  ],
-                },
-              },
-              deposits: {
-                $sum: {
-                  $cond: [
-                    { $and: [{ $eq: ["$financeType", "deposit"] }, { $eq: ["$type", "credit"] }] },
-                    { $ifNull: ["$amount", 0] },
-                    0,
-                  ],
-                },
-              },
-              expenses: {
-                $sum: {
-                  $cond: [
-                    { $and: [{ $eq: ["$financeType", "expense"] }, { $eq: ["$type", "debit"] }] },
-                    { $ifNull: ["$amount", 0] },
-                    0,
-                  ],
-                },
-              },
-              refunds: {
-                $sum: {
-                  $cond: [
-                    { $and: [{ $eq: ["$financeType", "refund"] }, { $eq: ["$type", "debit"] }] },
-                    { $ifNull: ["$amount", 0] },
-                    0,
-                  ],
-                },
-              },
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              revenue: 1,
-              incomes: 1,
-              deposits: 1,
-              expenses: 1,
-              refunds: 1,
-              gross_income: { $add: ["$revenue", "$incomes"] },
-            },
-          },
-          {
-            $addFields: {
-              net_profit: {
-                $subtract: [{ $subtract: ["$gross_income", "$refunds"] }, "$expenses"],
-              },
-              pending_cash: { $subtract: ["$gross_income", "$deposits"] },
-            },
-          },
-        ],
-        expenses_by_category: [
-          { $match: { financeType: "expense", type: "debit" } },
-          {
-            $group: {
-              _id: { $ifNull: ["$category", null] },
-              total: { $sum: { $ifNull: ["$amount", 0] } },
-            },
-          },
-          { $sort: { total: -1 } },
-          { $project: { _id: 0, category: "$_id", total: 1 } },
-        ],
-        income_by_source: [
-          { $match: { financeType: "income", type: "credit" } },
-          {
-            $group: {
-              _id: { $ifNull: ["$source", "manual"] },
-              total: { $sum: { $ifNull: ["$amount", 0] } },
-            },
-          },
-          { $sort: { total: -1 } },
-          { $project: { _id: 0, source: "$_id", total: 1 } },
-        ],
-      },
-    },
-    {
-      $project: {
-        totals: { $ifNull: [{ $first: "$totals" }, {}] },
-        expenses_by_category: 1,
-        income_by_source: 1,
-      },
-    },
+  let startDate;
+  let endDate;
+  let month;
+  let year;
+
+  if (typeof value.month === "string") {
+    const r = monthRangeUtc(value.month);
+    startDate = r.start;
+    endDate = new Date(r.endExclusive);
+    endDate.setUTCMilliseconds(endDate.getUTCMilliseconds() - 1);
+    month = r.month1to12;
+    year = r.year;
+  } else {
+    month = value.month || new Date().getMonth() + 1;
+    year = value.year || new Date().getFullYear();
+    startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+    endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+  }
+
+  const [summary, daily] = await Promise.all([
+    getFinanceSummary(ownerId, startDate, endDate),
+    getDailyBreakdown(ownerId, startDate, endDate),
   ]);
 
-  const payload = {
-    ...normalizeFinanceSummary(agg[0]?.totals),
-    expenses_by_category: agg[0]?.expenses_by_category || [],
-    income_by_source: agg[0]?.income_by_source || [],
-  };
-
-  success(res, payload);
+  success(res, {
+    summary,
+    daily,
+    period: {
+      month,
+      year,
+      startDate,
+      endDate,
+    },
+  });
 });
 
 /**

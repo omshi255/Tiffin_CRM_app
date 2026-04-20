@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import Income from "../models/Income.model.js";
+import Expense from "../models/Expense.model.js";
+import Transaction from "../models/Transaction.model.js";
 
 function asObjectId(id) {
   if (!id) return null;
@@ -13,101 +16,157 @@ function money(n) {
 }
 
 /**
- * Build a reusable finance summary aggregation pipeline for Transaction.
- *
- * Rules:
- *  revenue  = processed + completed + credit
- *  incomes  = income    + completed + credit
- *  deposits = deposit   + completed + credit
- *  expenses = expense   + completed + debit
- *  refunds  = refund    + completed + debit
- *
- * Returns: { revenue, incomes, deposits, expenses, refunds, gross_income, net_profit, pending_cash }
+ * Unified finance summary across:
+ * - Income model (manual income entries)
+ * - Expense model (manual expense entries)
+ * - Transaction model (processed/deposit/refund/manual ledger entries)
  */
-export function getFinanceSummary(ownerId, matchQuery = {}) {
+export async function getFinanceSummary(ownerId, startDate, endDate) {
   const ownerOid = asObjectId(ownerId);
-  if (!ownerOid) {
-    throw new Error("Invalid ownerId");
-  }
+  if (!ownerOid) throw new Error("Invalid ownerId");
 
-  const baseMatch = {
-    ownerId: ownerOid,
-    status: "completed",
-    ...matchQuery,
-  };
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
-  const sumFacet = (financeType, type) => [
-    { $match: { financeType, type } },
-    { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } },
-    { $project: { _id: 0, total: 1 } },
-  ];
+  const dateFilter = { date: { $gte: start, $lte: end } };
+  const ownerFilter = { ownerId: ownerOid };
 
-  return [
-    { $match: baseMatch },
-    {
-      $facet: {
-        revenue: sumFacet("processed", "credit"),
-        incomes: sumFacet("income", "credit"),
-        deposits: sumFacet("deposit", "credit"),
-        expenses: sumFacet("expense", "debit"),
-        refunds: sumFacet("refund", "debit"),
-      },
-    },
-    {
-      $project: {
-        revenue: { $ifNull: [{ $first: "$revenue.total" }, 0] },
-        incomes: { $ifNull: [{ $first: "$incomes.total" }, 0] },
-        deposits: { $ifNull: [{ $first: "$deposits.total" }, 0] },
-        expenses: { $ifNull: [{ $first: "$expenses.total" }, 0] },
-        refunds: { $ifNull: [{ $first: "$refunds.total" }, 0] },
-      },
-    },
-    {
-      $addFields: {
-        gross_income: { $add: ["$revenue", "$incomes"] },
-      },
-    },
-    {
-      $addFields: {
-        net_profit: { $subtract: [{ $subtract: ["$gross_income", "$refunds"] }, "$expenses"] },
-        pending_cash: { $subtract: ["$gross_income", "$deposits"] },
-      },
-    },
-    {
-      $project: {
-        revenue: 1,
-        incomes: 1,
-        deposits: 1,
-        expenses: 1,
-        refunds: 1,
-        gross_income: 1,
-        net_profit: 1,
-        pending_cash: 1,
-      },
-    },
-  ];
-}
+  const [incomes, expenses, transactions] = await Promise.all([
+    Income.find({ ...ownerFilter, ...dateFilter }).lean(),
+    Expense.find({ ...ownerFilter, ...dateFilter }).lean(),
+    Transaction.find({
+      ...ownerFilter,
+      ...dateFilter,
+      status: "completed",
+    }).lean(),
+  ]);
 
-export function normalizeFinanceSummary(doc) {
-  const o = doc || {};
-  const revenue = money(o.revenue);
-  const incomes = money(o.incomes);
-  const deposits = money(o.deposits);
-  const expenses = money(o.expenses);
-  const refunds = money(o.refunds);
-  const gross_income = money(o.gross_income ?? revenue + incomes);
-  const net_profit = money(o.net_profit ?? gross_income - refunds - expenses);
-  const pending_cash = money(o.pending_cash ?? gross_income - deposits);
+  const sum = (arr) =>
+    arr.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+
+  const byFinanceType = (financeType) =>
+    transactions
+      .filter((t) => String(t.financeType || "").toLowerCase() === financeType)
+      .reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+
+  const totalIncome = sum(incomes);
+  const totalExpense = sum(expenses);
+  const totalProcessed = byFinanceType("processed");
+  const totalDeposit = byFinanceType("deposit");
+  const totalRefund = byFinanceType("refund");
+  const totalManual = byFinanceType("manual");
+
+  // NOTE: keep these semantics aligned with the frontend expectation:
+  // income = Income model total
+  // expense = Expense model total
+  // processed/deposit/refund/manual = Transaction buckets
+  const revenue = totalIncome + totalProcessed + totalDeposit + totalManual;
+  const profit = revenue - totalExpense - totalRefund;
 
   return {
-    revenue,
-    incomes,
-    deposits,
-    expenses,
-    refunds,
-    gross_income,
-    net_profit,
-    pending_cash,
+    revenue: +money(revenue).toFixed(2),
+    expenses: +money(totalExpense).toFixed(2),
+    incomes: +money(totalIncome).toFixed(2),
+    deposit: +money(totalDeposit).toFixed(2),
+    processed: +money(totalProcessed).toFixed(2),
+    refund: +money(totalRefund).toFixed(2),
+    manual: +money(totalManual).toFixed(2),
+    profit: +money(profit).toFixed(2),
   };
+}
+
+function daysInMonth(year, month1to12) {
+  return new Date(year, month1to12, 0).getDate();
+}
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+function keyDdMm(d) {
+  const date = new Date(d);
+  return `${pad2(date.getUTCDate())}/${pad2(date.getUTCMonth() + 1)}`;
+}
+
+export async function getDailyBreakdown(ownerId, startDate, endDate) {
+  const ownerOid = asObjectId(ownerId);
+  if (!ownerOid) throw new Error("Invalid ownerId");
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  const dateFilter = { date: { $gte: start, $lte: end } };
+  const ownerFilter = { ownerId: ownerOid };
+
+  const [incomes, expenses, transactions] = await Promise.all([
+    Income.find({ ...ownerFilter, ...dateFilter }).lean(),
+    Expense.find({ ...ownerFilter, ...dateFilter }).lean(),
+    Transaction.find({
+      ...ownerFilter,
+      ...dateFilter,
+      status: "completed",
+    }).lean(),
+  ]);
+
+  const dailyMap = {};
+
+  const ensure = (key) => {
+    if (!dailyMap[key]) {
+      dailyMap[key] = {
+        processed: 0,
+        income: 0,
+        deposit: 0,
+        expense: 0,
+        refund: 0,
+        manual: 0,
+      };
+    }
+  };
+
+  for (const r of incomes) {
+    const key = keyDdMm(r.date);
+    ensure(key);
+    dailyMap[key].income += parseFloat(r.amount) || 0;
+  }
+
+  for (const r of expenses) {
+    const key = keyDdMm(r.date);
+    ensure(key);
+    dailyMap[key].expense += parseFloat(r.amount) || 0;
+  }
+
+  for (const r of transactions) {
+    const key = keyDdMm(r.date);
+    ensure(key);
+    const t = String(r.financeType || "").toLowerCase();
+    if (t && dailyMap[key][t] !== undefined) {
+      dailyMap[key][t] += parseFloat(r.amount) || 0;
+    }
+  }
+
+  // Ensure ALL days in the requested month are present (frontend calendar/table)
+  const year = start.getUTCFullYear();
+  const month = start.getUTCMonth() + 1;
+  const dim = daysInMonth(year, month);
+  for (let d = 1; d <= dim; d += 1) {
+    const key = `${pad2(d)}/${pad2(month)}`;
+    ensure(key);
+  }
+
+  return Object.entries(dailyMap)
+    .map(([date, values]) => ({
+      date,
+      processed: +money(values.processed).toFixed(2),
+      income: +money(values.income).toFixed(2),
+      deposit: +money(values.deposit).toFixed(2),
+      expense: +money(values.expense).toFixed(2),
+      refund: +money(values.refund).toFixed(2),
+      manual: +money(values.manual).toFixed(2),
+    }))
+    .sort((a, b) => {
+      const [da, ma] = a.date.split("/").map(Number);
+      const [db, mb] = b.date.split("/").map(Number);
+      return mb !== ma ? mb - ma : db - da;
+    });
 }
 
