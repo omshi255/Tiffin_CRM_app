@@ -9,6 +9,7 @@ import Transaction from "../models/Transaction.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
+import { readSpendableWalletFromDb } from "../utils/customerWallet.js";
 import { sendToToken } from "../services/notification.service.js";
 import {
   getTodayDailyOrders,
@@ -58,28 +59,62 @@ const VALID_TRANSITIONS = {
  * Deduct order.amount from Subscription.remainingBalance within the given session.
  * Returns { newSubscriptionBalance, deducted } or throws ApiError on insufficient funds.
  */
-const deductBalanceForOrder = async (order, _vendorSettings, session) => {
+const deductBalanceForOrder = async (order, _vendorSettings, session, ownerId) => {
   const orderAmount = order.amount || 0;
   if (orderAmount <= 0) return { newSubscriptionBalance: null, deducted: 0 };
 
-  if (!order.subscriptionId) {
-    throw new ApiError(400, "Order has no subscription for deduction");
+  // Some orders can be wallet-paid (no/expired subscription, migrated data, etc.).
+  // In that case, allow delivery using wallet balance.
+  if (!order.customerId) {
+    throw new ApiError(400, "Order has no customer for deduction");
   }
 
-  const subscription = await Subscription.findById(
-    order.subscriptionId
-  ).session(session);
-  if (!subscription) throw new ApiError(404, "Subscription not found");
+  const spendableWallet = await readSpendableWalletFromDb(
+    Customer,
+    order.customerId,
+    ownerId ?? order.ownerId
+  );
 
-  const current = Number(
+  if (!order.subscriptionId) {
+    if (spendableWallet < orderAmount) {
+      throw new ApiError(
+        400,
+        `Insufficient wallet balance. Available: ₹${spendableWallet}, Required: ₹${orderAmount}`
+      );
+    }
+    return { newSubscriptionBalance: null, deducted: orderAmount };
+  }
+
+  const subscription = await Subscription.findById(order.subscriptionId).session(
+    session
+  );
+
+  // If the linked subscription no longer exists, fall back to wallet.
+  if (!subscription) {
+    if (spendableWallet < orderAmount) {
+      throw new ApiError(
+        400,
+        `Insufficient wallet balance. Available: ₹${spendableWallet}, Required: ₹${orderAmount}`
+      );
+    }
+    return { newSubscriptionBalance: null, deducted: orderAmount };
+  }
+
+  const rawCurrent = Number(
     subscription.remainingBalance ?? subscription.totalAmount ?? 0
   );
+  const current = Math.max(0, rawCurrent);
   const newSubscriptionBalance = current - orderAmount;
+
+  // If subscription is insufficient but wallet can cover, allow delivery and only debit wallet.
   if (newSubscriptionBalance < 0) {
-    throw new ApiError(
-      400,
-      `Insufficient subscription balance. Available: ₹${current}, Required: ₹${orderAmount}`
-    );
+    if (spendableWallet < orderAmount) {
+      throw new ApiError(
+        400,
+        `Insufficient subscription balance. Available: ₹${current}, Required: ₹${orderAmount}`
+      );
+    }
+    return { newSubscriptionBalance: null, deducted: orderAmount };
   }
 
   await Subscription.findByIdAndUpdate(
@@ -346,7 +381,8 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     const { newSubscriptionBalance, deducted } = await deductBalanceForOrder(
       order,
       vendor?.settings,
-      session
+      session,
+      ownerId
     );
 
     // Record a debit ledger entry so it appears in customer transaction history.
@@ -582,10 +618,9 @@ export const markDelivered = asyncHandler(async (req, res) => {
       );
       const newBalance = current - totalDeduction;
       if (newBalance < 0) {
-        throw new ApiError(
-          400,
-          `Insufficient subscription balance for subscription ${sid}`
-        );
+        // Wallet is already being debited for these orders; allow delivery even if the
+        // linked subscription ledger is insufficient (common with expired/migrated subs).
+        continue;
       }
 
       await Subscription.findByIdAndUpdate(

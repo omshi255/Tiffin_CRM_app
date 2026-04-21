@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'dart:typed_data';
 import 'package:file_saver/file_saver.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -39,11 +39,12 @@ class TransactionsTab extends StatefulWidget {
 class _TransactionsTabState extends State<TransactionsTab>
     with AutomaticKeepAliveClientMixin {
   List<CustomerDetailTransaction> _all = [];
+  CustomerDetailBalance? _balance;
   bool _loading = true;
   String? _error;
-  int _filter = 0; // 0 all, 1 today, 2 week, 3 custom
-  DateTimeRange? _customRange;
+  int _filter = 0; // 0 all, 1 today, 2 week
   bool _downloading = false;
+  bool _posting = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -62,14 +63,20 @@ class _TransactionsTabState extends State<TransactionsTab>
     });
     final range = _computeRange();
     try {
-      final list = await CustomerDetailService.fetchTransactions(
-        widget.customerId,
-        startDate: range.$1,
-        endDate: range.$2,
-      );
+      final results = await Future.wait([
+        CustomerDetailService.fetchTransactions(
+          widget.customerId,
+          startDate: range.$1,
+          endDate: range.$2,
+        ),
+        CustomerDetailService.fetchBalance(widget.customerId),
+      ]);
+      final list = results[0] as List<CustomerDetailTransaction>;
+      final bal = results[1] as CustomerDetailBalance;
       if (mounted) {
         setState(() {
           _all = list;
+          _balance = bal;
           _loading = false;
         });
       }
@@ -93,44 +100,8 @@ class _TransactionsTabState extends State<TransactionsTab>
       case 2:
         final start = now.subtract(const Duration(days: 7));
         return (start.toUtc().toIso8601String(), now.toUtc().toIso8601String());
-      case 3:
-        if (_customRange != null) {
-          final a = _customRange!.start;
-          final b = DateTime(
-            _customRange!.end.year,
-            _customRange!.end.month,
-            _customRange!.end.day,
-            23,
-            59,
-            59,
-            999,
-          );
-          return (a.toUtc().toIso8601String(), b.toUtc().toIso8601String());
-        }
-        return (null, null);
       default:
         return (null, null);
-    }
-  }
-
-  Future<void> _pickRange() async {
-    final now = DateTime.now();
-    final range = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(now.year - 2),
-      lastDate: DateTime(now.year + 1),
-      initialDateRange: _customRange ??
-          DateTimeRange(
-            start: now.subtract(const Duration(days: 7)),
-            end: now,
-          ),
-    );
-    if (range != null) {
-      setState(() {
-        _filter = 3;
-        _customRange = range;
-      });
-      await _load();
     }
   }
 
@@ -151,6 +122,302 @@ class _TransactionsTabState extends State<TransactionsTab>
         AppSnackbar.error(context, e is ApiException ? (e.message ?? 'Error') : '$e');
       }
     }
+  }
+
+  Future<void> _openAddBalanceSheet() async {
+    final amountCtrl = TextEditingController();
+    final noteCtrl = TextEditingController();
+    String payMode = 'cash';
+    final formKey = GlobalKey<FormState>();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final bottom = MediaQuery.of(ctx).viewInsets.bottom;
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            padding: EdgeInsets.fromLTRB(14, 14, 14, 14 + bottom),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _P.s200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.10),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Add Balance',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: _P.s900,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: amountCtrl,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    ],
+                    decoration: const InputDecoration(
+                      labelText: 'Amount',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    value: payMode,
+                    decoration: const InputDecoration(
+                      labelText: 'Payment mode',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'cash', child: Text('Cash')),
+                      DropdownMenuItem(value: 'upi', child: Text('UPI')),
+                      DropdownMenuItem(value: 'online', child: Text('Online')),
+                    ],
+                    onChanged: (v) => payMode = v ?? 'cash',
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: noteCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Note (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _posting
+                              ? null
+                              : () async {
+                                  if (!(formKey.currentState?.validate() ??
+                                      false)) {
+                                    return;
+                                  }
+                                  final amt =
+                                      double.tryParse(amountCtrl.text.trim());
+                                  if (amt == null || amt <= 0) {
+                                    AppSnackbar.error(
+                                        context, 'Enter a valid amount');
+                                    return;
+                                  }
+                                  setState(() => _posting = true);
+                                  try {
+                                    await CustomerDetailService.addBalance(
+                                      widget.customerId,
+                                      amount: amt,
+                                      paymentMode: payMode,
+                                      note: noteCtrl.text.trim().isEmpty
+                                          ? null
+                                          : noteCtrl.text.trim(),
+                                    );
+                                    if (!mounted) return;
+                                    Navigator.pop(ctx);
+                                    AppSnackbar.success(
+                                        context, 'Balance added');
+                                    await _load();
+                                  } catch (e) {
+                                    if (mounted) {
+                                      AppSnackbar.error(
+                                        context,
+                                        e is ApiException
+                                            ? (e.message ?? 'Error')
+                                            : '$e',
+                                      );
+                                    }
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _posting = false);
+                                    }
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _P.green,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Add'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    amountCtrl.dispose();
+    noteCtrl.dispose();
+  }
+
+  Future<void> _openDeductBalanceSheet() async {
+    final amountCtrl = TextEditingController();
+    final noteCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final bottom = MediaQuery.of(ctx).viewInsets.bottom;
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            padding: EdgeInsets.fromLTRB(14, 14, 14, 14 + bottom),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _P.s200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.10),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Deduct Balance',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: _P.s900,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: amountCtrl,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    ],
+                    decoration: const InputDecoration(
+                      labelText: 'Amount',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: noteCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Reason / Note',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _posting
+                              ? null
+                              : () async {
+                                  if (!(formKey.currentState?.validate() ??
+                                      false)) {
+                                    return;
+                                  }
+                                  final amt =
+                                      double.tryParse(amountCtrl.text.trim());
+                                  if (amt == null || amt <= 0) {
+                                    AppSnackbar.error(
+                                        context, 'Enter a valid amount');
+                                    return;
+                                  }
+                                  setState(() => _posting = true);
+                                  try {
+                                    await CustomerDetailService.deductBalance(
+                                      widget.customerId,
+                                      amount: amt,
+                                      note: noteCtrl.text.trim(),
+                                    );
+                                    if (!mounted) return;
+                                    Navigator.pop(ctx);
+                                    AppSnackbar.success(
+                                        context, 'Balance deducted');
+                                    await _load();
+                                  } catch (e) {
+                                    if (mounted) {
+                                      AppSnackbar.error(
+                                        context,
+                                        e is ApiException
+                                            ? (e.message ?? 'Error')
+                                            : '$e',
+                                      );
+                                    }
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _posting = false);
+                                    }
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _P.red,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Add'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    amountCtrl.dispose();
+    noteCtrl.dispose();
   }
 
   @override
@@ -180,6 +447,8 @@ class _TransactionsTabState extends State<TransactionsTab>
       return CustomerDetailNetworkError(message: _error!, onRetry: _load);
     }
 
+    final bal = _balance;
+
     return Column(
       children: [
         SingleChildScrollView(
@@ -198,6 +467,39 @@ class _TransactionsTabState extends State<TransactionsTab>
             ],
           ),
         ),
+        if (bal != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _P.s200, width: 0.8),
+              ),
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _BalanceTile(
+                      icon: Icons.account_balance_wallet_rounded,
+                      label: 'Wallet',
+                      value: '₹${bal.walletBalance.toStringAsFixed(0)}',
+                      color: _P.green,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _BalanceTile(
+                      icon: Icons.subscriptions_rounded,
+                      label: 'Subscription',
+                      value: '₹${bal.subscriptionBalance.toStringAsFixed(0)}',
+                      color: _P.g1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         Expanded(
           child: _all.isEmpty
               ? const Center(
@@ -221,14 +523,12 @@ class _TransactionsTabState extends State<TransactionsTab>
                   color: _P.g1,
                   onRefresh: _load,
                   child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 80),
                     itemCount: _all.length,
                     itemBuilder: (context, i) {
                       final t = _all[i];
                       final credit = t.isCredit;
                       final amtColor = credit ? _P.green : _P.red;
-                      // Keep same logic; only adjust debit visual to match requirement:
-                      // debit should also show a downward arrow, but in red.
                       final icon = Icons.arrow_circle_down;
                       final dt = DateTime.tryParse(t.date);
                       final dateStr = dt != null
@@ -244,70 +544,119 @@ class _TransactionsTabState extends State<TransactionsTab>
                             side: const BorderSide(color: _P.s200, width: 0.5),
                           ),
                           child: ListTile(
-                          leading: Icon(icon, color: amtColor, size: 28),
-                          title: Text(
-                            dateStr,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: _P.s900,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                desc,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: _P.s600,
-                                ),
+                            leading: Icon(icon, color: amtColor, size: 28),
+                            title: Text(
+                              dateStr,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: _P.s900,
                               ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Text(
-                                    '${credit ? '+' : '-'}₹${t.displayAmount.toStringAsFixed(0)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      color: amtColor,
-                                    ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  desc,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: _P.s600,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _P.s100,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: _P.s200),
-                                    ),
-                                    child: Text(
-                                      t.typeLabel,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: _P.s600,
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${credit ? '+' : '-'}₹${t.displayAmount.toStringAsFixed(0)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        color: amtColor,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          isThreeLine: true,
-                          trailing: IconButton(
-                            icon: const Icon(Icons.receipt, color: _P.g1),
-                            onPressed: () => _openReceipt(t),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _P.s100,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: _P.s200),
+                                      ),
+                                      child: Text(
+                                        t.typeLabel,
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          color: _P.s600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            isThreeLine: true,
+                            trailing: IconButton(
+                              icon: const Icon(Icons.receipt, color: _P.g1),
+                              onPressed: () => _openReceipt(t),
+                            ),
                           ),
                         ),
-                      ),
-                    );
+                      );
                     },
                   ),
                 ),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _posting ? null : _openAddBalanceSheet,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _P.green,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Add Balance',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _posting ? null : _openDeductBalanceSheet,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _P.red,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Deduct Balance',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -615,7 +964,7 @@ class _TransactionsTabState extends State<TransactionsTab>
           t.typeLabel,
           amountStr,
           t.paymentMode,
-        ].map((e) => esc('$e')).join(','));
+        ].map((e) => esc(e.toString())).join(','));
       }
       lines.add([
         'Totals',
@@ -623,7 +972,7 @@ class _TransactionsTabState extends State<TransactionsTab>
         '',
         'Credits ₹${credits.toStringAsFixed(2)} | Debits ₹${debits.toStringAsFixed(2)} | Net ₹${net.toStringAsFixed(2)}',
         '',
-      ].map((e) => esc('$e')).join(','));
+      ].map((e) => esc(e.toString())).join(','));
 
       final bytes = Uint8List.fromList(lines.join('\n').codeUnits);
       await FileSaver.instance.saveFile(
@@ -758,4 +1107,70 @@ class _DashedLinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _BalanceTile extends StatelessWidget {
+  const _BalanceTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _P.s100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _P.s200, width: 0.8),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: _P.s600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: _P.s900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -9442,3 +9442,97 @@ MongoServerSelectionError: connection <monitor> to 159.41.174.254:27017 closed
     at async Promise.all (index 1)
 
 
+2026-04-21T15:03:53.951Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T15:05:37.320Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T15:10:27.782Z [info] : 21/04/2026, 08:40:27 pm
+2026-04-21T15:10:27.791Z [error] : [21/04/2026, 08:40:27 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T15:10:28.359Z [info] : 21/04/2026, 08:40:28 pm
+2026-04-21T15:10:28.384Z [error] : [21/04/2026, 08:40:28 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T15:13:23.879Z [info] : 21/04/2026, 08:43:23 pm
+2026-04-21T15:13:23.881Z [error] : [21/04/2026, 08:43:23 pm] Insufficient subscription balance. Available: ₹-100, Required: ₹100
+Error: Insufficient subscription balance. Available: ₹-100, Required: ₹100
+    at deductBalanceForOrder (file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:346:50
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T15:13:28.766Z [info] : 21/04/2026, 08:43:28 pm
+2026-04-21T15:13:28.767Z [error] : [21/04/2026, 08:43:28 pm] Insufficient subscription balance. Available: ₹-100, Required: ₹100
+Error: Insufficient subscription balance. Available: ₹-100, Required: ₹100
+    at deductBalanceForOrder (file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:346:50
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T15:15:25.264Z [info] : 21/04/2026, 08:45:25 pm
+2026-04-21T15:15:25.267Z [error] : [21/04/2026, 08:45:25 pm] Insufficient subscription balance. Available: ₹-100, Required: ₹100
+Error: Insufficient subscription balance. Available: ₹-100, Required: ₹100
+    at deductBalanceForOrder (file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:346:50
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T15:15:41.902Z [info] : 21/04/2026, 08:45:41 pm
+2026-04-21T15:15:41.903Z [error] : [21/04/2026, 08:45:41 pm] Insufficient subscription balance. Available: ₹-100, Required: ₹100
+Error: Insufficient subscription balance. Available: ₹-100, Required: ₹100
+    at deductBalanceForOrder (file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:346:50
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T15:18:16.507Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T15:43:48.072Z [info] : 21/04/2026, 09:13:48 pm
+2026-04-21T15:43:48.094Z [error] : [21/04/2026, 09:13:48 pm] Active subscription already exists for customer
+Error: Active subscription already exists for customer
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:250:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T15:44:51.580Z [info] : 21/04/2026, 09:14:51 pm
+2026-04-21T15:44:51.581Z [error] : [21/04/2026, 09:14:51 pm] Active subscription already exists for customer
+Error: Active subscription already exists for customer
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:250:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T15:44:55.879Z [info] : 21/04/2026, 09:14:55 pm
+2026-04-21T15:44:55.883Z [error] : [21/04/2026, 09:14:55 pm] Active subscription already exists for customer
+Error: Active subscription already exists for customer
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/subscription.controller.js:250:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T15:48:19.092Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'tabs/balance_tab.dart';
 import 'tabs/customer_info_tab.dart';
 import 'tabs/deliveries_tab.dart';
 import 'tabs/meal_plan_tab.dart';
@@ -36,7 +35,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -72,8 +71,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
-            tabAlignment: TabAlignment.start,   // ← fixes left space
-  padding: EdgeInsets.zero, 
+          tabAlignment: TabAlignment.start, // ← fixes left space
+          padding: EdgeInsets.zero,
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
@@ -95,10 +94,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
               text: 'Transactions',
             ),
             Tab(
-              icon: Icon(Icons.account_balance_wallet, size: 20),
-              text: 'Balance',
-            ),
-            Tab(
               icon: Icon(Icons.delivery_dining, size: 20),
               text: 'Deliveries',
             ),
@@ -110,8 +105,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen>
         children: [
           CustomerInfoTab(customerId: widget.customerId),
           MealPlanTab(customerId: widget.customerId),
-          TransactionsTab(customerId: widget.customerId, customerName: widget.customerName),
-          BalanceTab(customerId: widget.customerId),
+          TransactionsTab(
+            customerId: widget.customerId,
+            customerName: widget.customerName,
+          ),
           DeliveriesTab(customerId: widget.customerId, customerName: widget.customerName),
         ],
       ),

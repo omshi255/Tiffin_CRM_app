@@ -239,10 +239,14 @@ export const createSubscription = asyncHandler(async (req, res) => {
     throw new ApiError(400, "End date must be after start date");
   }
 
+  // Block only if there's an actually-active subscription (not expired by endDate).
+  // This must align with customer-details `activePlan` logic (endDate >= now).
+  const now = new Date();
   const existingActive = await Subscription.findOne({
     ownerId,
     customerId,
-    status: "active",
+    status: { $in: ["active", "paused"] },
+    endDate: { $gte: now },
   });
 
   if (existingActive) {
