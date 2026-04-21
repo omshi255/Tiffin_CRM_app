@@ -137,6 +137,7 @@ export async function getDailyBreakdown(ownerId, startDate, endDate) {
     if (!dailyMap[key]) {
       dailyMap[key] = {
         processed: 0,
+        processedCount: 0,
         income: 0,
         deposit: 0,
         expense: 0,
@@ -172,6 +173,7 @@ export async function getDailyBreakdown(ownerId, startDate, endDate) {
     const key = keyDdMm(o.orderDate);
     ensure(key);
     dailyMap[key].processed += parseFloat(o.amount) || 0;
+    dailyMap[key].processedCount += 1;
   }
 
   // Ensure ALL days in the requested month are present (frontend calendar/table)
@@ -187,6 +189,7 @@ export async function getDailyBreakdown(ownerId, startDate, endDate) {
     .map(([date, values]) => ({
       date,
       processed: +money(values.processed).toFixed(2),
+      processedCount: values.processedCount || 0,
       income: +money(values.income).toFixed(2),
       deposit: +money(values.deposit).toFixed(2),
       expense: +money(values.expense).toFixed(2),

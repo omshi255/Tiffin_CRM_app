@@ -47,14 +47,33 @@ class _CustomerNotificationsScreenState
       final res = await CustomerPortalApi.getMyNotifications();
       if (mounted) {
         setState(() {
-          _notifications =
+          final raw =
               (res['notifications'] as List<NotificationModel>?) ?? [];
+          _notifications = _dedupeVendorAnnouncements(raw);
           _loading = false;
         });
       }
     } catch (e) {
       if (mounted) { setState(() => _loading = false); ErrorHandler.show(context, e); }
     }
+  }
+
+  /// Collapses duplicate vendor broadcast rows (same title+body), keeps first (newest from API order).
+  static List<NotificationModel> _dedupeVendorAnnouncements(
+    List<NotificationModel> list,
+  ) {
+    final seen = <String>{};
+    final out = <NotificationModel>[];
+    for (final n in list) {
+      final t = (n.type ?? '').toLowerCase();
+      if (t == 'vendor_announcement') {
+        final key = '${n.title}|${n.body}';
+        if (seen.contains(key)) continue;
+        seen.add(key);
+      }
+      out.add(n);
+    }
+    return out;
   }
 
   Future<void> _markAllRead() async {
@@ -161,6 +180,16 @@ class _CustomerNotificationsScreenState
           pillBg: const Color(0xFFFCEBEB), pillText: const Color(0xFF8C2020),
           iconBg: const Color(0xFFFCEBEB), iconColor: const Color(0xFFC0392B),
           dotColor: const Color(0xFFC0392B), icon: Icons.warning_amber_rounded);
+      case 'vendor_announcement':
+        return _NotifStyle(
+          label: 'Announcement',
+          pillBg: _violet100,
+          pillText: _violet600,
+          iconBg: _violet100,
+          iconColor: _violet600,
+          dotColor: _violet600,
+          icon: Icons.campaign_rounded,
+        );
       default:
         return _NotifStyle(label: 'Notification',
           pillBg: _green50, pillText: _green700,

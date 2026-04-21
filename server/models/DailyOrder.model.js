@@ -34,6 +34,15 @@ const dailyOrderSchema = new mongoose.Schema(
       enum: ["breakfast", "lunch", "dinner", "snack", "both", "all"],
       required: true,
     },
+    /**
+     * Which meal slot this row belongs to (from plan.mealSlots[].slot).
+     * `combined` = legacy / plans without per-slot items (one row per subscription per day).
+     */
+    planMealSlot: {
+      type: String,
+      trim: true,
+      default: "combined",
+    },
     /** Aggregated from plan items: all veg, all non-veg, or mixed. */
     dietType: {
       type: String,
@@ -141,7 +150,11 @@ dailyOrderSchema.index({ ownerId: 1, orderDate: 1, status: 1 });
 dailyOrderSchema.index({ ownerId: 1, orderDate: 1, mealType: 1, dietType: 1 });
 dailyOrderSchema.index({ customerId: 1, orderDate: -1 });
 dailyOrderSchema.index({ ownerId: 1, orderDate: 1, deliveryStaffId: 1 });
-dailyOrderSchema.index({ subscriptionId: 1, orderDate: 1 }, { unique: true, sparse: true });
+// One row per subscription per calendar day per slot (or `combined` for legacy single-row plans).
+dailyOrderSchema.index(
+  { subscriptionId: 1, orderDate: 1, planMealSlot: 1 },
+  { unique: true, sparse: true }
+);
 
 const DailyOrder = mongoose.model("DailyOrder", dailyOrderSchema);
 

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/utils/error_handler.dart';
+import '../../../orders/data/order_api.dart';
 import '../../data/portal_announcement_api.dart';
 
 /// Vendor: view and edit the customer portal announcement.
@@ -53,12 +54,95 @@ class _PortalAnnouncementScreenState extends State<PortalAnnouncementScreen> {
     }
   }
 
-  Future<void> _openEdit() async {
-    await _openEditor(initialText: _text);
+  /// Opens editor: empty for first message, or pre-filled so saving does not wipe the prior text.
+  Future<void> _openAnnouncementEditor() async {
+    final hasText = _text.trim().isNotEmpty;
+    await _openEditor(initialText: hasText ? _text : '');
   }
 
-  Future<void> _openAdd() async {
-    await _openEditor(initialText: '');
+  String _ymd(DateTime d) {
+    final y = d.year;
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '$y-$m-$day';
+  }
+
+  Future<void> _openHolidayCancelDeliveries() async {
+    var picked = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: const Text('Cancel deliveries'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'This cancels all orders for the selected day that are not yet delivered. '
+                'Wallet and subscription balances are only charged when an order is marked delivered, '
+                'so cancelled orders are not charged for that day.',
+                style: TextStyle(fontSize: 13, height: 1.35),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Date'),
+                subtitle: Text(_dateFmt.format(picked)),
+                trailing: const Icon(Icons.calendar_today_rounded),
+                onTap: () async {
+                  final d = await showDatePicker(
+                    context: ctx,
+                    initialDate: picked,
+                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (d != null) {
+                    setLocal(() {
+                      picked = DateTime(d.year, d.month, d.day);
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Back'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Cancel deliveries'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+
+    try {
+      final count = await OrderApi.cancelVendorHoliday(date: _ymd(picked));
+      if (!mounted) return;
+      AppSnackbar.success(
+        context,
+        count == 0
+            ? 'No active orders to cancel for that day.'
+            : 'Cancelled $count delivery order(s).',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ErrorHandler.show(context, e);
+    }
   }
 
   Future<void> _openEditor({required String initialText}) async {
@@ -194,14 +278,30 @@ class _PortalAnnouncementScreenState extends State<PortalAnnouncementScreen> {
                               ),
                             ),
                           ],
+                          const SizedBox(height: 10),
+                          Text(
+                            'Only one announcement is stored. Use Edit to change it; saving always replaces the previous message.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              height: 1.35,
+                              color: AppColors.textSecondary.withValues(alpha: 0.95),
+                            ),
+                          ),
                           const SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed: _openAdd,
-                                  icon: const Icon(Icons.add_rounded, size: 18),
-                                  label: const Text('Add'),
+                                  onPressed: _openAnnouncementEditor,
+                                  icon: Icon(
+                                    _text.trim().isEmpty
+                                        ? Icons.add_rounded
+                                        : Icons.edit_rounded,
+                                    size: 18,
+                                  ),
+                                  label: Text(
+                                    _text.trim().isEmpty ? 'Add' : 'Edit',
+                                  ),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: AppColors.primary,
                                     side: const BorderSide(color: AppColors.border),
@@ -216,6 +316,33 @@ class _PortalAnnouncementScreenState extends State<PortalAnnouncementScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: _openHolidayCancelDeliveries,
+                            icon: const Icon(Icons.event_busy_rounded, size: 18),
+                            label: const Text('Cancel all deliveries (no charge)'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.error,
+                              side: const BorderSide(color: AppColors.error),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Cancels undelivered orders for the day you pick. Already-delivered orders stay as-is. '
+                            'Meal balance is charged only on delivery, so these cancellations are not charged.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              height: 1.35,
+                              color: AppColors.textSecondary.withValues(alpha: 0.9),
+                            ),
                           ),
                         ],
                       ),

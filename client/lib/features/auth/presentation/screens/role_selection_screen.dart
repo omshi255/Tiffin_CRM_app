@@ -191,6 +191,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/tiffin_logo_mark.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
@@ -241,19 +242,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     ),
   ];
 
-  List<Color> _getLogoGradient(String role) {
-    switch (role) {
-      case 'vendor':
-        return [const Color(0xFF9B59D0), const Color(0xFF3B1472)];
-      case 'customer':
-        return [const Color(0xFF1DB87A), const Color(0xFF0A5C3A)];
-      case 'delivery_staff':
-        return [const Color(0xFFE8A020), const Color(0xFF8B4A00)];
-      default:
-        return [const Color(0xFF9B59D0), const Color(0xFF3B1472)];
-    }
-  }
-
   void _onContinue() {
     HapticFeedback.lightImpact();
     context.push(
@@ -302,10 +290,11 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                       ),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Image.asset(
-                        'assets/images/tiffin_logo.png',
-                        fit: BoxFit.contain,
+                      padding: const EdgeInsets.all(4),
+                      child: TiffinLogoMark(
+                        size: 40,
+                        borderRadius: 11,
+                        contentScale: 2.05,
                       ),
                     ),
                   ),

@@ -1,19 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/socket/delivery_tracking_socket.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/bottom_sheet_handle.dart';
-import '../../features/delivery/data/delivery_api.dart';
 import '../../features/expenses/data/expense_api.dart';
 import '../../features/expenses/screens/expenses_screen.dart';
 import '../../features/income/data/income_api.dart';
 import '../../features/income/screens/income_screen.dart';
-import '../../features/orders/models/order_model.dart';
 import '../../models/finance_stats.dart';
 import '../../models/finance_summary.dart';
 import '../../services/finance_calculator.dart';
 import '../../services/finance_service.dart';
+import 'finance_refresh_signal.dart';
 
 class FinanceScreen extends StatefulWidget {
   const FinanceScreen({super.key});
@@ -36,6 +38,7 @@ class _FinanceScreenState extends State<FinanceScreen>
   List<FinanceTransaction> _transactions = [];
   bool _isLoading = false;
   String? _error;
+  StreamSubscription<void>? _dailyOrdersSocketSub;
 
   late final TabController _tabController;
 
@@ -49,11 +52,27 @@ class _FinanceScreenState extends State<FinanceScreen>
     _selectedMonth = DateTime(n.year, n.month);
     _selectedDay = DateTime(n.year, n.month, n.day);
     _tabController = TabController(length: 2, vsync: this);
+    financeDashboardTabSelectedTick.addListener(_onFinanceTabReselected);
     _fetch();
+    _attachFinanceSocket();
+  }
+
+  void _onFinanceTabReselected() {
+    if (mounted) _fetch();
+  }
+
+  Future<void> _attachFinanceSocket() async {
+    await DeliveryTrackingSocket.instance.ensureConnected();
+    _dailyOrdersSocketSub =
+        DeliveryTrackingSocket.instance.dailyOrdersRefresh.listen((_) {
+      if (mounted) _fetch();
+    });
   }
 
   @override
   void dispose() {
+    financeDashboardTabSelectedTick.removeListener(_onFinanceTabReselected);
+    _dailyOrdersSocketSub?.cancel();
     _tabController.dispose();
     super.dispose();
   }
@@ -66,7 +85,6 @@ class _FinanceScreenState extends State<FinanceScreen>
     try {
       final summary = await FinanceService.fetchSummaryForMonth(_selectedMonth);
       final daily = await FinanceService.fetchCalendarForMonth(_selectedMonth);
-      final deliveries = await DeliveryApi.getAllDeliveries();
 
       // Transactions should NOT block the whole Finance screen.
       List<FinanceTransaction> txns = const [];
@@ -76,17 +94,10 @@ class _FinanceScreenState extends State<FinanceScreen>
         txns = const [];
       }
 
-      // Fix processedCount/processedAmount using real delivered orders data.
-      // Backend daily rows may not include count (and can be affected by ledger double counting).
-      final fixedDaily = _mergeDeliveredOrdersIntoDailyRows(
-        month: _selectedMonth,
-        rows: daily,
-        orders: deliveries,
-      );
       if (!mounted) return;
       setState(() {
         _summary = summary;
-        _calendarData = fixedDaily;
+        _calendarData = daily;
         _transactions = txns;
         _isLoading = false;
       });
@@ -97,60 +108,6 @@ class _FinanceScreenState extends State<FinanceScreen>
         _error = e.toString();
       });
     }
-  }
-
-  static DateTime _localYmd(DateTime d) {
-    final x = d.toLocal();
-    return DateTime(x.year, x.month, x.day);
-  }
-
-  static List<DailyFinanceRow> _mergeDeliveredOrdersIntoDailyRows({
-    required DateTime month,
-    required List<DailyFinanceRow> rows,
-    required List<OrderModel> orders,
-  }) {
-    // Group delivered orders by local day within selected month.
-    final m = <DateTime, ({int count, double amount})>{};
-    for (final o in orders) {
-      final st = o.status.toLowerCase().trim();
-      if (st != 'delivered') continue;
-      final d = _localYmd(o.date);
-      if (d.year != month.year || d.month != month.month) continue;
-      final amount = (o.totalAmount ?? 0).toDouble();
-      final prev = m[d];
-      if (prev == null) {
-        m[d] = (count: 1, amount: amount);
-      } else {
-        m[d] = (count: prev.count + 1, amount: prev.amount + amount);
-      }
-    }
-
-    return rows.map((r) {
-      final d = _localYmd(r.date);
-      final agg = m[d];
-      if (agg == null) {
-        return DailyFinanceRow(
-          date: r.date,
-          processedCount: 0,
-          processedAmount: 0,
-          incomes: r.incomes,
-          deposits: r.deposits,
-          refund: r.refund,
-          expenses: r.expenses,
-          manual: r.manual,
-        );
-      }
-      return DailyFinanceRow(
-        date: r.date,
-        processedCount: agg.count,
-        processedAmount: agg.amount,
-        incomes: r.incomes,
-        deposits: r.deposits,
-        refund: r.refund,
-        expenses: r.expenses,
-        manual: r.manual,
-      );
-    }).toList();
   }
 
   void _onMonthPicked(DateTime month) {
@@ -574,6 +531,7 @@ class _FinanceScreenState extends State<FinanceScreen>
                         selectedMonth: _selectedMonth,
                         selectedDay: _selectedDay ??
                             DateTime(_selectedMonth.year, _selectedMonth.month, 1),
+                        onRefresh: _fetch,
                       ),
                       _TransactionsTab(
                         theme: theme,
@@ -632,6 +590,7 @@ class _RevenueTab extends StatefulWidget {
     required this.rangeLabel,
     required this.selectedMonth,
     required this.selectedDay,
+    required this.onRefresh,
   });
 
   final ThemeData theme;
@@ -641,6 +600,7 @@ class _RevenueTab extends StatefulWidget {
   final String rangeLabel;
   final DateTime selectedMonth;
   final DateTime selectedDay;
+  final Future<void> Function() onRefresh;
 
   static final _money = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
 
@@ -667,7 +627,7 @@ class _RevenueTabState extends State<_RevenueTab> {
     final bottomPad = MediaQuery.of(context).padding.bottom + 24;
     return RefreshIndicator(
       color: AppColors.primaryAccent,
-      onRefresh: () async {},
+      onRefresh: widget.onRefresh,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
@@ -1136,91 +1096,105 @@ class _TransactionsTab extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: transactions.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No transactions this month',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                      itemCount: transactions.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        final t = transactions[index];
-                        final isCredit = t.isCredit;
-                        final titleColor =
-                            isCredit ? AppColors.success : AppColors.error;
-                        final dateStr = DateFormat('MMM d, yyyy', 'en')
-                            .format(t.date.toLocal());
-
-                        final title = t.title.isNotEmpty
-                            ? t.title
-                            : (isCredit ? 'Income' : 'Expense');
-
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: AppColors.border,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '$title (${_money.format(t.amount)})',
-                                      style: theme.textTheme.titleSmall?.copyWith(
-                                        color: titleColor,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      dateStr,
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+              child: RefreshIndicator(
+                color: AppColors.primaryAccent,
+                onRefresh: onChanged,
+                child: transactions.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                        children: [
+                          SizedBox(
+                            height: 220,
+                            child: Center(
+                              child: Text(
+                                'No transactions this month',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              IconButton(
-                                onPressed: () {
-                                  // Edit flow not implemented in existing APIs here.
-                                  // Keeping icon to match requested UI.
-                                },
-                                icon: const Icon(Icons.edit_outlined, size: 20),
-                                color: AppColors.textSecondary,
-                                tooltip: 'Edit',
-                              ),
-                              IconButton(
-                                onPressed: () => _confirmDelete(context, t),
-                                icon: const Icon(Icons.delete_outline_rounded,
-                                    size: 22),
-                                color: AppColors.textSecondary,
-                                tooltip: 'Delete',
-                              ),
-                            ],
+                            ),
                           ),
-                        );
-                      },
-                    ),
+                        ],
+                      )
+                    : ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                        itemCount: transactions.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final t = transactions[index];
+                          final isCredit = t.isCredit;
+                          final titleColor =
+                              isCredit ? AppColors.success : AppColors.error;
+                          final dateStr = DateFormat('MMM d, yyyy', 'en')
+                              .format(t.date.toLocal());
+
+                          final title = t.title.isNotEmpty
+                              ? t.title
+                              : (isCredit ? 'Income' : 'Expense');
+
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: AppColors.border,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '$title (${_money.format(t.amount)})',
+                                        style: theme.textTheme.titleSmall?.copyWith(
+                                          color: titleColor,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        dateStr,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                IconButton(
+                                  onPressed: () {
+                                    // Edit flow not implemented in existing APIs here.
+                                    // Keeping icon to match requested UI.
+                                  },
+                                  icon: const Icon(Icons.edit_outlined, size: 20),
+                                  color: AppColors.textSecondary,
+                                  tooltip: 'Edit',
+                                ),
+                                IconButton(
+                                  onPressed: () => _confirmDelete(context, t),
+                                  icon: const Icon(Icons.delete_outline_rounded,
+                                      size: 22),
+                                  color: AppColors.textSecondary,
+                                  tooltip: 'Delete',
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
             ),
 
             // Bottom action bar (Add Expense / Add Income)

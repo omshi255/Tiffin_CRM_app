@@ -96,30 +96,59 @@ function computeOrderDietType(plan, itemMap) {
   return [...kinds][0];
 }
 
+/** One DailyOrder row per subscription/day when the plan has no per-slot items. */
+export const COMBINED_PLAN_MEAL_SLOT = "combined";
+
+function slotToOrderMealType(slot) {
+  if (slot === "early_morning") return "breakfast";
+  if (
+    slot === "breakfast" ||
+    slot === "lunch" ||
+    slot === "dinner" ||
+    slot === "snack"
+  ) {
+    return slot;
+  }
+  return "lunch";
+}
+
 /**
- * Build resolvedItems array and compute total amount from plan mealSlots.
- * Fetches item prices from DB in a single query.
- * Returns { resolvedItems, amount, orderDietType }
+ * Builds one row per plan.mealSlots entry: `amount` = Σ(quantity × unitPrice) for that slot
+ * only (per-meal charge). Plans without mealSlots use a single row charged at `plan.price`.
  */
-const buildResolvedItems = async (plan) => {
-  if (!plan.mealSlots || plan.mealSlots.length === 0) {
-    return { resolvedItems: [], amount: plan.price || 0, orderDietType: "veg" };
+const buildOrderRowsForPlan = async (plan) => {
+  if (!plan.mealSlots?.length) {
+    return [
+      {
+        planMealSlot: COMBINED_PLAN_MEAL_SLOT,
+        mealType: resolveMealType(plan),
+        resolvedItems: [],
+        amount: plan.price || 0,
+        orderDietType: "veg",
+      },
+    ];
   }
 
-  // Collect unique itemIds from all slots
   const allItemIds = [
     ...new Set(
       plan.mealSlots.flatMap((slot) =>
-        slot.items.map((i) => i.itemId.toString())
+        (slot.items || []).map((i) => i.itemId.toString())
       )
     ),
   ];
 
-  if (allItemIds.length === 0) {
-    return { resolvedItems: [], amount: 0, orderDietType: "veg" };
+  if (!allItemIds.length) {
+    return [
+      {
+        planMealSlot: COMBINED_PLAN_MEAL_SLOT,
+        mealType: resolveMealType(plan),
+        resolvedItems: [],
+        amount: 0,
+        orderDietType: "veg",
+      },
+    ];
   }
 
-  // Fetch item prices in one query
   const itemDocs = await Item.find({ _id: { $in: allItemIds } })
     .select("name unitPrice dietType")
     .lean();
@@ -129,13 +158,12 @@ const buildResolvedItems = async (plan) => {
     itemMap[item._id.toString()] = item;
   }
 
-  const resolvedItems = [];
-  let amount = 0;
-
-  for (const slot of plan.mealSlots) {
-    for (const slotItem of slot.items) {
+  return plan.mealSlots.map((mealSlot) => {
+    const resolvedItems = [];
+    let amount = 0;
+    for (const slotItem of mealSlot.items || []) {
       const itemData = itemMap[slotItem.itemId.toString()];
-      if (!itemData) continue; // skip if item was deleted/not found
+      if (!itemData) continue;
 
       const subtotal = slotItem.quantity * itemData.unitPrice;
       resolvedItems.push({
@@ -147,11 +175,20 @@ const buildResolvedItems = async (plan) => {
       });
       amount += subtotal;
     }
-  }
 
-  const orderDietType = computeOrderDietType(plan, itemMap);
+    const orderDietType = computeOrderDietType(
+      { mealSlots: [mealSlot] },
+      itemMap
+    );
 
-  return { resolvedItems, amount, orderDietType };
+    return {
+      planMealSlot: mealSlot.slot,
+      mealType: slotToOrderMealType(mealSlot.slot),
+      resolvedItems,
+      amount,
+      orderDietType,
+    };
+  });
 };
 
 /**
@@ -181,25 +218,26 @@ export const generateDailyOrdersForDate = async (ownerId, date) => {
 
   if (!subscriptions.length) return { generatedCount: 0, existingCount: 0 };
 
-  // Skip already-generated orders
+  // Skip subscription+slot pairs that already have a row (supports one row per meal slot).
   const existing = await DailyOrder.find({
     ownerId,
     orderDate: day,
     subscriptionId: { $in: subscriptions.map((s) => s._id) },
   })
-    .select("subscriptionId")
+    .select("subscriptionId planMealSlot")
     .lean();
 
-  const existingSet = new Set(existing.map((d) => d.subscriptionId.toString()));
+  const existingSet = new Set(
+    existing.map((d) => {
+      const slot =
+        d.planMealSlot != null && String(d.planMealSlot).trim() !== ""
+          ? String(d.planMealSlot).trim()
+          : COMBINED_PLAN_MEAL_SLOT;
+      return `${d.subscriptionId.toString()}|${slot}`;
+    })
+  );
 
-  // Collect unique planIds needed
-  const planIds = [
-    ...new Set(
-      subscriptions
-        .filter((s) => !existingSet.has(s._id.toString()))
-        .map((s) => s.planId.toString())
-    ),
-  ];
+  const planIds = [...new Set(subscriptions.map((s) => s.planId.toString()))];
 
   // Fetch all plans in one query
   const plans = await MealPlan.find({ _id: { $in: planIds } }).lean();
@@ -209,10 +247,17 @@ export const generateDailyOrdersForDate = async (ownerId, date) => {
   }
 
   const toInsert = [];
+  const orderRowsByPlanId = new Map();
+
+  const getRowsForPlan = async (plan) => {
+    const pid = plan._id.toString();
+    if (!orderRowsByPlanId.has(pid)) {
+      orderRowsByPlanId.set(pid, await buildOrderRowsForPlan(plan));
+    }
+    return orderRowsByPlanId.get(pid);
+  };
 
   for (const sub of subscriptions) {
-    if (existingSet.has(sub._id.toString())) continue;
-
     const plan = planMap[sub.planId.toString()];
     if (!plan) {
       console.warn(`⚠️  Plan ${sub.planId} not found for subscription ${sub._id}`);
@@ -231,24 +276,28 @@ export const generateDailyOrdersForDate = async (ownerId, date) => {
       continue;
     }
 
-    const { resolvedItems, amount, orderDietType } = await buildResolvedItems(
-      plan
-    );
-    const mealType = resolveMealType(plan);
+    const slotRows = await getRowsForPlan(plan);
 
-    toInsert.push({
-      ownerId,
-      customerId: sub.customerId,
-      subscriptionId: sub._id,
-      planId: sub.planId,
-      orderDate: day,
-      mealType,
-      dietType: orderDietType,
-      deliverySlot: sub.deliverySlot,
-      resolvedItems,
-      amount,
-      status: "pending",
-    });
+    for (const row of slotRows) {
+      const dedupeKey = `${sub._id.toString()}|${row.planMealSlot}`;
+      if (existingSet.has(dedupeKey)) continue;
+
+      toInsert.push({
+        ownerId,
+        customerId: sub.customerId,
+        subscriptionId: sub._id,
+        planId: sub.planId,
+        orderDate: day,
+        planMealSlot: row.planMealSlot,
+        mealType: row.mealType,
+        dietType: row.orderDietType,
+        deliverySlot: sub.deliverySlot,
+        resolvedItems: row.resolvedItems,
+        amount: row.amount,
+        status: "pending",
+      });
+      existingSet.add(dedupeKey);
+    }
   }
 
   if (!toInsert.length) {

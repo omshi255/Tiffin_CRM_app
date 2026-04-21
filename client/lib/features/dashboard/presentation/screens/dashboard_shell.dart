@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_drawer.dart';
 import '../../../../core/notifications/notification_badge_service.dart';
 import '../../../auth/data/auth_api.dart';
 import '../../../auth/models/user_model.dart';
+import '../../../../screens/finance/finance_refresh_signal.dart';
 import '../../../customers/presentation/screens/customers_list_screen.dart';
 import 'dashboard_home_screen.dart';
 import 'delivery_screen.dart';
@@ -209,6 +210,9 @@ class _DashboardShellState extends State<DashboardShell>
             currentIndex: _selectedIndex,
             onTap: (index) {
               HapticFeedback.lightImpact();
+              if (index == 3) {
+                financeDashboardTabSelectedTick.value++;
+              }
               setState(() => _selectedIndex = index);
             },
             type: BottomNavigationBarType.fixed,

@@ -40,6 +40,7 @@ import { ApiError } from "../class/apiErrorClass.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import User from "../models/User.model.js";
 import Customer from "../models/Customer.model.js";
+import Notification from "../models/Notification.model.js";
 import { sendNotification } from "../services/inAppNotification.service.js";
 import { NOTIFICATION_TYPES } from "../utils/notificationTypes.js";
 
@@ -161,26 +162,32 @@ export const updatePortalAnnouncement = asyncHandler(async (req, res) => {
     const pushPreview =
       value.text.length > 180 ? `${value.text.slice(0, 177)}...` : value.text;
 
-    const chunkSize = 25;
-    for (let i = 0; i < customers.length; i += chunkSize) {
-      const slice = customers.slice(i, i + chunkSize);
-      await Promise.all(
-        slice.map((c) =>
-          sendNotification({
-            customerId: c._id,
-            ownerId,
-            type: NOTIFICATION_TYPES.VENDOR_ANNOUNCEMENT,
-            title,
-            message: value.text,
-            pushBody: pushPreview,
-            data: {
-              screen: "announcement",
-            },
-          }).catch(() => null)
-        )
-      );
-      notifiedCount += slice.length;
+    // One in-app row per customer per save: same revision for this broadcast.
+    // Removes any partial duplicate for this customer+revision before insert.
+    const portalRevision = new Date(
+      updated.settings?.portalAnnouncementUpdatedAt || now
+    ).toISOString();
+
+    for (const c of customers) {
+      await Notification.deleteMany({
+        customerId: c._id,
+        type: NOTIFICATION_TYPES.VENDOR_ANNOUNCEMENT,
+        "data.portalRevision": portalRevision,
+      });
+      await sendNotification({
+        customerId: c._id,
+        ownerId,
+        type: NOTIFICATION_TYPES.VENDOR_ANNOUNCEMENT,
+        title,
+        message: value.text,
+        pushBody: pushPreview,
+        data: {
+          screen: "announcement",
+          portalRevision,
+        },
+      }).catch(() => null);
     }
+    notifiedCount = customers.length;
   }
 
   res.status(200).json(

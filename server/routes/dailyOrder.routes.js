@@ -4,6 +4,7 @@ import { requireRole } from "../middleware/rbac.middleware.js";
 import {
   getToday,
   processToday,
+  cancelVendorHoliday,
   markDelivered,
   updateOrderStatus,
   assignDeliveryStaff,
@@ -25,6 +26,11 @@ router.use(authMiddleware);
 // Vendor/admin only routes
 router.get("/today", requireRole(["vendor", "admin"]), getToday);
 router.post("/process", requireRole(["vendor", "admin"]), processToday);
+router.post(
+  "/cancel-vendor-holiday",
+  requireRole(["vendor", "admin"]),
+  cancelVendorHoliday
+);
 router.post("/mark-delivered", requireRole(["vendor", "admin"]), markDelivered);
 router.post("/assign-bulk", requireRole(["vendor", "admin"]), assignBulk);
 router.post("/generate", requireRole(["vendor", "admin"]), generateOrders);

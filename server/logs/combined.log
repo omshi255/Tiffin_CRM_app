@@ -9536,3 +9536,229 @@ Error: Active subscription already exists for customer
 
 
 2026-04-21T15:48:19.092Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T16:04:08.486Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T16:04:19.271Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T16:15:38.781Z [info] : 21/04/2026, 09:45:38 pm
+2026-04-21T16:15:38.827Z [error] : [21/04/2026, 09:45:38 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T16:15:40.246Z [info] : 21/04/2026, 09:45:40 pm
+2026-04-21T16:15:40.251Z [error] : [21/04/2026, 09:45:40 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T16:17:35.104Z [info] : 21/04/2026, 09:47:35 pm
+2026-04-21T16:17:35.110Z [error] : [21/04/2026, 09:47:35 pm] The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+Error: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/auth.controller.js:129:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T16:17:43.821Z [info] : 21/04/2026, 09:47:43 pm
+2026-04-21T16:17:43.824Z [error] : [21/04/2026, 09:47:43 pm] The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+Error: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/auth.controller.js:129:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T16:18:03.004Z [info] : 21/04/2026, 09:48:03 pm
+2026-04-21T16:18:03.006Z [error] : [21/04/2026, 09:48:03 pm] The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+Error: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/auth.controller.js:129:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T16:18:07.953Z [info] : 21/04/2026, 09:48:07 pm
+2026-04-21T16:18:07.958Z [error] : [21/04/2026, 09:48:07 pm] The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+Error: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/auth.controller.js:129:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T16:20:04.173Z [info] : 21/04/2026, 09:50:04 pm
+2026-04-21T16:20:04.176Z [error] : [21/04/2026, 09:50:04 pm] Access denied. Required role: vendor or admin or delivery_staff
+Error: Access denied. Required role: vendor or admin or delivery_staff
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/middleware/rbac.middleware.js:25:9
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+    at authMiddleware (file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/middleware/auth.middleware.js:32:5)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:342:13)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:297:9
+
+
+2026-04-21T16:20:35.185Z [info] : 21/04/2026, 09:50:35 pm
+2026-04-21T16:20:35.186Z [error] : [21/04/2026, 09:50:35 pm] "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+Error: "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:1094:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/middleware/rbac.middleware.js:34:5
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-04-21T16:21:23.677Z [info] : 21/04/2026, 09:51:23 pm
+2026-04-21T16:21:23.679Z [error] : [21/04/2026, 09:51:23 pm] "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+Error: "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:1094:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/middleware/rbac.middleware.js:34:5
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-04-21T16:24:05.346Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T16:25:56.459Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T16:29:36.063Z [info] : 21/04/2026, 09:59:35 pm
+2026-04-21T16:29:36.071Z [error] : [21/04/2026, 09:59:35 pm] "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+Error: "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:1094:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/middleware/rbac.middleware.js:34:5
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-04-21T16:29:54.815Z [info] : 21/04/2026, 09:59:54 pm
+2026-04-21T16:29:54.817Z [error] : [21/04/2026, 09:59:54 pm] "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+Error: "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:1094:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/middleware/rbac.middleware.js:34:5
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-04-21T16:31:44.326Z [info] : 21/04/2026, 10:01:44 pm
+2026-04-21T16:31:44.337Z [error] : [21/04/2026, 10:01:44 pm] "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+Error: "[0].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[1].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[2].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string; "[3].itemId" must only contain hexadecimal characters; itemId must be a 24-character hex string
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:1094:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/middleware/rbac.middleware.js:34:5
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+
+
+2026-04-21T16:37:16.126Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T16:48:00.221Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T16:48:24.878Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T16:56:21.603Z [info] : 21/04/2026, 10:26:21 pm
+2026-04-21T16:56:21.616Z [error] : [21/04/2026, 10:26:21 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T16:56:21.774Z [info] : 21/04/2026, 10:26:21 pm
+2026-04-21T16:56:21.813Z [error] : [21/04/2026, 10:26:21 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T16:58:11.064Z [info] : 21/04/2026, 10:28:11 pm
+2026-04-21T16:58:11.074Z [error] : [21/04/2026, 10:28:11 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T16:58:11.191Z [info] : 21/04/2026, 10:28:11 pm
+2026-04-21T16:58:11.192Z [error] : [21/04/2026, 10:28:11 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T17:00:54.245Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T17:02:54.930Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T17:09:48.563Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T17:20:01.348Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T17:20:39.133Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T17:20:41.472Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T17:20:59.166Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted

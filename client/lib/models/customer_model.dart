@@ -7,20 +7,35 @@ class CustomerVendorInfo {
     this.ownerName,
     this.phone,
     this.upiId,
+    this.announcementText,
+    this.announcementUpdatedAt,
   });
 
   final String? businessName;
   final String? ownerName;
   final String? phone;
   final String? upiId;
+  /// Current portal announcement from vendor (GET /customer/me → vendor.announcement).
+  final String? announcementText;
+  final DateTime? announcementUpdatedAt;
 
   factory CustomerVendorInfo.fromJson(Map<String, dynamic>? json) {
     if (json == null) return const CustomerVendorInfo();
+    String? annText;
+    DateTime? annAt;
+    final rawAnn = json['announcement'];
+    if (rawAnn is Map<String, dynamic>) {
+      annText = rawAnn['text']?.toString();
+      final u = rawAnn['updatedAt'];
+      if (u is String) annAt = DateTime.tryParse(u);
+    }
     return CustomerVendorInfo(
       businessName: json['businessName']?.toString(),
       ownerName: json['ownerName']?.toString(),
       phone: json['phone']?.toString(),
       upiId: json['upiId']?.toString(),
+      announcementText: annText,
+      announcementUpdatedAt: annAt,
     );
   }
 }

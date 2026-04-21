@@ -86,7 +86,7 @@ abstract final class FinanceService {
         out.add(
           DailyFinanceRow(
             date: DateTime(date.year, date.month, date.day),
-            processedCount: 0,
+            processedCount: e.processedCount,
             processedAmount: e.processed,
             incomes: e.income,
             deposits: e.deposit,
@@ -112,18 +112,8 @@ abstract final class FinanceService {
     // We intentionally fetch using Dio directly here (rather than relying solely on
     // IncomeApi/ExpenseApi list parsing) because some deployments return list payloads
     // under keys like `items` or `results` instead of `data`.
-    final incomes = await _fetchIncomeModels(
-      page: 1,
-      limit: 200,
-      dateFrom: dateFrom,
-      dateTo: dateTo,
-    );
-    final expenses = await _fetchExpenseModels(
-      page: 1,
-      limit: 200,
-      dateFrom: dateFrom,
-      dateTo: dateTo,
-    );
+    final incomes = await _fetchIncomeModels(dateFrom: dateFrom, dateTo: dateTo);
+    final expenses = await _fetchExpenseModels(dateFrom: dateFrom, dateTo: dateTo);
 
     final out = <FinanceTransaction>[
       for (final i in incomes)
@@ -177,67 +167,75 @@ abstract final class FinanceService {
   }
 
   static Future<List<IncomeModel>> _fetchIncomeModels({
-    int page = 1,
-    int limit = 200,
     String? dateFrom,
     String? dateTo,
   }) async {
-    try {
-      // Try existing API parsing first (fast path).
-      final res = await IncomeApi.list(
-        page: page,
-        limit: limit,
-        dateFrom: dateFrom,
-        dateTo: dateTo,
-      );
-      if (res.items.isNotEmpty) return res.items;
-    } catch (_) {
-      // Fall back to robust parsing below.
+    const pageSize = 200;
+    final all = <IncomeModel>[];
+    for (var page = 1;; page++) {
+      try {
+        final res = await IncomeApi.list(
+          page: page,
+          limit: pageSize,
+          dateFrom: dateFrom,
+          dateTo: dateTo,
+        );
+        all.addAll(res.items);
+        if (res.items.isEmpty ||
+            res.items.length < pageSize ||
+            all.length >= res.total) {
+          return all;
+        }
+      } catch (_) {
+        if (page > 1) rethrow;
+        final query = <String, dynamic>{'page': page, 'limit': pageSize};
+        if (dateFrom != null) query['dateFrom'] = dateFrom;
+        if (dateTo != null) query['dateTo'] = dateTo;
+        final response = await DioClient.instance.get(
+          ApiEndpoints.incomes,
+          queryParameters: query,
+        );
+        final data = parseData(response);
+        final raw = _extractListMaps(data);
+        return raw.map(IncomeModel.fromJson).toList();
+      }
     }
-
-    final query = <String, dynamic>{'page': page, 'limit': limit};
-    if (dateFrom != null) query['dateFrom'] = dateFrom;
-    if (dateTo != null) query['dateTo'] = dateTo;
-
-    final response = await DioClient.instance.get(
-      ApiEndpoints.incomes,
-      queryParameters: query,
-    );
-    final data = parseData(response);
-    final raw = _extractListMaps(data);
-    return raw.map(IncomeModel.fromJson).toList();
   }
 
   static Future<List<ExpenseModel>> _fetchExpenseModels({
-    int page = 1,
-    int limit = 200,
     String? dateFrom,
     String? dateTo,
   }) async {
-    try {
-      // Try existing API parsing first (fast path).
-      final res = await ExpenseApi.list(
-        page: page,
-        limit: limit,
-        dateFrom: dateFrom,
-        dateTo: dateTo,
-      );
-      if (res.items.isNotEmpty) return res.items;
-    } catch (_) {
-      // Fall back to robust parsing below.
+    const pageSize = 200;
+    final all = <ExpenseModel>[];
+    for (var page = 1;; page++) {
+      try {
+        final res = await ExpenseApi.list(
+          page: page,
+          limit: pageSize,
+          dateFrom: dateFrom,
+          dateTo: dateTo,
+        );
+        all.addAll(res.items);
+        if (res.items.isEmpty ||
+            res.items.length < pageSize ||
+            all.length >= res.total) {
+          return all;
+        }
+      } catch (_) {
+        if (page > 1) rethrow;
+        final query = <String, dynamic>{'page': page, 'limit': pageSize};
+        if (dateFrom != null) query['dateFrom'] = dateFrom;
+        if (dateTo != null) query['dateTo'] = dateTo;
+        final response = await DioClient.instance.get(
+          ApiEndpoints.expenses,
+          queryParameters: query,
+        );
+        final data = parseData(response);
+        final raw = _extractListMaps(data);
+        return raw.map(ExpenseModel.fromJson).toList();
+      }
     }
-
-    final query = <String, dynamic>{'page': page, 'limit': limit};
-    if (dateFrom != null) query['dateFrom'] = dateFrom;
-    if (dateTo != null) query['dateTo'] = dateTo;
-
-    final response = await DioClient.instance.get(
-      ApiEndpoints.expenses,
-      queryParameters: query,
-    );
-    final data = parseData(response);
-    final raw = _extractListMaps(data);
-    return raw.map(ExpenseModel.fromJson).toList();
   }
 }
 

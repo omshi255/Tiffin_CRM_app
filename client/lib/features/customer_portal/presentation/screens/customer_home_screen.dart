@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tiffin_crm/features/orders/models/order_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -57,9 +58,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   String? _vendorUpiId;
   String _vendorPayLabel = 'vendor';
 
+  // My Plan tab removed from shell — see commented block below (_CustomerMyPlanTab).
   static final List<Widget> _tabs = [
     RepaintBoundary(child: _CustomerHomeTab()),
-    RepaintBoundary(child: _CustomerMyPlanTab()),
     RepaintBoundary(child: _CustomerOrdersTab()),
     RepaintBoundary(child: _CustomerWalletTab()),
     RepaintBoundary(child: _CustomerProfileTab()),
@@ -80,18 +81,84 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       if (!mounted) return;
       if (upi.isEmpty) {
         setState(() => _vendorUpiId = null);
-        return;
+      } else {
+        final biz = v?.businessName?.trim() ?? '';
+        final owner = v?.ownerName?.trim() ?? '';
+        final label =
+            biz.isNotEmpty ? biz : (owner.isNotEmpty ? owner : 'vendor');
+        setState(() {
+          _vendorUpiId = upi;
+          _vendorPayLabel = label;
+        });
       }
-      final biz = v?.businessName?.trim() ?? '';
-      final owner = v?.ownerName?.trim() ?? '';
-      final label = biz.isNotEmpty ? biz : (owner.isNotEmpty ? owner : 'vendor');
-      setState(() {
-        _vendorUpiId = upi;
-        _vendorPayLabel = label;
-      });
+      await _maybeShowAnnouncementPopup(profile);
     } catch (_) {
       if (mounted) setState(() => _vendorUpiId = null);
     }
+  }
+
+  /// One-time dialog when vendor portal announcement text changes (per owner + updatedAt).
+  Future<void> _maybeShowAnnouncementPopup(CustomerModel profile) async {
+    final ownerId = profile.ownerId?.trim() ?? '';
+    if (ownerId.isEmpty || !mounted) return;
+
+    final text = profile.vendor?.announcementText?.trim() ?? '';
+    if (text.isEmpty) return;
+
+    final at = profile.vendor?.announcementUpdatedAt;
+    if (at == null) return;
+
+    final stamp = at.toUtc().toIso8601String();
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'portal_ann_seen_$ownerId';
+    if (prefs.getString(key) == stamp) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (ctx) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.campaign_rounded, color: _green700, size: 26),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Announcement',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: _text1,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 15,
+                height: 1.45,
+                color: _text1,
+              ),
+            ),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: FilledButton.styleFrom(
+                backgroundColor: _green700,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      await prefs.setString(key, stamp);
+    });
   }
 
   Future<void> _loadUnreadCount() async {
@@ -238,36 +305,28 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   onTap: () => setState(() => _selectedIndex = 0),
                 ),
                 _NavItem(
-                  icon: Icons.restaurant_menu_outlined,
-                  activeIcon: Icons.restaurant_menu_rounded,
-                  label: 'My Plan',
+                  icon: Icons.receipt_long_outlined,
+                  activeIcon: Icons.receipt_long_rounded,
+                  label: 'Orders',
                   index: 1,
                   selected: _selectedIndex == 1,
                   onTap: () => setState(() => _selectedIndex = 1),
                 ),
                 _NavItem(
-                  icon: Icons.receipt_long_outlined,
-                  activeIcon: Icons.receipt_long_rounded,
-                  label: 'Orders',
+                  icon: Icons.account_balance_wallet_outlined,
+                  activeIcon: Icons.account_balance_wallet_rounded,
+                  label: 'Wallet',
                   index: 2,
                   selected: _selectedIndex == 2,
                   onTap: () => setState(() => _selectedIndex = 2),
                 ),
                 _NavItem(
-                  icon: Icons.account_balance_wallet_outlined,
-                  activeIcon: Icons.account_balance_wallet_rounded,
-                  label: 'Wallet',
-                  index: 3,
-                  selected: _selectedIndex == 3,
-                  onTap: () => setState(() => _selectedIndex = 3),
-                ),
-                _NavItem(
                   icon: Icons.person_outline_rounded,
                   activeIcon: Icons.person_rounded,
                   label: 'Profile',
-                  index: 4,
-                  selected: _selectedIndex == 4,
-                  onTap: () => setState(() => _selectedIndex = 4),
+                  index: 3,
+                  selected: _selectedIndex == 3,
+                  onTap: () => setState(() => _selectedIndex = 3),
                 ),
               ],
             ),
@@ -1075,9 +1134,10 @@ class _CustomerHomeTabState extends State<_CustomerHomeTab> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// My Plan Tab
+// My Plan Tab — HIDDEN (not in bottom nav / _tabs). Uncomment block + restore tab
+// in _tabs and _NavItem "My Plan" (index 1) to show again.
 // ─────────────────────────────────────────────────────────────────────────────
-
+/*
 class _CustomerMyPlanTab extends StatefulWidget {
   const _CustomerMyPlanTab();
   @override
@@ -1401,6 +1461,7 @@ class _PlanItemStepper extends StatelessWidget {
     ),
   );
 }
+*/
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Orders Tab

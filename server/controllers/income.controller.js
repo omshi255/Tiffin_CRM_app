@@ -4,8 +4,9 @@ import Income, { INCOME_PAYMENT_METHODS } from "../models/Income.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../class/apiResponseClass.js";
 import { ApiError } from "../class/apiErrorClass.js";
+import { utcDayRangeFilter } from "../utils/utcDateRangeFilter.js";
 
-const MAX_LIMIT = 100;
+const MAX_LIMIT = 200;
 const DEFAULT_LIMIT = 20;
 const DEFAULT_PAGE = 1;
 
@@ -83,11 +84,8 @@ export const listIncomes = asyncHandler(async (req, res) => {
   const ownerId = req.user.userId;
 
   const filter = { ownerId };
-  if (value.dateFrom || value.dateTo) {
-    filter.date = {};
-    if (value.dateFrom) filter.date.$gte = new Date(value.dateFrom);
-    if (value.dateTo) filter.date.$lte = new Date(value.dateTo);
-  }
+  const dateBounds = utcDayRangeFilter(value.dateFrom, value.dateTo);
+  if (dateBounds) filter.date = dateBounds;
   if (value.source && value.source.trim()) {
     filter.source = { $regex: value.source.trim(), $options: "i" };
   }

@@ -24,6 +24,14 @@ import {
   resolvedToLineItems,
 } from "../utils/deliveryLedger.js";
 
+function emitVendorDailyOrdersChanged(req, ownerId, data = {}) {
+  const io = req.app.get("io");
+  if (!io) return;
+  io.of("/delivery")
+    .to(`admin:${String(ownerId)}`)
+    .emit("daily_orders_changed", data);
+}
+
 const todayOrdersQuerySchema = Joi.object({
   mealPeriod: Joi.string()
     .valid("breakfast", "lunch", "dinner", "snack")
@@ -214,6 +222,79 @@ export const processToday = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json(new ApiResponse(200, "Orders processed", { processedCount }));
+});
+
+const cancelVendorHolidaySchema = Joi.object({
+  date: Joi.string()
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "date must be YYYY-MM-DD",
+    }),
+});
+
+/**
+ * POST /api/v1/daily-orders/cancel-vendor-holiday
+ * Vendor: cancel all daily orders for a calendar day (default: today UTC).
+ * Only affects orders not yet delivered — wallet/subscription are charged on "delivered",
+ * so cancelling here does not deduct that day's meal balance.
+ */
+export const cancelVendorHoliday = asyncHandler(async (req, res) => {
+  const { error, value } = cancelVendorHolidaySchema.validate(req.body ?? {}, {
+    stripUnknown: true,
+    abortEarly: false,
+  });
+  if (error) {
+    throw new ApiError(400, error.details.map((d) => d.message).join("; "));
+  }
+
+  const ownerId = req.user.userId;
+  const targetDate = value.date
+    ? parseUTC(value.date)
+    : parseUTC(new Date().toISOString().slice(0, 10));
+
+  const result = await DailyOrder.updateMany(
+    {
+      ownerId,
+      orderDate: targetDate,
+      status: { $nin: ["delivered", "cancelled", "failed", "skipped"] },
+    },
+    {
+      $set: {
+        status: "cancelled",
+        cancelledBy: "owner",
+        cancellationReason: "vendor_holiday",
+        cancelledAt: new Date(),
+        deliveryStaffId: null,
+        acceptedAt: null,
+        outForDeliveryAt: null,
+      },
+    }
+  );
+
+  const cancelledCount = result.modifiedCount || 0;
+
+  const io = req.app.get("io");
+  if (io) {
+    io.of("/delivery")
+      .to(`admin:${ownerId}`)
+      .emit("orders_processed", {
+        count: cancelledCount,
+        date: targetDate.toISOString().slice(0, 10),
+        reason: "vendor_holiday",
+      });
+  }
+  emitVendorDailyOrdersChanged(req, ownerId, {
+    date: targetDate.toISOString().slice(0, 10),
+    reason: "vendor_holiday",
+  });
+
+  res.status(200).json(
+    new ApiResponse(200, "Holiday cancellations applied", {
+      cancelledCount,
+      date: targetDate.toISOString().slice(0, 10),
+    })
+  );
 });
 
 /**
@@ -493,6 +574,11 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       ]);
     }
 
+    emitVendorDailyOrdersChanged(req, ownerId, {
+      orderId: id,
+      status: "delivered",
+    });
+
     return res.status(200).json(
       new ApiResponse(200, "Order marked delivered", {
         order,
@@ -681,6 +767,11 @@ export const markDelivered = asyncHandler(async (req, res) => {
       }),
     ])
   );
+
+  emitVendorDailyOrdersChanged(req, ownerId, {
+    date: date.toISOString().slice(0, 10),
+    deliveredCount: orders.length,
+  });
 
   res.status(200).json(
     new ApiResponse(200, "Orders marked as delivered", {

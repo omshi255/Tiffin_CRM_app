@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../auth/auth_session.dart';
 import '../router/app_routes.dart';
 import '../utils/app_snackbar.dart';
-import '../widgets/notification_bell_icon.dart';
+import 'notification_bell_icon.dart';
+import 'tiffin_logo_mark.dart';
 import '../../features/auth/data/auth_api.dart';
 import '../../features/profile/data/profile_api.dart';
 import '../../features/support/screens/support_screen.dart';
@@ -338,10 +339,11 @@ class _AppDrawerState extends State<AppDrawer> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Image.asset(
-                    'assets/images/tiffin_logo.png',
-                    fit: BoxFit.contain,
+                  padding: const EdgeInsets.all(4),
+                  child: TiffinLogoMark(
+                    size: 42,
+                    borderRadius: 11,
+                    contentScale: 2.12,
                   ),
                 ),
               ),

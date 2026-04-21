@@ -29,6 +29,26 @@ import {
   ymdIST,
 } from "../utils/subscriptionCalendarDays.js";
 
+/**
+ * Shown amount for subscription history. Many legacy rows have paidAmount 0 while
+ * totalAmount holds the priced period (wallet prepay); mirror subscription list normalization.
+ */
+function historySubscriptionAmount(sub) {
+  const paid = Number(sub.paidAmount) || 0;
+  const total = Number(sub.totalAmount) || 0;
+  if (paid > 0) return paid;
+  if (total > 0) return total;
+  const plan = sub.planId;
+  const price = plan && Number(plan.price);
+  if (!price || !sub.startDate || !sub.endDate) return 0;
+  const start = new Date(sub.startDate);
+  const end = new Date(sub.endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+  const totalDays =
+    Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  return price * Math.max(0, totalDays);
+}
+
 const router = Router();
 
 /**
@@ -262,7 +282,7 @@ router.get(
         planName,
         startDate: h.startDate ? new Date(h.startDate).toISOString() : "",
         endDate: h.endDate ? new Date(h.endDate).toISOString() : "",
-        amountPaid: Number(h.paidAmount) || 0,
+        amountPaid: historySubscriptionAmount(h),
         completed,
       };
     });

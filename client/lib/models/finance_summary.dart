@@ -54,6 +54,7 @@ final class DailyEntry {
   const DailyEntry({
     required this.date,
     required this.processed,
+    required this.processedCount,
     required this.income,
     required this.deposit,
     required this.expense,
@@ -63,6 +64,8 @@ final class DailyEntry {
 
   final String date; // "DD/MM"
   final double processed;
+  /// Delivered daily orders count for this calendar day (UTC bucket from API).
+  final int processedCount;
   final double income;
   final double deposit;
   final double expense;
@@ -73,6 +76,9 @@ final class DailyEntry {
     return DailyEntry(
       date: json['date']?.toString() ?? '',
       processed: _toDouble(json['processed']),
+      processedCount: (json['processedCount'] as num?)?.toInt() ??
+          (json['processed_count'] as num?)?.toInt() ??
+          0,
       income: _toDouble(json['income']),
       deposit: _toDouble(json['deposit']),
       expense: _toDouble(json['expense']),

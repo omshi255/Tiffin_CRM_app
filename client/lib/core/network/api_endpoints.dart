@@ -90,6 +90,8 @@ abstract final class ApiEndpoints {
   // Daily orders
   static const String dailyOrdersToday = '/daily-orders/today';
   static const String dailyOrdersProcess = '/daily-orders/process';
+  static const String dailyOrdersCancelVendorHoliday =
+      '/daily-orders/cancel-vendor-holiday';
   static const String dailyOrdersMarkDelivered = '/daily-orders/mark-delivered';
   static const String dailyOrdersAssignBulk = '/daily-orders/assign-bulk';
   static const String dailyOrdersGenerate = '/daily-orders/generate';
