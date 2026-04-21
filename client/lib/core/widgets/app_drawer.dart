@@ -337,10 +337,12 @@ class _AppDrawerState extends State<AppDrawer> {
                     width: 1.5,
                   ),
                 ),
-                child: const Icon(
-                  Icons.storefront_rounded,
-                  color: Colors.white,
-                  size: 26,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Image.asset(
+                    'assets/images/tiffin_logo.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),

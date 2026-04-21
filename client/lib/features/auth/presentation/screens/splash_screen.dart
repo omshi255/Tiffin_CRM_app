@@ -103,14 +103,24 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: const Center(
+      backgroundColor: Colors.white,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.restaurant_menu, size: 64, color: AppColors.onPrimary),
-            SizedBox(height: 16),
-            CircularProgressIndicator(color: AppColors.onPrimary),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: 140,
+                height: 140,
+                child: Image.asset(
+                  'assets/images/tiffin_logo.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const CircularProgressIndicator(color: AppColors.primary),
           ],
         ),
       ),

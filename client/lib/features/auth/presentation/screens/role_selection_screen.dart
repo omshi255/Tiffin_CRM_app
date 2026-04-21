@@ -288,11 +288,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: _getLogoGradient(_selectedRole),
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
@@ -301,12 +297,15 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                           offset: const Offset(0, 4),
                         ),
                       ],
+                      border: Border.all(
+                        color: const Color(0xFFEDE9FE),
+                      ),
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.lunch_dining_rounded,
-                        color: Colors.white,
-                        size: 26,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Image.asset(
+                        'assets/images/tiffin_logo.png',
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
