@@ -9136,3 +9136,234 @@ Error: "limit" must be less than or equal to 100
     at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
 
+2026-04-21T07:39:15.654Z [warn] : SENDGRID_API_KEY is not set; emails will fail if attempted
+2026-04-21T08:05:35.799Z [info] : 21/04/2026, 01:35:35 pm
+2026-04-21T08:05:35.801Z [error] : [21/04/2026, 01:35:35 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T08:05:36.196Z [info] : 21/04/2026, 01:35:36 pm
+2026-04-21T08:05:36.198Z [error] : [21/04/2026, 01:35:36 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T08:31:37.144Z [info] : 21/04/2026, 02:01:37 pm
+2026-04-21T08:31:37.145Z [error] : [21/04/2026, 02:01:37 pm] Cannot move order from "out_for_delivery" to "processing"
+Error: Cannot move order from "out_for_delivery" to "processing"
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:243:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T08:31:53.232Z [info] : 21/04/2026, 02:01:53 pm
+2026-04-21T08:31:53.238Z [error] : [21/04/2026, 02:01:53 pm] Insufficient subscription balance. Available: ₹0, Required: ₹100
+Error: Insufficient subscription balance. Available: ₹0, Required: ₹100
+    at deductBalanceForOrder (file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:346:50
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T08:57:52.793Z [info] : 21/04/2026, 02:27:52 pm
+2026-04-21T08:57:52.801Z [error] : [21/04/2026, 02:27:52 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T08:57:53.601Z [info] : 21/04/2026, 02:27:53 pm
+2026-04-21T08:57:53.602Z [error] : [21/04/2026, 02:27:53 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T09:37:00.519Z [info] : 21/04/2026, 03:07:00 pm
+2026-04-21T09:37:00.537Z [error] : [21/04/2026, 03:07:00 pm] Insufficient subscription balance. Available: ₹-190, Required: ₹190
+Error: Insufficient subscription balance. Available: ₹-190, Required: ₹190
+    at deductBalanceForOrder (file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:346:50
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T09:37:02.208Z [info] : 21/04/2026, 03:07:02 pm
+2026-04-21T09:37:02.210Z [error] : [21/04/2026, 03:07:02 pm] Insufficient subscription balance. Available: ₹-190, Required: ₹190
+Error: Insufficient subscription balance. Available: ₹-190, Required: ₹190
+    at deductBalanceForOrder (file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:79:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/dailyOrder.controller.js:346:50
+    at async file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:7
+
+
+2026-04-21T09:47:43.557Z [info] : 21/04/2026, 03:17:43 pm
+2026-04-21T09:47:43.564Z [error] : [21/04/2026, 03:17:43 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T09:47:43.617Z [info] : 21/04/2026, 03:17:43 pm
+2026-04-21T09:47:43.618Z [error] : [21/04/2026, 03:17:43 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T11:04:02.243Z [info] : 21/04/2026, 04:34:02 pm
+2026-04-21T11:04:02.255Z [error] : [21/04/2026, 04:34:02 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T11:04:02.326Z [info] : 21/04/2026, 04:34:02 pm
+2026-04-21T11:04:02.329Z [error] : [21/04/2026, 04:34:02 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T11:04:56.437Z [info] : 21/04/2026, 04:34:56 pm
+2026-04-21T11:04:56.468Z [error] : [21/04/2026, 04:34:56 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T11:04:59.516Z [info] : 21/04/2026, 04:34:59 pm
+2026-04-21T11:04:59.517Z [error] : [21/04/2026, 04:34:59 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T11:31:09.775Z [info] : 21/04/2026, 05:01:09 pm
+2026-04-21T11:31:09.783Z [error] : [21/04/2026, 05:01:09 pm] getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-00.0ytrsll.mongodb.net
+MongoServerSelectionError: getaddrinfo ENOTFOUND ac-lgaj5fg-shard-00-00.0ytrsll.mongodb.net
+    at Topology.selectServer (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:60:5)
+    at listOnTimeout (node:internal/timers:545:9)
+    at process.processTimers (node:internal/timers:519:7)
+    at async tryOperation (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:198:22)
+    at async executeOperation (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-04-21T11:41:28.832Z [info] : 21/04/2026, 05:11:28 pm
+2026-04-21T11:41:28.845Z [error] : [21/04/2026, 05:11:28 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+
+2026-04-21T11:41:28.910Z [info] : 21/04/2026, 05:11:28 pm
+2026-04-21T11:41:28.911Z [error] : [21/04/2026, 05:11:28 pm] "limit" must be less than or equal to 100
+Error: "limit" must be less than or equal to 100
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/controllers/income.controller.js:77:11
+    at file:///C:/Users/DELL/Documents/Tiffin_CRM_app/server/utils/asyncHandler.js:7:13
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\lib\layer.js:152:17)
+    at C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:295:15
+    at processParams (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:582:12)
+    at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
+
+

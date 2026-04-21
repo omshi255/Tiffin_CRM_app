@@ -54,6 +54,14 @@ class _PortalAnnouncementScreenState extends State<PortalAnnouncementScreen> {
   }
 
   Future<void> _openEdit() async {
+    await _openEditor(initialText: _text);
+  }
+
+  Future<void> _openAdd() async {
+    await _openEditor(initialText: '');
+  }
+
+  Future<void> _openEditor({required String initialText}) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -63,7 +71,7 @@ class _PortalAnnouncementScreenState extends State<PortalAnnouncementScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => _EditAnnouncementSheet(
-        initialText: _text,
+        initialText: initialText,
         onSaved: (dto) {
           if (!mounted) return;
           setState(() {
@@ -91,19 +99,6 @@ class _PortalAnnouncementScreenState extends State<PortalAnnouncementScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Navigator.maybePop(context),
         ),
-        actions: [
-          if (!_loading && !_loadFailed)
-            TextButton(
-              onPressed: _openEdit,
-              child: const Text(
-                'Edit',
-                style: TextStyle(
-                  color: AppColors.onPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -199,6 +194,29 @@ class _PortalAnnouncementScreenState extends State<PortalAnnouncementScreen> {
                               ),
                             ),
                           ],
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: _openAdd,
+                                  icon: const Icon(Icons.add_rounded, size: 18),
+                                  label: const Text('Add'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    side: const BorderSide(color: AppColors.border),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -261,6 +279,7 @@ class _EditAnnouncementSheetState extends State<_EditAnnouncementSheet> {
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).viewInsets.bottom;
+    final isAdd = widget.initialText.trim().isEmpty;
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
       child: SingleChildScrollView(
@@ -281,9 +300,9 @@ class _EditAnnouncementSheetState extends State<_EditAnnouncementSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Edit announcement',
-                style: TextStyle(
+              Text(
+                isAdd ? 'Make announcement' : 'Edit announcement',
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -313,6 +332,14 @@ class _EditAnnouncementSheetState extends State<_EditAnnouncementSheet> {
                 title: const Text('Notify all customers'),
                 value: _notifyAll,
                 activeThumbColor: AppColors.primaryAccent,
+                inactiveThumbColor: AppColors.textHint,
+                inactiveTrackColor: AppColors.surfaceContainerLow,
+                trackOutlineColor: WidgetStateProperty.resolveWith(
+                  (states) =>
+                      states.contains(WidgetState.selected)
+                          ? AppColors.primaryAccent
+                          : AppColors.border,
+                ),
                 onChanged: _saving
                     ? null
                     : (v) => setState(() => _notifyAll = v),

@@ -40,6 +40,245 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
 
   static const _categories = ['roti', 'sabji', 'dal', 'rice', 'other'];
 
+  String _categoryPillLabel() {
+    final label = _categoryFilter == null
+        ? 'All'
+        : (_categoryFilter![0].toUpperCase() + _categoryFilter!.substring(1));
+    return 'Category ($label)';
+  }
+
+  String _statusPillLabel() {
+    final label = _activeFilter == null
+        ? 'All'
+        : (_activeFilter == true ? 'Active' : 'Inactive');
+    return 'Status ($label)';
+  }
+
+  Widget _dropdownPill({required String label, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: _textSecondary,
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 18,
+              color: _violet600,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openCategorySheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        Widget item(String? value, String label) {
+          final sel = _categoryFilter == value;
+          return InkWell(
+            onTap: () async {
+              Navigator.pop(ctx);
+              setState(() => _categoryFilter = value);
+              await _load();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    sel ? Icons.radio_button_checked : Icons.radio_button_off,
+                    size: 18,
+                    color: sel ? _violet600 : _textSecondary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: sel ? _textPrimary : _textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Category',
+                            style: TextStyle(
+                              color: _textPrimary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          color: _textSecondary,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: _divider),
+                  item(null, 'All'),
+                  for (final c in _categories) ...[
+                    Container(height: 1, color: _divider),
+                    item(c, c[0].toUpperCase() + c.substring(1)),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openStatusSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        Widget item(bool? value, String label) {
+          final sel = _activeFilter == value;
+          return InkWell(
+            onTap: () async {
+              Navigator.pop(ctx);
+              setState(() => _activeFilter = value);
+              await _load();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    sel ? Icons.radio_button_checked : Icons.radio_button_off,
+                    size: 18,
+                    color: sel ? _violet600 : _textSecondary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: sel ? _textPrimary : _textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Status',
+                            style: TextStyle(
+                              color: _textPrimary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          color: _textSecondary,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: _divider),
+                  item(true, 'Active'),
+                  Container(height: 1, color: _divider),
+                  item(false, 'Inactive'),
+                  Container(height: 1, color: _divider),
+                  item(null, 'All'),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -212,7 +451,7 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: _violet700,
         foregroundColor: Colors.white,
@@ -265,76 +504,30 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
         ],
         // Filter strip in AppBar bottom
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(90),
+          preferredSize: const Size.fromHeight(56),
           child: Container(
-            color: _violet700,
+            color: Colors.white,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Category filter
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+                Container(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                   child: Row(
                     children: [
-                      _Chip(
-                        label: 'All',
-                        selected: _categoryFilter == null,
-                        onTap: () {
-                          setState(() => _categoryFilter = null);
-                          _load();
-                        },
+                      _dropdownPill(
+                        label: _categoryPillLabel(),
+                        onTap: _openCategorySheet,
                       ),
-                      ..._categories.map(
-                        (c) => Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: _Chip(
-                            label: c[0].toUpperCase() + c.substring(1),
-                            selected: _categoryFilter == c,
-                            onTap: () {
-                              setState(() => _categoryFilter = c);
-                              _load();
-                            },
-                          ),
-                        ),
+                      const SizedBox(width: 10),
+                      _dropdownPill(
+                        label: _statusPillLabel(),
+                        onTap: _openStatusSheet,
                       ),
                     ],
                   ),
                 ),
-                // Active/Inactive filter
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Row(
-                    children: [
-                      _Chip(
-                        label: 'Active',
-                        selected: _activeFilter == true,
-                        onTap: () {
-                          setState(() => _activeFilter = true);
-                          _load();
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      _Chip(
-                        label: 'Inactive',
-                        selected: _activeFilter == false,
-                        onTap: () {
-                          setState(() => _activeFilter = false);
-                          _load();
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      _Chip(
-                        label: 'All Status',
-                        selected: _activeFilter == null,
-                        onTap: () {
-                          setState(() => _activeFilter = null);
-                          _load();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+                Container(height: 1, color: _divider),
               ],
             ),
           ),
@@ -363,14 +556,17 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
           : RefreshIndicator(
               color: _violet600,
               onRefresh: _load,
-              child: ListView.builder(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  16,
-                  16,
-                  MediaQuery.of(context).padding.bottom + 100,
+              child: ListView.separated(
+                padding: EdgeInsets.only(
+                  top: 6,
+                  bottom: MediaQuery.of(context).padding.bottom + 92,
                 ),
                 itemCount: _items.length,
+                separatorBuilder: (_, __) => Container(
+                  height: 1,
+                  margin: const EdgeInsets.only(left: 16),
+                  color: _divider,
+                ),
                 itemBuilder: (ctx, i) => _buildItemCard(_items[i]),
               ),
             ),
@@ -413,327 +609,111 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
     ),
   );
 
-  // ── Item card ─────────────────────────────────────────────────────────────
+  // ── Item row (simple list style) ──────────────────────────────────────────
   Widget _buildItemCard(ItemModel item) {
     final (icon, iconColor, iconBg) = _catMeta(item.category);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        decoration: BoxDecoration(
-          color: _surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _border),
-          boxShadow: [
-            BoxShadow(
-              color: _violet900.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // ── Main row ────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 14, 10, 10),
-              child: Row(
-                children: [
-                  // Category icon
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: iconBg,
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                    child: Icon(icon, size: 22, color: iconColor),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Name + price + category
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: _textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Row(
-                          children: [
-                            Text(
-                              '₹${item.unitPrice.toStringAsFixed(0)}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: _violet700,
-                              ),
-                            ),
-                            Text(
-                              ' / ${item.unit}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: _textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: iconBg,
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Text(
-                                item.category,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: iconColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Active toggle
-                  GestureDetector(
-                    onTap: () => _toggleActive(item, !item.isActive),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 48,
-                      height: 26,
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        color: item.isActive
-                            ? _violet600
-                            : const Color(0xFFD0C8E8),
-                        borderRadius: BorderRadius.circular(13),
-                        border: Border.all(
-                          color: item.isActive
-                              ? _violet700
-                              : const Color(0xFFB0A8D0),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: AnimatedAlign(
-                        duration: const Duration(milliseconds: 200),
-                        alignment: item.isActive
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Container(
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 3,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            item.isActive
-                                ? Icons.check_rounded
-                                : Icons.close_rounded,
-                            size: 10,
-                            color: item.isActive
-                                ? _violet600
-                                : const Color(0xFFB0A8D0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ── Divider + action row ─────────────────────────────────────────
-            Divider(
-              color: _divider,
-              height: 1,
-              thickness: 1,
-              indent: 14,
-              endIndent: 14,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Row(
-                children: [
-                  // Status indicator
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: item.isActive ? _successSoft : _dangerSoft,
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: item.isActive
-                                ? _success.withValues(alpha: 0.25)
-                                : _danger.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 5,
-                              height: 5,
-                              decoration: BoxDecoration(
-                                color: item.isActive ? _success : _danger,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              item.isActive ? 'Active' : 'Inactive',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: item.isActive ? _success : _danger,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Edit
-                  _ActionBtn(
-                    icon: Icons.edit_outlined,
-                    label: 'Edit',
-                    color: _violet600,
-                    bg: _violet50,
-                    onTap: () => _showAddEditSheet(item: item),
-                  ),
-                  // Delete
-                  _ActionBtn(
-                    icon: Icons.delete_outline_rounded,
-                    label: 'Delete',
-                    color: _danger,
-                    bg: _dangerSoft,
-                    onTap: () => _confirmDelete(item),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Filter chip
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _Chip extends StatelessWidget {
-  const _Chip({
-    super.key,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 160),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: selected ? Colors.white : Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: selected ? Colors.white : Colors.white.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: selected ? const Color(0xFF4C2DB8) : Colors.white,
-        ),
-      ),
-    ),
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Action button
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _ActionBtn extends StatelessWidget {
-  const _ActionBtn({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.bg,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final Color color, bg;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(8),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 28,
-            height: 28,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: bg,
-              borderRadius: BorderRadius.circular(8),
+              color: iconBg,
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, size: 14, color: color),
+            child: Icon(icon, size: 20, color: iconColor),
           ),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      '₹${item.unitPrice.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: _violet700,
+                      ),
+                    ),
+                    Text(
+                      ' / ${item.unit}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: _textSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      item.category,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: _textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () => _showAddEditSheet(item: item),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: _violet600,
+                      ),
+                      child: const Text(
+                        'Edit',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    TextButton(
+                      onPressed: () => _confirmDelete(item),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: _danger,
+                      ),
+                      child: const Text(
+                        'Delete',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
+          ),
+          const SizedBox(width: 12),
+          Switch(
+            value: item.isActive,
+            activeColor: _violet600,
+            onChanged: (v) => _toggleActive(item, v),
           ),
         ],
       ),
-    ),
-  );
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

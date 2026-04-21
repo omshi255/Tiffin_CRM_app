@@ -63,6 +63,8 @@ class _StatusStyle {
 
 enum _MealTimeFilter { all, breakfast, lunch, dinner }
 
+enum _OrderSort { apiDefault, nameAz, nameZa }
+
 _StatusStyle _ss(String status) {
   switch (status.toLowerCase()) {
     case 'out_for_delivery':
@@ -106,15 +108,15 @@ _StatusStyle _ss(String status) {
 
 // ─── Shared badge widget ─────────────────────────────────────────────────────
 Widget _badge(_StatusStyle st) => Container(
-  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
   decoration: BoxDecoration(
     color: st.bg,
-    borderRadius: BorderRadius.circular(20),
+    borderRadius: BorderRadius.circular(18),
     border: Border.all(color: st.bdr, width: 0.5),
   ),
   child: Text(
     st.label,
-    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: st.txt),
+    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: st.txt),
   ),
 );
 
@@ -131,8 +133,11 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   // ── ALL LOGIC UNCHANGED ──
   List<OrderModel> _orders = [];
   bool _loading = true;
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
   String? _statusFilter;
   _MealTimeFilter _mealTimeFilter = _MealTimeFilter.all;
+  _OrderSort? _sort = _OrderSort.apiDefault;
   final Set<String> _selectedIds = {};
   bool _bulkMode = false;
   StreamSubscription<void>? _dailyOrdersSocketSub;
@@ -185,6 +190,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   @override
   void dispose() {
     _dailyOrdersSocketSub?.cancel();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -227,6 +233,17 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
       _MealTimeFilter.all => null,
     };
     return base.where((o) => _normalizeMealTime(o.mealTime) == wanted).toList();
+  }
+
+  List<OrderModel> get _searchedOrders {
+    final q = _query.trim().toLowerCase();
+    final base = _timeFilteredOrders;
+    if (q.isEmpty) return base;
+    return base.where((o) {
+      final name = (o.customerName ?? '').toLowerCase();
+      final phone = (o.customerPhone ?? '').toLowerCase();
+      return name.contains(q) || phone.contains(q);
+    }).toList();
   }
 
   static String _todayDateStr() {
@@ -509,6 +526,358 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
     ),
   ];
 
+  // ── Dropdown pills (same style as customer list) ──────────────────────────
+
+  String _sortLabel() {
+    final label = switch (_sort ?? _OrderSort.apiDefault) {
+      _OrderSort.apiDefault => 'Default',
+      _OrderSort.nameAz => 'Name A–Z',
+      _OrderSort.nameZa => 'Name Z–A',
+    };
+    return 'Sort By ($label)';
+  }
+
+  String _statusLabel() {
+    final i = _filterValues.indexOf(_statusFilter);
+    final label = (i >= 0) ? _filterLabels[i] : _filterLabels.first;
+    return 'Status ($label)';
+  }
+
+  String _mealLabel() {
+    final i = _mealTimeValues.indexOf(_mealTimeFilter);
+    final label = (i >= 0) ? _mealTimeLabels[i] : _mealTimeLabels.first;
+    return 'Meal ($label)';
+  }
+
+  Widget _dropdownPill({
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: _P.s200, width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: _P.s900,
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: _P.s400,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openSortSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        Widget item(_OrderSort v, String label) {
+          final sel = (_sort ?? _OrderSort.apiDefault) == v;
+          return InkWell(
+            onTap: () {
+              Navigator.pop(ctx);
+              setState(() => _sort = v);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    sel ? Icons.radio_button_checked : Icons.radio_button_off,
+                    size: 18,
+                    color: sel ? _P.g1 : _P.s400,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _P.s900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _P.s200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Sort By',
+                            style: TextStyle(
+                              color: _P.s900,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          color: _P.s600,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: _P.s200),
+                  item(_OrderSort.apiDefault, 'Default'),
+                  Container(height: 1, color: _P.s200),
+                  item(_OrderSort.nameAz, 'Name A–Z'),
+                  Container(height: 1, color: _P.s200),
+                  item(_OrderSort.nameZa, 'Name Z–A'),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openStatusSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        Widget item(String? v, String label) {
+          final sel = _statusFilter == v;
+          return InkWell(
+            onTap: () {
+              Navigator.pop(ctx);
+              setState(() => _statusFilter = v);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    sel ? Icons.radio_button_checked : Icons.radio_button_off,
+                    size: 18,
+                    color: sel ? _P.g1 : _P.s400,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _P.s900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _P.s200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Status',
+                            style: TextStyle(
+                              color: _P.s900,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          color: _P.s600,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: _P.s200),
+                  ...List.generate(_filterLabels.length, (i) {
+                    return Column(
+                      children: [
+                        item(_filterValues[i], _filterLabels[i]),
+                        if (i != _filterLabels.length - 1)
+                          Container(height: 1, color: _P.s200),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openMealSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        Widget item(_MealTimeFilter v, String label) {
+          final sel = _mealTimeFilter == v;
+          return InkWell(
+            onTap: () {
+              Navigator.pop(ctx);
+              setState(() => _mealTimeFilter = v);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    sel ? Icons.radio_button_checked : Icons.radio_button_off,
+                    size: 18,
+                    color: sel ? _P.g1 : _P.s400,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _P.s900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _P.s200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Meal',
+                            style: TextStyle(
+                              color: _P.s900,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          color: _P.s600,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: _P.s200),
+                  ...List.generate(_mealTimeLabels.length, (i) {
+                    return Column(
+                      children: [
+                        item(_mealTimeValues[i], _mealTimeLabels[i]),
+                        if (i != _mealTimeLabels.length - 1)
+                          Container(height: 1, color: _P.s200),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // Filter chips
   Widget _filterChips() {
     final currentIndex = _filterValues.indexOf(_statusFilter);
@@ -619,119 +988,69 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   }
 
   Widget _filtersRow() {
-    final currentStatusIndex = _filterValues.indexOf(_statusFilter);
-    final currentStatusLabel = (currentStatusIndex >= 0)
-        ? _filterLabels[currentStatusIndex]
-        : _filterLabels.first;
-
-    final currentMealIndex = _mealTimeValues.indexOf(_mealTimeFilter);
-    final currentMealLabel = (currentMealIndex >= 0)
-        ? _mealTimeLabels[currentMealIndex]
-        : _mealTimeLabels.first;
-
-    Widget dropdownBox({
-      required Widget child,
-    }) {
-      return Container(
-        height: 40,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _P.s200, width: 1),
-        ),
-        child: DropdownButtonHideUnderline(child: child),
-      );
-    }
-
-    Widget field({
-      required String label,
-      required Widget dropdown,
-    }) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: _P.s600,
-            ),
-          ),
-          const SizedBox(height: 6),
-          dropdown,
-        ],
-      );
-    }
-
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
+      child: Column(
         children: [
-          Expanded(
-            child: field(
-              label: 'Status',
-              dropdown: dropdownBox(
-                child: DropdownButton<String?>(
-                  value: _statusFilter,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: _P.s600),
-                  hint: Text(
-                    currentStatusLabel,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: _P.s900,
+          // Search bar (same format as customer list)
+          Container(
+            decoration: BoxDecoration(
+              color: _P.s100,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _P.s200, width: 0.5),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.search_rounded,
+                  size: 16,
+                  color: _P.s400,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(fontSize: 13, color: _P.s900),
+                    decoration: const InputDecoration(
+                      hintText: 'Search name, phone…',
+                      hintStyle: TextStyle(fontSize: 13, color: _P.s400),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    onChanged: (v) => setState(() => _query = v),
+                  ),
+                ),
+                if (_query.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      _searchController.clear();
+                      setState(() => _query = '');
+                    },
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 15,
+                      color: _P.s400,
                     ),
                   ),
-                  items: List.generate(_filterLabels.length, (i) {
-                    return DropdownMenuItem<String?>(
-                      value: _filterValues[i],
-                      child: Text(
-                        _filterLabels[i],
-                        style: const TextStyle(fontSize: 13, color: _P.s900),
-                      ),
-                    );
-                  }),
-                  onChanged: (v) => setState(() => _statusFilter = v),
-                ),
-              ),
+              ],
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: field(
-              label: 'Meal',
-              dropdown: dropdownBox(
-                child: DropdownButton<_MealTimeFilter>(
-                  value: _mealTimeFilter,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: _P.s600),
-                  hint: Text(
-                    currentMealLabel,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: _P.s900,
-                    ),
-                  ),
-                  items: List.generate(_mealTimeLabels.length, (i) {
-                    return DropdownMenuItem<_MealTimeFilter>(
-                      value: _mealTimeValues[i],
-                      child: Text(
-                        _mealTimeLabels[i],
-                        style: const TextStyle(fontSize: 13, color: _P.s900),
-                      ),
-                    );
-                  }),
-                  onChanged: (v) {
-                    if (v == null) return;
-                    setState(() => _mealTimeFilter = v);
-                  },
-                ),
-              ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _dropdownPill(label: _sortLabel(), onTap: _openSortSheet),
+                const SizedBox(width: 8),
+                _dropdownPill(label: _statusLabel(), onTap: _openStatusSheet),
+                const SizedBox(width: 8),
+                _dropdownPill(label: _mealLabel(), onTap: _openMealSheet),
+              ],
             ),
           ),
         ],
@@ -816,383 +1135,180 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
                 ),
               ],
             )
-          : ListView.builder(
+          : ListView(
               padding: EdgeInsets.fromLTRB(
-                16,
-                14,
-                16,
-                MediaQuery.of(context).padding.bottom + 100,
+                0,
+                6,
+                0,
+                MediaQuery.of(context).padding.bottom + 16,
               ),
-              itemCount: filtered.length,
-              itemBuilder: (context, index) {
+              children: List.generate(filtered.length, (index) {
                 final order = filtered[index];
-                final isLast = index == filtered.length - 1;
                 final st = _ss(order.status);
-                final selected = _bulkMode && _selectedIds.contains(order.id);
-                final isDone = order.status.toLowerCase() == 'delivered';
+                final selected = _selectedIds.contains(order.id);
+                final isLast = index == filtered.length - 1;
 
-                return IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Timeline spine ──
-                      SizedBox(
-                        width: 36,
-                        child: Column(
+                final name = (order.customerName?.trim().isNotEmpty == true)
+                    ? order.customerName!.trim()
+                    : order.customerId;
+
+                final slot = order.slot?.trim();
+                final time = (slot != null && slot.isNotEmpty)
+                    ? slot
+                    : (_normalizeMealTime(order.mealTime) ?? '').trim();
+
+                final staff = order.deliveryStaffName?.trim();
+                final parts = <String>[
+                  if (time.isNotEmpty)
+                    '${time[0].toUpperCase()}${time.substring(1)}',
+                  if (staff != null && staff.isNotEmpty) staff,
+                ];
+                final subtitle = parts.join('  ·  ');
+
+                return Material(
+                  color: Colors.white,
+                  child: InkWell(
+                    onTap: () {
+                      if (_bulkMode) {
+                        _toggleSelect(order);
+                      } else {
+                        _showOrderSheet(order);
+                      }
+                    },
+                    onLongPress: _bulkMode
+                        ? null
+                        : () => setState(() {
+                            _bulkMode = true;
+                            _selectedIds.add(order.id);
+                          }),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isLast ? Colors.transparent : _P.s100,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (index > 0)
-                              Expanded(
-                                flex: 1,
-                                child: Center(
-                                  child: Container(width: 1.5, color: _P.v200),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
                                 ),
-                              )
-                            else
-                              const SizedBox(height: 10),
-
-                            // Dot — bulk checkbox OR status dot
-                            _bulkMode
-                                ? GestureDetector(
-                                    onTap: () => _toggleSelect(order),
-                                    child: Container(
-                                      width: 22,
-                                      height: 22,
-                                      decoration: BoxDecoration(
+                                child: Row(
+                                  children: [
+                                    if (_bulkMode)
+                                      GestureDetector(
+                                        onTap: () => _toggleSelect(order),
+                                        child: Container(
+                                          width: 22,
+                                          height: 22,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            border: Border.all(
+                                              color: selected ? _P.g1 : _P.s400,
+                                              width: 2,
+                                            ),
+                                            color: selected
+                                                ? _P.g1
+                                                : Colors.transparent,
+                                          ),
+                                          child: selected
+                                              ? const Icon(
+                                                  Icons.check,
+                                                  size: 14,
+                                                  color: Colors.white,
+                                                )
+                                              : null,
+                                        ),
+                                      )
+                                    else
+                                      const SizedBox.shrink(),
+                                    if (_bulkMode) const SizedBox(width: 12),
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: selected ? _P.g1 : Colors.white,
-                                        border: Border.all(
-                                          color: selected ? _P.g1 : _P.s300,
-                                          width: 2,
+                                        color: _P.v100,
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        _initials(name),
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                          color: _P.v700,
                                         ),
                                       ),
-                                      child: selected
-                                          ? const Icon(
-                                              Icons.check,
-                                              size: 13,
-                                              color: Colors.white,
-                                            )
-                                          : null,
                                     ),
-                                  )
-                                : Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: isDone ? st.dot : Colors.white,
-                                      border: Border.all(
-                                        color: st.dot,
-                                        width: isDone ? 0 : 2,
-                                      ),
-                                      boxShadow: isDone
-                                          ? [
-                                              BoxShadow(
-                                                color: st.dot.withValues(
-                                                  alpha: 0.3,
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              if (_bulkMode && selected) ...[
+                                                const Icon(
+                                                  Icons.check_circle_rounded,
+                                                  size: 16,
+                                                  color: _P.g1,
                                                 ),
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
+                                                const SizedBox(width: 6),
+                                              ],
+                                              Expanded(
+                                                child: Text(
+                                                  name,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: (_bulkMode && selected)
+                                                        ? _P.g1
+                                                        : _P.s900,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
                                               ),
-                                            ]
-                                          : [],
+                                            ],
+                                          ),
+                                          if (subtitle.isNotEmpty) ...[
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              subtitle,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: _P.s600,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ],
+                                      ),
                                     ),
-                                    child: isDone
-                                        ? const Icon(
-                                            Icons.check_rounded,
-                                            size: 11,
-                                            color: Colors.white,
-                                          )
-                                        : null,
-                                  ),
-
-                            if (!isLast)
-                              Expanded(
-                                flex: 3,
-                                child: Center(
-                                  child: Container(width: 1.5, color: _P.v200),
+                                    const SizedBox(width: 10),
+                                    _badge(st),
+                                  ],
                                 ),
-                              )
-                            else
-                              const SizedBox(height: 10),
+                              ),
+                            ),
                           ],
                         ),
                       ),
-
-                      const SizedBox(width: 8),
-
-                      // ── Card ──
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          child: GestureDetector(
-                            onTap: () {
-                              if (_bulkMode) {
-                                _toggleSelect(order);
-                              } else {
-                                _showOrderSheet(order);
-                              }
-                            },
-                            onLongPress: _bulkMode
-                                ? null
-                                : () => setState(() {
-                                    _bulkMode = true;
-                                    _selectedIds.add(order.id);
-                                  }),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: selected ? _P.v50 : Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: _P.s200,
-                                    width: 0.5,
-                                  ),
-                                ),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      // Left accent bar
-                                      Container(width: 4, color: st.accent),
-                                      // Card content
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(12),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              // Row 1: index + name + badge
-                                              Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    width: 22,
-                                                    height: 22,
-                                                    decoration: BoxDecoration(
-                                                      color: _P.v100,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            6,
-                                                          ),
-                                                    ),
-                                                    alignment: Alignment.center,
-                                                    child: Text(
-                                                      '${index + 1}'.padLeft(
-                                                        2,
-                                                        '0',
-                                                      ),
-                                                      style: const TextStyle(
-                                                        fontSize: 9,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        color: _P.v700,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          order
-                                                                      .customerName
-                                                                      ?.isNotEmpty ==
-                                                                  true
-                                                              ? order
-                                                                    .customerName!
-                                                              : order
-                                                                    .customerId,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 13,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700,
-                                                                color: Color(
-                                                                  0xFF0F172A,
-                                                                ),
-                                                              ),
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 2,
-                                                        ),
-                                                        Text(
-                                                          order
-                                                                      .customerAddress
-                                                                      ?.isNotEmpty ==
-                                                                  true
-                                                              ? order
-                                                                    .customerAddress!
-                                                              : '—',
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 11,
-                                                                color: Color(
-                                                                  0xFF64748B,
-                                                                ),
-                                                              ),
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  _badge(st),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Container(
-                                                height: 0.5,
-                                                color: const Color(0xFFE2E8F0),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              // Row 2: slot + delivery staff
-                                              Row(
-                                                children: [
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 3,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      color: const Color(
-                                                        0xFFF5F3FF,
-                                                      ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            6,
-                                                          ),
-                                                      border: Border.all(
-                                                        color: const Color(
-                                                          0xFFDDD6FE,
-                                                        ),
-                                                        width: 0.5,
-                                                      ),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        const Icon(
-                                                          Icons
-                                                              .schedule_outlined,
-                                                          size: 10,
-                                                          color: Color(
-                                                            0xFF7C3AED,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 4,
-                                                        ),
-                                                        Text(
-                                                          order.slot?.isNotEmpty ==
-                                                                  true
-                                                              ? order.slot!
-                                                              : 'No slot',
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 10,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                color: Color(
-                                                                  0xFF5B21B6,
-                                                                ),
-                                                              ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  if (order
-                                                          .deliveryStaffName
-                                                          ?.isNotEmpty ==
-                                                      true) ...[
-                                                    const SizedBox(width: 8),
-                                                    Container(
-                                                      padding:
-                                                          const EdgeInsets.symmetric(
-                                                            horizontal: 8,
-                                                            vertical: 3,
-                                                          ),
-                                                      decoration: BoxDecoration(
-                                                        color: const Color(
-                                                          0xFFF0FDF4,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              6,
-                                                            ),
-                                                        border: Border.all(
-                                                          color: const Color(
-                                                            0xFF86EFAC,
-                                                          ),
-                                                          width: 0.5,
-                                                        ),
-                                                      ),
-                                                      child: Row(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          const Icon(
-                                                            Icons
-                                                                .delivery_dining,
-                                                            size: 10,
-                                                            color: Color(
-                                                              0xFF166534,
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                            width: 4,
-                                                          ),
-                                                          Text(
-                                                            order
-                                                                .deliveryStaffName!,
-                                                            style:
-                                                                const TextStyle(
-                                                                  fontSize: 10,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  color: Color(
-                                                                    0xFF166534,
-                                                                  ),
-                                                                ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ],
-                                              ),
-                                            ],
-                                          ), // Column
-                                        ), // Padding
-                                      ), // Expanded
-                                    ],
-                                  ), // Row (IntrinsicHeight inner)
-                                ), // IntrinsicHeight inner
-                              ), // Container
-                            ), // ClipRRect
-                          ), // Padding (vertical: 5)
-                        ), // GestureDetector
-                      ), // Expanded
-                    ],
-                  ), // Row (outer timeline)
-                ); // IntrinsicHeight outer
-              },
+                    ),
+                  ),
+                );
+              }),
             ),
     );
   }
@@ -1224,7 +1340,25 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   // ── BUILD ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final filtered = _timeFilteredOrders;
+    final filtered = [..._searchedOrders];
+    switch (_sort ?? _OrderSort.apiDefault) {
+      case _OrderSort.apiDefault:
+        break;
+      case _OrderSort.nameAz:
+        filtered.sort((a, b) {
+          final an = (a.customerName ?? '').trim().toLowerCase();
+          final bn = (b.customerName ?? '').trim().toLowerCase();
+          return an.compareTo(bn);
+        });
+        break;
+      case _OrderSort.nameZa:
+        filtered.sort((a, b) {
+          final an = (a.customerName ?? '').trim().toLowerCase();
+          final bn = (b.customerName ?? '').trim().toLowerCase();
+          return bn.compareTo(an);
+        });
+        break;
+    }
 
     // ── Embedded in shell (dashboard tab) ──
     if (widget.embeddedInShell) {

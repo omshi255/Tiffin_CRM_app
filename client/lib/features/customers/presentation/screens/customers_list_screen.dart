@@ -325,6 +325,110 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   static const _filterLabels = ['All', 'Active', 'Inactive', 'Low Balance'];
   static const _filterValues = ['all', 'active', 'inactive', 'lowBalance'];
 
+  String _mainFilterLabel() {
+    final i = _filterValues.indexOf(_filter);
+    final label = (i >= 0) ? _filterLabels[i] : 'All';
+    return 'Filter ($label)';
+  }
+
+  Future<void> _openMainFilterSheet(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        Widget item(String value, String label) {
+          final sel = _filter == value;
+          return InkWell(
+            onTap: () {
+              Navigator.pop(ctx);
+              setState(() => _filter = value);
+              _loadCustomers(reset: true);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    sel ? Icons.radio_button_checked : Icons.radio_button_off,
+                    size: 18,
+                    color: sel ? _P.g1 : _P.s400,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: sel ? _P.s900 : _P.s600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _P.s200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Filter',
+                            style: TextStyle(
+                              color: _P.s900,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          color: _P.s600,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(height: 1, color: _P.s200),
+                  item('all', 'All'),
+                  Container(height: 1, color: _P.s200),
+                  item('active', 'Active'),
+                  Container(height: 1, color: _P.s200),
+                  item('inactive', 'Inactive'),
+                  Container(height: 1, color: _P.s200),
+                  item('lowBalance', 'Low Balance'),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   static const _sheetBg = Color(0xFF1E1E1E);
   static const _sheetBorder = Color(0x33FFFFFF);
 
@@ -1597,48 +1701,6 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                     ],
                   ),
                 ),
-                // Filter chips
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-                  child: Row(
-                    children: List.generate(_filterLabels.length, (i) {
-                      final active = _filter == _filterValues[i];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 7),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() => _filter = _filterValues[i]);
-                            _loadCustomers(reset: true);
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 160),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: active ? _P.g1 : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: active ? _P.g1 : _P.s300,
-                                width: 0.5,
-                              ),
-                            ),
-                            child: Text(
-                              _filterLabels[i],
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: active ? Colors.white : _P.s600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                ),
                 // Added: Sort / Status / Time Slot dropdown pills (local-only)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -1648,6 +1710,11 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                       _dropdownPill(
                         label: _sortLabel(),
                         onTap: () => _openSortSheet(context, searched),
+                      ),
+                      const SizedBox(width: 8),
+                      _dropdownPill(
+                        label: _mainFilterLabel(),
+                        onTap: () => _openMainFilterSheet(context),
                       ),
                       const SizedBox(width: 8),
                       _dropdownPill(

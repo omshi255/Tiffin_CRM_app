@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/bottom_sheet_handle.dart';
+import '../../features/delivery/data/delivery_api.dart';
 import '../../features/expenses/data/expense_api.dart';
 import '../../features/expenses/screens/expenses_screen.dart';
 import '../../features/income/data/income_api.dart';
 import '../../features/income/screens/income_screen.dart';
+import '../../features/orders/models/order_model.dart';
+import '../../models/finance_stats.dart';
 import '../../models/finance_summary.dart';
+import '../../services/finance_calculator.dart';
 import '../../services/finance_service.dart';
 
 class FinanceScreen extends StatefulWidget {
@@ -61,6 +66,7 @@ class _FinanceScreenState extends State<FinanceScreen>
     try {
       final summary = await FinanceService.fetchSummaryForMonth(_selectedMonth);
       final daily = await FinanceService.fetchCalendarForMonth(_selectedMonth);
+      final deliveries = await DeliveryApi.getAllDeliveries();
 
       // Transactions should NOT block the whole Finance screen.
       List<FinanceTransaction> txns = const [];
@@ -69,10 +75,18 @@ class _FinanceScreenState extends State<FinanceScreen>
       } catch (_) {
         txns = const [];
       }
+
+      // Fix processedCount/processedAmount using real delivered orders data.
+      // Backend daily rows may not include count (and can be affected by ledger double counting).
+      final fixedDaily = _mergeDeliveredOrdersIntoDailyRows(
+        month: _selectedMonth,
+        rows: daily,
+        orders: deliveries,
+      );
       if (!mounted) return;
       setState(() {
         _summary = summary;
-        _calendarData = daily;
+        _calendarData = fixedDaily;
         _transactions = txns;
         _isLoading = false;
       });
@@ -83,6 +97,60 @@ class _FinanceScreenState extends State<FinanceScreen>
         _error = e.toString();
       });
     }
+  }
+
+  static DateTime _localYmd(DateTime d) {
+    final x = d.toLocal();
+    return DateTime(x.year, x.month, x.day);
+  }
+
+  static List<DailyFinanceRow> _mergeDeliveredOrdersIntoDailyRows({
+    required DateTime month,
+    required List<DailyFinanceRow> rows,
+    required List<OrderModel> orders,
+  }) {
+    // Group delivered orders by local day within selected month.
+    final m = <DateTime, ({int count, double amount})>{};
+    for (final o in orders) {
+      final st = o.status.toLowerCase().trim();
+      if (st != 'delivered') continue;
+      final d = _localYmd(o.date);
+      if (d.year != month.year || d.month != month.month) continue;
+      final amount = (o.totalAmount ?? 0).toDouble();
+      final prev = m[d];
+      if (prev == null) {
+        m[d] = (count: 1, amount: amount);
+      } else {
+        m[d] = (count: prev.count + 1, amount: prev.amount + amount);
+      }
+    }
+
+    return rows.map((r) {
+      final d = _localYmd(r.date);
+      final agg = m[d];
+      if (agg == null) {
+        return DailyFinanceRow(
+          date: r.date,
+          processedCount: 0,
+          processedAmount: 0,
+          incomes: r.incomes,
+          deposits: r.deposits,
+          refund: r.refund,
+          expenses: r.expenses,
+          manual: r.manual,
+        );
+      }
+      return DailyFinanceRow(
+        date: r.date,
+        processedCount: agg.count,
+        processedAmount: agg.amount,
+        incomes: r.incomes,
+        deposits: r.deposits,
+        refund: r.refund,
+        expenses: r.expenses,
+        manual: r.manual,
+      );
+    }).toList();
   }
 
   void _onMonthPicked(DateTime month) {
@@ -445,6 +513,21 @@ class _FinanceScreenState extends State<FinanceScreen>
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: false,
+          leading: IconButton(
+            tooltip: 'Back',
+            onPressed: () async {
+              final nav = Navigator.of(context);
+              if (nav.canPop()) {
+                nav.pop();
+                return;
+              }
+              final router = GoRouter.of(context);
+              if (router.canPop()) {
+                context.pop();
+              }
+            },
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          ),
           title: const Text('Finance'),
           actions: [
             IconButton(
@@ -540,7 +623,7 @@ class _FinanceScreenState extends State<FinanceScreen>
   }
 }
 
-class _RevenueTab extends StatelessWidget {
+class _RevenueTab extends StatefulWidget {
   const _RevenueTab({
     required this.theme,
     required this.summary,
@@ -561,9 +644,18 @@ class _RevenueTab extends StatelessWidget {
 
   static final _money = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
 
+  @override
+  State<_RevenueTab> createState() => _RevenueTabState();
+}
+
+class _RevenueTabState extends State<_RevenueTab> {
+  bool _showTotal = false;
+
+  static final _money = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
+
   DailyFinanceRow? _rowForSelectedDay() {
-    final d = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
-    for (final r in dailyRows) {
+    final d = DateTime(widget.selectedDay.year, widget.selectedDay.month, widget.selectedDay.day);
+    for (final r in widget.dailyRows) {
       final rd = DateTime(r.date.year, r.date.month, r.date.day);
       if (rd == d) return r;
     }
@@ -582,6 +674,8 @@ class _RevenueTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _viewToggle(),
+            const SizedBox(height: 12),
             _summaryRow(context),
             const SizedBox(height: 16),
             _dailyTableLikeScreenshot(context),
@@ -591,111 +685,133 @@ class _RevenueTab extends StatelessWidget {
     );
   }
 
-  Widget _summaryRow(BuildContext context) {
-    final r = _rowForSelectedDay();
-    final revenue = r?.processedAmount ?? 0;
-    final expenses = r?.expenses ?? 0;
-    final incomes = r?.incomes ?? 0;
-    final profit = r == null
-        ? 0.0
-        : (r.processedAmount +
-            r.incomes +
-            r.deposits +
-            r.manual -
-            r.expenses -
-            r.refund);
-
-    // 2x2 grid so amounts don't truncate on small screens.
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _sumCard(
-                context,
-                _money.format(revenue),
-                'Revenue',
-              ),
+  Widget _viewToggle() {
+    Widget pill(String label, bool sel, VoidCallback onTap) {
+      return GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: sel ? AppColors.primary.withValues(alpha: 0.10) : AppColors.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: sel ? AppColors.primary : AppColors.border,
+              width: 1,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _sumCard(
-                context,
-                _money.format(expenses),
-                'Expenses',
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: widget.theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: sel ? AppColors.primary : AppColors.textSecondary,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
+          ),
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _sumCard(
-                context,
-                _money.format(incomes),
-                'Incomes',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _sumCard(
-                context,
-                _money.format(profit),
-                'Profit',
-              ),
-            ),
-          ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: pill(
+            'Today',
+            !_showTotal,
+            () => setState(() => _showTotal = false),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: pill(
+            'Total',
+            _showTotal,
+            () => setState(() => _showTotal = true),
+          ),
         ),
       ],
     );
   }
 
-  Widget _sumCard(BuildContext context, String value, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
+  Widget _summaryRow(BuildContext context) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final stats = _showTotal
+        ? FinanceCalculator.calculateTotalStats(rows: widget.dailyRows)
+        : FinanceCalculator.calculateTodayStats(rows: widget.dailyRows, today: today);
+
+    final processedCount = stats.processedCount;
+    final processedAmount = stats.processedAmount;
+    final refund = stats.refundAmount;
+    final netRevenue = stats.netRevenue;
+    final expenses = stats.expenses;
+    final incomes = stats.income;
+    final profit = stats.profit;
+    final deposit = stats.deposit;
+
+    final processedLabel = processedCount > 0
+        ? '$processedCount (${_money.format(processedAmount)})'
+        : _money.format(processedAmount);
+
+    final cards = <Widget>[
+      FinanceMiniCard(
+        title: 'Revenue',
+        value: _money.format(netRevenue),
+        color: AppColors.primary,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+      FinanceMiniCard(
+        title: 'Expenses',
+        value: _money.format(expenses),
+        color: const Color(0xFFF97316), // orange
+      ),
+      FinanceMiniCard(
+        title: 'Income',
+        value: _money.format(incomes),
+        color: AppColors.primaryAccent,
+      ),
+      FinanceMiniCard(
+        title: 'Profit',
+        value: _money.format(profit),
+        color: const Color(0xFF16A34A), // green
+      ),
+      FinanceMiniCard(
+        title: 'Refund',
+        value: _money.format(refund),
+        color: const Color(0xFFF59E0B), // yellow/amber
+      ),
+      FinanceMiniCard(
+        title: 'Deposit',
+        value: _money.format(deposit),
+        color: AppColors.textSecondary,
+      ),
+      FinanceMiniCard(
+        title: 'Processed',
+        value: processedLabel,
+        color: AppColors.primary,
+      ),
+    ];
+
+    return SizedBox(
+      height: 86,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: cards.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, i) => cards[i],
       ),
     );
   }
 
+  // Old large grid cards removed; we use FinanceMiniCard instead.
+
   bool _isCurrentMonth() {
     final now = DateTime.now();
-    return selectedMonth.year == now.year && selectedMonth.month == now.month;
+    return widget.selectedMonth.year == now.year && widget.selectedMonth.month == now.month;
   }
 
   Widget _dailyTableLikeScreenshot(BuildContext context) {
@@ -705,7 +821,7 @@ class _RevenueTab extends StatelessWidget {
 
     // Use full month daily data so backend values always show here
     // (chartRows may be locally date-range filtered).
-    final visible = [...dailyRows]..sort((a, b) => b.date.compareTo(a.date));
+    final visible = [...widget.dailyRows]..sort((a, b) => b.date.compareTo(a.date));
 
     // Never show future dates for the current month.
     final filtered = isCurrentMonth
@@ -721,50 +837,51 @@ class _RevenueTab extends StatelessWidget {
 
     String moneyOr0(double v) => _money.format(v);
     String dateLabel(DateTime d) => DateFormat('MMM d', 'en').format(d);
-    double profit(DailyFinanceRow r) {
-      // Daily profit based on available backend breakdown fields.
-      // Revenue-like: processed + income + deposit + manual
-      // Costs: expenses + refund
-      return r.processedAmount +
-          r.incomes +
-          r.deposits +
-          r.manual -
-          r.expenses -
-          r.refund;
-    }
+    double profit(DailyFinanceRow r) => FinanceCalculator.fromDailyRow(r).profit;
 
-    final headerStyle = theme.textTheme.labelSmall?.copyWith(
+    final headerStyle = widget.theme.textTheme.labelSmall?.copyWith(
       color: AppColors.textSecondary,
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w900,
+      letterSpacing: 0.2,
     );
-    final cellStyle = theme.textTheme.bodySmall?.copyWith(
+    final cellStyle = widget.theme.textTheme.bodySmall?.copyWith(
       color: AppColors.textPrimary,
       fontWeight: FontWeight.w700,
     );
 
-    const dateColW = 82.0;
-    const colW = 124.0;
+    const dateColW = 86.0;
+    const colW = 126.0;
 
-    Widget headerCell(String t, {required double w}) => SizedBox(
+    Widget headerCell(String t, {required double w, TextAlign align = TextAlign.center}) => SizedBox(
           width: w,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
             child: Text(
               t,
-              textAlign: TextAlign.center,
+              textAlign: align,
               style: headerStyle,
             ),
           ),
         );
 
-    Widget dataCell(String t, {required double w}) => SizedBox(
+    Widget dataCell(
+      String t, {
+      required double w,
+      TextAlign align = TextAlign.center,
+      Color? color,
+      FontWeight? weight,
+    }) =>
+        SizedBox(
           width: w,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Text(
               t,
-              textAlign: TextAlign.center,
-              style: cellStyle,
+              textAlign: align,
+              style: cellStyle?.copyWith(
+                color: color ?? cellStyle?.color,
+                fontWeight: weight ?? cellStyle?.fontWeight,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -785,6 +902,8 @@ class _RevenueTab extends StatelessWidget {
           ),
         );
 
+    Widget vSep() => Container(width: 1, height: 44, color: AppColors.border);
+
     if (filtered.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(14),
@@ -795,7 +914,7 @@ class _RevenueTab extends StatelessWidget {
         ),
         child: Text(
           'No daily data',
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: widget.theme.textTheme.bodyMedium?.copyWith(
             color: AppColors.textSecondary,
             fontWeight: FontWeight.w600,
           ),
@@ -808,6 +927,13 @@ class _RevenueTab extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
@@ -816,18 +942,32 @@ class _RevenueTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  headerCell('', w: dateColW),
-                  headerCell('Processed', w: colW),
-                  headerCell('Income', w: colW),
-                  headerCell('Deposit', w: colW),
-                  headerCell('Refund', w: colW),
-                  headerCell('Expenses', w: colW),
-                  headerCell('Profit', w: colW),
-                ],
+              // Header
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLow,
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.border, width: 1),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    headerCell('Date', w: dateColW, align: TextAlign.left),
+                    vSep(),
+                    headerCell('Processed', w: colW),
+                    vSep(),
+                    headerCell('Income', w: colW),
+                    vSep(),
+                    headerCell('Deposit', w: colW),
+                    vSep(),
+                    headerCell('Refund', w: colW),
+                    vSep(),
+                    headerCell('Expenses', w: colW),
+                    vSep(),
+                    headerCell('Profit', w: colW),
+                  ],
+                ),
               ),
-              Container(height: 1, color: AppColors.border),
               for (var i = 0; i < filtered.length; i += 1)
                 Builder(
                   builder: (_) {
@@ -852,12 +992,47 @@ class _RevenueTab extends StatelessWidget {
                       child: Row(
                         children: [
                           dateCell(dateLabel(r.date), muted: muted),
-                          dataCell(processedText(r), w: colW),
-                          dataCell(moneyOr0(r.incomes), w: colW),
+                          vSep(),
+                          dataCell(
+                            processedText(r),
+                            w: colW,
+                            weight: FontWeight.w800,
+                          ),
+                          vSep(),
+                          dataCell(
+                            moneyOr0(r.incomes),
+                            w: colW,
+                            color: AppColors.primary,
+                          ),
+                          vSep(),
                           dataCell(moneyOr0(r.deposits), w: colW),
-                          dataCell(moneyOr0(r.refund), w: colW),
-                          dataCell(moneyOr0(r.expenses), w: colW),
-                          dataCell(moneyOr0(profit(r)), w: colW),
+                          vSep(),
+                          dataCell(
+                            moneyOr0(r.refund),
+                            w: colW,
+                            color: const Color(0xFFF59E0B),
+                          ),
+                          vSep(),
+                          dataCell(
+                            moneyOr0(r.expenses),
+                            w: colW,
+                            color: const Color(0xFFF97316),
+                          ),
+                          vSep(),
+                          Builder(
+                            builder: (_) {
+                              final p = profit(r);
+                              final pc = p >= 0
+                                  ? const Color(0xFF16A34A)
+                                  : AppColors.error;
+                              return dataCell(
+                                moneyOr0(p),
+                                w: colW,
+                                color: pc,
+                                weight: FontWeight.w900,
+                              );
+                            },
+                          ),
                         ],
                       ),
                     );
@@ -865,6 +1040,71 @@ class _RevenueTab extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class FinanceMiniCard extends StatelessWidget {
+  const FinanceMiniCard({
+    super.key,
+    required this.title,
+    required this.value,
+    this.color,
+  });
+
+  final String title;
+  final String value;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final c = color ?? AppColors.primary;
+    final bg = c.withValues(alpha: 0.08);
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 128),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: c,
+                      letterSpacing: -0.2,
+                    ),
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
