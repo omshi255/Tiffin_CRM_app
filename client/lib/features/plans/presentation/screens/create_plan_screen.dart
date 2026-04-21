@@ -50,6 +50,30 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
   bool _isActive = true;
   bool _saving = false;
   List<ItemModel> _items = [];
+  bool _didAutoFillDefaults = false;
+
+  bool get _isNewPlan => widget.plan == null;
+
+  List<MealSlotItemModel> _defaultItemsForSlot() {
+    return _items
+        .map(
+          (i) => MealSlotItemModel(
+            itemId: i.id,
+            itemName: i.name,
+            quantity: 1,
+            unitPrice: i.unitPrice,
+          ),
+        )
+        .toList();
+  }
+
+  void _ensureDefaultItemsForSlot(String slot) {
+    if (!_isNewPlan) return;
+    if (_items.isEmpty) return;
+    final existing = _slotItems[slot];
+    if (existing != null && existing.isNotEmpty) return;
+    _slotItems[slot] = _defaultItemsForSlot();
+  }
 
   // ── Slot meta ─────────────────────────────────────────────────────────────
   static (IconData, Color, Color) _slotMeta(String slot) {
@@ -108,8 +132,17 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
     try {
       final list = await ItemApi.list(limit: 100, isActive: true);
       if (mounted) {
-        setState(() => _items = list);
-        // Resolve item names for any existing slot items that only have itemId
+        setState(() {
+          _items = list;
+          // Auto-fill defaults once for new plans (and only for empty slots).
+          if (_isNewPlan && !_didAutoFillDefaults) {
+            for (final slot in _selectedSlots) {
+              _ensureDefaultItemsForSlot(slot);
+            }
+            _didAutoFillDefaults = true;
+          }
+        });
+        // Resolve item names for any existing slot items that only have itemId.
         _resolveItemNames(list);
       }
     } catch (_) {}
@@ -356,6 +389,8 @@ class _CreatePlanScreenState extends State<CreatePlanScreen> {
                       _slotItems.remove(slot);
                     } else {
                       _selectedSlots.add(slot);
+                      // Auto-fill default menu items so user doesn't add manually.
+                      _ensureDefaultItemsForSlot(slot);
                     }
                   }),
                   child: AnimatedContainer(

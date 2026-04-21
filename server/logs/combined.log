@@ -9367,3 +9367,48 @@ Error: "limit" must be less than or equal to 100
     at next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\router\index.js:291:5)
 
 
+2026-04-21T12:06:10.632Z [info] : 21/04/2026, 05:36:10 pm
+2026-04-21T12:06:10.647Z [error] : [21/04/2026, 05:36:10 pm] connection <monitor> to 159.41.174.254:27017 closed
+MongoServerSelectionError: connection <monitor> to 159.41.174.254:27017 closed
+    at Topology.selectServer (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at async tryOperation (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:198:22)
+    at async executeOperation (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async FindCursor._initialize (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async FindCursor.fetchBatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async FindCursor.next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+    at async [Symbol.asyncIterator] (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:254:34)
+    at async FindCursor.toArray (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:406:26)
+    at async model.Query._find (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongoose\lib\query.js:2434:14)
+
+
+2026-04-21T12:06:21.510Z [info] : 21/04/2026, 05:36:21 pm
+2026-04-21T12:06:21.510Z [error] : [21/04/2026, 05:36:21 pm] connection <monitor> to 159.41.174.253:27017 timed out
+MongoServerSelectionError: connection <monitor> to 159.41.174.253:27017 timed out
+    at Topology.selectServer (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:60:5)
+    at listOnTimeout (node:internal/timers:545:9)
+    at process.processTimers (node:internal/timers:519:7)
+    at async tryOperation (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:150:18)
+    at async executeOperation (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
+2026-04-21T12:22:05.690Z [info] : 21/04/2026, 05:52:05 pm
+2026-04-21T12:22:05.691Z [error] : [21/04/2026, 05:52:05 pm] connection <monitor> to 159.41.174.253:27017 timed out
+MongoServerSelectionError: connection <monitor> to 159.41.174.253:27017 timed out
+    at Topology.selectServer (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\sdam\topology.js:346:38)
+    at runNextTicks (node:internal/process/task_queues:60:5)
+    at listOnTimeout (node:internal/timers:545:9)
+    at process.processTimers (node:internal/timers:519:7)
+    at async tryOperation (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:198:22)
+    at async executeOperation (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\operations\execute_operation.js:80:16)
+    at async AggregationCursor._initialize (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\aggregation_cursor.js:57:26)
+    at async AggregationCursor.cursorInit (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:620:27)
+    at async AggregationCursor.fetchBatch (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:654:13)
+    at async AggregationCursor.next (C:\Users\DELL\Documents\Tiffin_CRM_app\server\node_modules\mongodb\lib\cursor\abstract_cursor.js:326:17)
+
+
