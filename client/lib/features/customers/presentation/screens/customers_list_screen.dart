@@ -988,7 +988,6 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
     const card = Colors.white;
     const divider = _P.s200;
     const text = _P.s900;
-    const subText = _P.s600;
 
     Widget item({
       required IconData icon,
@@ -1149,7 +1148,6 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   Future<void> _openCustomizeCardInfo() async {
     const bg = Colors.white;
     const divider = _P.s200;
-    const subText = _P.s600;
     var temp = Set<_CardField>.from(_cardFields);
 
     await showModalBottomSheet<void>(
@@ -1327,10 +1325,10 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
           addr,
           c.area ?? '',
           c.effectiveWalletBalance.toStringAsFixed(2),
-          c.status ?? '',
+          c.status,
           (c.tags ?? const <String>[]).join(' | '),
           slots,
-        ].map((e) => esc('$e')).join(','));
+        ].map((e) => esc(e.toString())).join(','));
       }
 
       final bytes = Uint8List.fromList(lines.join('\n').codeUnits);
@@ -1379,7 +1377,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                       c.phone,
                       '${c.address ?? ''} ${c.area ?? ''}'.trim(),
                       '₹${c.effectiveWalletBalance.toStringAsFixed(2)}',
-                      c.status ?? '',
+                      c.status,
                       (c.timeSlots ?? const <String>[]).join(' | '),
                     ]
                 ],

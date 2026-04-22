@@ -422,47 +422,6 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     );
   }
 
-  Widget _itemsFilterDropdown<T>({
-    required T value,
-    required List<T> values,
-    required String Function(T) labelFor,
-    required ValueChanged<T?> onChanged,
-    required bool enabled,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: value,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: enabled ? AppColors.primary : AppColors.textHint,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          style: _itemsDropdownTextStyle,
-          items: values
-              .map(
-                (v) => DropdownMenuItem<T>(
-                  value: v,
-                  child: Text(
-                    labelFor(v),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: enabled ? onChanged : null,
-        ),
-      ),
-    );
-  }
-
   String _emptyDailyItemsMessage() {
     final isToday = _isItemsDayToday();
     final slot = _mealSlot;

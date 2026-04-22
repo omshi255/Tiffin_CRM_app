@@ -149,7 +149,7 @@ abstract final class FinanceService {
       return data.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
     }
     if (data is! Map) return const [];
-    final m = Map<String, dynamic>.from(data as Map);
+    final m = Map<String, dynamic>.from(data);
     dynamic list =
         m['data'] ?? m['items'] ?? m['results'] ?? m['incomes'] ?? m['expenses'];
     if (list is List) {

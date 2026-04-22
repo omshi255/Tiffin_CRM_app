@@ -562,7 +562,7 @@ class _ItemsListScreenState extends State<ItemsListScreen> {
                   bottom: MediaQuery.of(context).padding.bottom + 92,
                 ),
                 itemCount: _items.length,
-                separatorBuilder: (_, __) => Container(
+                separatorBuilder: (_, _) => Container(
                   height: 1,
                   margin: const EdgeInsets.only(left: 16),
                   color: _divider,

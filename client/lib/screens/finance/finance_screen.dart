@@ -613,15 +613,6 @@ class _RevenueTabState extends State<_RevenueTab> {
 
   static final _money = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
 
-  DailyFinanceRow? _rowForSelectedDay() {
-    final d = DateTime(widget.selectedDay.year, widget.selectedDay.month, widget.selectedDay.day);
-    for (final r in widget.dailyRows) {
-      final rd = DateTime(r.date.year, r.date.month, r.date.day);
-      if (rd == d) return r;
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final bottomPad = MediaQuery.of(context).padding.bottom + 24;
@@ -761,7 +752,7 @@ class _RevenueTabState extends State<_RevenueTab> {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: cards.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, i) => cards[i],
       ),
     );
@@ -805,9 +796,14 @@ class _RevenueTabState extends State<_RevenueTab> {
       letterSpacing: 0.2,
     );
     final cellStyle = widget.theme.textTheme.bodySmall?.copyWith(
-      color: AppColors.textPrimary,
-      fontWeight: FontWeight.w700,
-    );
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w700,
+        ) ??
+        const TextStyle(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        );
 
     const dateColW = 86.0;
     const colW = 126.0;
@@ -838,9 +834,9 @@ class _RevenueTabState extends State<_RevenueTab> {
             child: Text(
               t,
               textAlign: align,
-              style: cellStyle?.copyWith(
-                color: color ?? cellStyle?.color,
-                fontWeight: weight ?? cellStyle?.fontWeight,
+              style: cellStyle.copyWith(
+                color: color ?? cellStyle.color,
+                fontWeight: weight ?? cellStyle.fontWeight,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -854,7 +850,7 @@ class _RevenueTabState extends State<_RevenueTab> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Text(
               t,
-              style: cellStyle?.copyWith(
+              style: cellStyle.copyWith(
                 color: muted ? AppColors.textSecondary : AppColors.textPrimary,
                 fontWeight: FontWeight.w800,
               ),

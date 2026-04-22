@@ -83,7 +83,6 @@ class NotificationService {
       final data = event.notification.additionalData;
       debugPrint('[OneSignal] click additionalData: $data');
       if (data == null) return;
-      if (data is! Map) return;
       final map = <String, dynamic>{};
       data.forEach((k, v) => map[k.toString()] = v);
       _navigateFromPayload(map);
