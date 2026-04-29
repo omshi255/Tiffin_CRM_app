@@ -44,9 +44,8 @@ function historySubscriptionAmount(sub) {
   const start = new Date(sub.startDate);
   const end = new Date(sub.endDate);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
-  const totalDays =
-    Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  return price * Math.max(0, totalDays);
+  const totalDays = totalDaysInclusiveIST(start, end);
+  return price * totalDays;
 }
 
 const router = Router();

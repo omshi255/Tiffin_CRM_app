@@ -15,6 +15,7 @@ import { generateDailyOrdersForDate } from "../services/dailyOrder.service.js";
 import { sendNotification } from "../services/inAppNotification.service.js";
 import { NOTIFICATION_TYPES } from "../utils/notificationTypes.js";
 import { notifyIfWalletJustHitZero } from "../utils/walletZeroNotification.js";
+import { totalDaysInclusiveIST } from "../utils/subscriptionCalendarDays.js";
 
 const pauseSchema = Joi.object({
   pausedFrom: Joi.date().iso().required(),
@@ -24,6 +25,68 @@ const pauseSchema = Joi.object({
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
 const DEFAULT_PAGE = 1;
+
+function addDays(d, days) {
+  const date = new Date(d);
+  date.setDate(date.getDate() + Number(days || 0));
+  return date;
+}
+
+function addMonths(d, months) {
+  const date = new Date(d);
+  date.setMonth(date.getMonth() + Number(months || 0));
+  return date;
+}
+
+/**
+ * Compute an inclusive endDate for the subscription window.
+ * - If endDate is passed explicitly, keep it.
+ * - Else derive from durationDays or billingPeriod/customDays.
+ * All windows are inclusive of both start and end calendar dates.
+ */
+function resolveSubscriptionDates({
+  startDate,
+  endDate,
+  billingPeriod,
+  customDays,
+  durationDays,
+}) {
+  const start = new Date(startDate);
+  if (Number.isNaN(start.getTime())) {
+    throw new ApiError(400, "Invalid startDate");
+  }
+
+  if (endDate) {
+    const end = new Date(endDate);
+    if (Number.isNaN(end.getTime())) {
+      throw new ApiError(400, "Invalid endDate");
+    }
+    return { startDate: start, endDate: end };
+  }
+
+  let days = durationDays;
+  if (!days && billingPeriod) {
+    if (billingPeriod === "daily") days = 1;
+    else if (billingPeriod === "weekly") days = 7;
+    else if (billingPeriod === "custom") days = customDays;
+    else if (billingPeriod === "monthly") {
+      // Calendar month window, inclusive.
+      const exclusive = addMonths(start, 1);
+      const inclusiveEnd = addDays(exclusive, -1);
+      return { startDate: start, endDate: inclusiveEnd };
+    }
+  }
+
+  const n = Number(days);
+  if (!Number.isFinite(n) || n < 1) {
+    throw new ApiError(
+      400,
+      "Provide either endDate, or durationDays, or billingPeriod (daily/weekly/monthly/custom with customDays)"
+    );
+  }
+
+  return { startDate: start, endDate: addDays(start, n - 1) };
+}
 
 function normalizeSubscriptionLedger(subscription) {
   if (!subscription || typeof subscription !== "object") return subscription;
@@ -49,7 +112,13 @@ const createSubscriptionSchema = Joi.object({
   customerId: Joi.string().hex().length(24).required(),
   planId: Joi.string().hex().length(24).required(),
   startDate: Joi.date().iso().required(),
-  endDate: Joi.date().iso().min(Joi.ref("startDate")).required(),
+  // Either provide endDate directly, or provide durationDays / billingPeriod (+customDays).
+  endDate: Joi.date().iso().min(Joi.ref("startDate")).optional(),
+  billingPeriod: Joi.string()
+    .valid("daily", "weekly", "monthly", "custom")
+    .optional(),
+  durationDays: Joi.number().integer().min(1).max(366).optional(),
+  customDays: Joi.number().integer().min(1).max(366).optional(),
   deliverySlot: Joi.string()
     .valid("morning", "afternoon", "evening")
     .required(),
@@ -60,7 +129,12 @@ const createSubscriptionSchema = Joi.object({
 
 const renewSubscriptionSchema = Joi.object({
   startDate: Joi.date().iso().required(),
-  endDate: Joi.date().iso().min(Joi.ref("startDate")).required(),
+  endDate: Joi.date().iso().min(Joi.ref("startDate")).optional(),
+  billingPeriod: Joi.string()
+    .valid("daily", "weekly", "monthly", "custom")
+    .optional(),
+  durationDays: Joi.number().integer().min(1).max(366).optional(),
+  customDays: Joi.number().integer().min(1).max(366).optional(),
 });
 
 const listQuerySchema = Joi.object({
@@ -225,8 +299,13 @@ export const createSubscription = asyncHandler(async (req, res) => {
     );
   }
 
-  const startDate = new Date(value.startDate);
-  const endDate = new Date(value.endDate);
+  const { startDate, endDate } = resolveSubscriptionDates({
+    startDate: value.startDate,
+    endDate: value.endDate,
+    billingPeriod: value.billingPeriod,
+    durationDays: value.durationDays,
+    customDays: value.customDays,
+  });
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -254,10 +333,7 @@ export const createSubscription = asyncHandler(async (req, res) => {
     throw new ApiError(409, "Active subscription already exists for customer");
   }
 
-  const totalDays =
-    Math.floor(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    ) + 1;
+  const totalDays = totalDaysInclusiveIST(startDate, endDate);
 
   const totalAmount = plan.price * totalDays;
 
@@ -387,10 +463,14 @@ export const renewSubscription = asyncHandler(async (req, res) => {
   if (!plan || !plan.isActive) {
     throw new ApiError(400, "Plan is not active or not found");
   }
-  const startDate = new Date(value.startDate);
-  const endDate = new Date(value.endDate);
-  const totalDays =
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
+  const { startDate, endDate } = resolveSubscriptionDates({
+    startDate: value.startDate,
+    endDate: value.endDate,
+    billingPeriod: value.billingPeriod,
+    durationDays: value.durationDays,
+    customDays: value.customDays,
+  });
+  const totalDays = totalDaysInclusiveIST(startDate, endDate);
   const totalAmount = plan.price * totalDays;
 
   const customer = await Customer.findOne({
@@ -546,6 +626,13 @@ export const unpauseSubscription = asyncHandler(async (req, res) => {
   const ownerId = role === "customer" ? req.user.ownerId : req.user.userId;
   const { id } = req.params;
 
+  const resumeDateRaw = req.body?.resumeDate;
+  const resumeDate = resumeDateRaw ? new Date(resumeDateRaw) : new Date();
+  if (Number.isNaN(resumeDate.getTime())) {
+    throw new ApiError(400, "Invalid resumeDate");
+  }
+  resumeDate.setHours(0, 0, 0, 0);
+
   const filter = { _id: id, ownerId };
   if (role === "customer") {
     filter.customerId = req.user.customerId;
@@ -563,10 +650,30 @@ export const unpauseSubscription = asyncHandler(async (req, res) => {
     );
   }
 
+  const pausedFrom = subscription.pausedFrom
+    ? new Date(subscription.pausedFrom)
+    : null;
+  const pausedUntil = subscription.pausedUntil
+    ? new Date(subscription.pausedUntil)
+    : null;
+
+  let pausedDaysToShift = 0;
+  if (pausedFrom && !Number.isNaN(pausedFrom.getTime())) {
+    const inclusivePauseEnd = addDays(resumeDate, -1);
+    const actualPauseEnd = pausedUntil
+      ? new Date(Math.min(pausedUntil.getTime(), inclusivePauseEnd.getTime()))
+      : inclusivePauseEnd;
+
+    pausedDaysToShift = totalDaysInclusiveIST(pausedFrom, actualPauseEnd);
+  }
+
+  const newEndDate =
+    pausedDaysToShift > 0 ? addDays(subscription.endDate, pausedDaysToShift) : subscription.endDate;
+
   const updated = await Subscription.findByIdAndUpdate(
     id,
     {
-      $set: { status: "active" },
+      $set: { status: "active", endDate: newEndDate },
       $unset: { pausedFrom: "", pausedUntil: "" },
     },
     { new: true, runValidators: true }
